@@ -46,10 +46,8 @@ NearMe allows users to view short descriptions of events near them along with sh
 
 ### 2. Screen Archetypes
 
-* Login Screen
-   * User can login
-* Registration Screen
-   * User can create a new account
+* Login Screen/ Registration Screen
+   * User can login/create new acct
 * Where you at Screen
     * User can choose btwn input location, or use curr location
 * List View
@@ -71,9 +69,7 @@ NearMe allows users to view short descriptions of events near them along with sh
 
 **Flow Navigation** (Screen to Screen)
 
-* Login Screen
-   => Where You At
-* Registration Screen
+* Login Screen/Registration
    => Where You At
 * Where You At
   => Home Screen
@@ -86,7 +82,7 @@ NearMe allows users to view short descriptions of events near them along with sh
 
 ## Wireframes
 [Add picture of your hand sketched wireframes in this section]
-<img src="YOUR_WIREFRAME_IMAGE_URL" width=600>
+<img src="nearMeWireframe.jpg" width=600>
 
 ### [BONUS] Digital Wireframes & Mockups
 
