@@ -81,7 +81,6 @@ NearMe allows users to view short descriptions of events near them along with sh
   => Can go to Home
 
 ## Wireframes
-[Add picture of your hand sketched wireframes in this section]
 <img src="nearMeWireframe.jpg" width=600>
 
 ### [BONUS] Digital Wireframes & Mockups
@@ -112,12 +111,23 @@ NearMe allows users to view short descriptions of events near them along with sh
    | password      | String   | password |
    | last_latitude | Number   | last updated latitude |
    | last_longitude| Number   | last updated longitude |
-   | posts_made    | Array    | posts made by user |
    | createdAt     | DateTime | date when post is created (default field) |
 
 
 
 ### Networking
-- [Add list of network requests by screen ]
-- [Create basic snippets for each Parse network request]
+**List of network requests by screen**
+- Login/Register Screen
+    - (Create/POST) Create a new user object
+    - (Read/GET) Query logged in user object
+- Where You At Screen
+    - (Update/PUT) Update Logged in User object w/ location
+- Compose Post Screen
+    - (Create/POST) Create a new post object associated w/ User
+- Map/List View
+    - (Read/GET) Query all posts, sorted based on time creatd
+- Profile Screen
+    - (Read/GET) Query logged in user object
+    - (Delete) Delete previous posts
+
 - [OPTIONAL: List endpoints if using existing API such as Yelp]
