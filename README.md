@@ -91,7 +91,32 @@ NearMe allows users to view short descriptions of events near them along with sh
 ## Schema 
 [This section will be completed in Unit 9]
 ### Models
-[Add table of models]
+#### Post
+
+   | Property      | Type     | Description |
+   | ------------- | -------- | ------------|
+   | objectId      | String   | unique id for the user post (default field) |
+   | author        | Pointer to User| post creator |
+   | media         | File     | video that user posts |
+   | desc          | String   | description user made |
+   | latitude      | Number   |where user made post for |
+   | longitude     | Number   |where user made post for |
+   | createdAt     | DateTime | date when post is created (default field) |
+   
+ #### User
+
+   | Property      | Type     | Description |
+   | ------------- | -------- | ------------|
+   | objectId      | String   | unique id for the user post (default field) |
+   | username      | String   | username |
+   | password      | String   | password |
+   | last_latitude | Number   | last updated latitude |
+   | last_longitude| Number   | last updated longitude |
+   | posts_made    | Array    | posts made by user |
+   | createdAt     | DateTime | date when post is created (default field) |
+
+
+
 ### Networking
 - [Add list of network requests by screen ]
 - [Create basic snippets for each Parse network request]
