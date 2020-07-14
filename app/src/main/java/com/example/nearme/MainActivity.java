@@ -59,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
                         fragment = new ComposeFragment();
                         break;
                 }
-                fragmentManager.beginTransaction().replace(R.id.frameContainer, fragment).commit();
+                if(fragment != null) {
+                    fragmentManager.beginTransaction().replace(R.id.frameContainer, fragment).commit();
+                }
                 return true;
             }
         });
@@ -81,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //setting default bottom nav view
-        bottomNavigationView.setSelectedItemId(R.id.action_map);
+        bottomNavigationView.setSelectedItemId(R.id.action_text);
 
     }
 }

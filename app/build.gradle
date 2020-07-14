@@ -34,4 +34,12 @@ dependencies {
     implementation "androidx.appcompat:appcompat:${appCompatVersion}"
     implementation "com.google.android.material:material:${designSupportVersion}"
 
+
+    implementation "com.google.android.gms:play-services-maps:$googlePlayVersion"
+    implementation "com.google.android.gms:play-services-location:$googlePlayVersion"
+    implementation "org.permissionsdispatcher:permissionsdispatcher:$permissionDispatcherVersion"
+    annotationProcessor "org.permissionsdispatcher:permissionsdispatcher-processor:$permissionDispatcherVersion"
+
+    implementation 'com.github.parse-community.Parse-SDK-Android:parse:1.24.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:3.8.1' // for logging API calls to LogCat
 }
