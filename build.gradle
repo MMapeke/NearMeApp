@@ -27,6 +27,8 @@ task clean(type: Delete) {
 ext {
     appCompatVersion = '1.0.0'
     designSupportVersion = '1.0.0'
-    googlePlayVersion = "17.0.0"
+
     permissionDispatcherVersion = "4.7.0"
+    supportLibVersion = "1.0.0"
+    googlePlayVersion = "17.0.0"
 }
