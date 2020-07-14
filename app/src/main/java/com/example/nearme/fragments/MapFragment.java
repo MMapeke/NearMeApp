@@ -26,10 +26,13 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapFragment extends Fragment implements OnMapReadyCallback {
+import permissions.dispatcher.RuntimePermissions;
+
+public class MapFragment extends Fragment{
 
     public static final String TAG = "MapFragment";
     private GoogleMap mMap;
+    SupportMapFragment mapFragment;
 
 
     public MapFragment() {
@@ -47,20 +50,23 @@ public class MapFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        if(getActivity()!=null) {
-            SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager()
-                    .findFragmentById(R.id.map);
+        // Do a null check to confirm that we have not already instantiated the map.
+        if (mapFragment == null) {
+            mapFragment = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
+            // Check if we were successful in obtaining the map.
             if (mapFragment != null) {
-                mapFragment.getMapAsync(this);
+                mapFragment.getMapAsync(new OnMapReadyCallback() {
+                    @Override
+                    public void onMapReady(GoogleMap map) {
+                        loadMap(map);
+                    }
+                });
             }
         }
-
     }
 
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        mMap = googleMap;
+    private void loadMap(GoogleMap map) {
+        mMap = map;
 
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
