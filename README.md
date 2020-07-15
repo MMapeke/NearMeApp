@@ -25,39 +25,45 @@ NearMe allows users to view short descriptions of events near them along with sh
 
 **Required Must-have Stories**
 
-* User can create a new account
-* User can logins
-* User can choose btwn input location, or use curr location
-* User can post short info for local event w/ short desc, location, short vid,
-* User can view map of local and recent (x HOURS) posts
-* User can view list of local and recent posts
+- [x] User can create a new account
+- [x] User can logins
+- [x] User can use current location
+- [ ] User can view map of local and recent (x HOURS) posts
+- [ ] User can view list of local and recent posts
+- [ ] User can post short info for local event w/ short desc, location, short vid
+- [ ] User can set input location
+
 
 
 **Optional Nice-to-have Stories**
 
-* Group together posts in same area for nicer map UI
-*  Notification if area near seems active
-*  User can change recent hour time frame
-* User can only post vid for post after X time
-* User can remove post
-* User can follow/unfollow AND view feed based off followers' post
-* User profiles more complex, profile pics, short desc
+- [ ] Video Support
+- [ ] Profile Configuration(Pics,Desc) / User Can Remove Post
+- [ ] Improve Map UI/ Group Posts Together
+- [ ] User can follow/unfollow and view profiles
+- [ ] User can like posts
+- [ ]  Notifications for Active Area
+- [ ] User can customize sorting of posts
+
 
 
 ### 2. Screen Archetypes
 
 * Login Screen/ Registration Screen
    * User can login/create new acct
-* Where you at Screen
+* Choose Location
     * User can choose btwn input location, or use curr location
+* Profile
+    * User can view and edit profile
 * List View
-    * User can view list of local and recent posts
+    * User can view list of posts
 * Map View
-   * User can view map of local and recent posts
+   * User can view map of posts
+* Compose Post
+    * User can post short info for local event w/ short desc, location, and media
 * More Details
    * User can view video and description
-* Compose Post
-    * User can post short info for local event w/ short desc, location, short vid
+
 
 ### 3. Navigation
 
@@ -66,29 +72,30 @@ NearMe allows users to view short descriptions of events near them along with sh
 *  Map View
 *  List View
 *  Compose Post
+*  Profile
+*  Choose Location
 
 **Flow Navigation** (Screen to Screen)
 
 * Login Screen/Registration
    => Where You At
-* Where You At
-  => Home Screen
+* Profile Screen
+   => Main Screen w/ Tab Navigation
+   => Login Screen/Registraton
+* Location Screen
+  => Main Screen w/ Tab Navigation
 * Compose Post
-  => Home Screen
+  => Main Screen w/ Tab Navigation
 * Map/List View
   => More Details
 * More Details
-  => Can go to Home
+  => Main Screen w/ Tab Navigation
 
 ## Wireframes
 <img src="nearMeWireframe.jpg" width=600>
 
-### [BONUS] Digital Wireframes & Mockups
-
-### [BONUS] Interactive Prototype
 
 ## Schema 
-[This section will be completed in Unit 9]
 ### Models
 #### Post
 
@@ -98,8 +105,7 @@ NearMe allows users to view short descriptions of events near them along with sh
    | author        | Pointer to User| post creator |
    | media         | File     | video that user posts |
    | desc          | String   | description user made |
-   | latitude      | Number   |where user made post for |
-   | longitude     | Number   |where user made post for |
+   | location      | GeoPoint   |where user made post for |
    | createdAt     | DateTime | date when post is created (default field) |
    
  #### User
@@ -109,8 +115,7 @@ NearMe allows users to view short descriptions of events near them along with sh
    | objectId      | String   | unique id for the user post (default field) |
    | username      | String   | username |
    | password      | String   | password |
-   | last_latitude | Number   | last updated latitude |
-   | last_longitude| Number   | last updated longitude |
+   | last_location| GeoPoint   | last updated latitude |
    | createdAt     | DateTime | date when post is created (default field) |
 
 
@@ -130,4 +135,3 @@ NearMe allows users to view short descriptions of events near them along with sh
     - (Read/GET) Query logged in user object
     - (Delete) Delete previous posts
 
-- [OPTIONAL: List endpoints if using existing API such as Yelp]

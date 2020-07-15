@@ -40,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
 
         //if already logged in
-//        if(ParseUser.getCurrentUser() != null) goMainActivity();
+        if(ParseUser.getCurrentUser() != null) goMainActivity();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
