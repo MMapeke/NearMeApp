@@ -24,6 +24,7 @@ import com.example.nearme.fragments.MapFragment;
 import com.example.nearme.fragments.ProfileFragment;
 import com.example.nearme.fragments.TextFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.parse.ParseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -43,6 +44,12 @@ public class MainActivity extends AppCompatActivity {
         btnLocation = findViewById(R.id.btnLocation);
         btnProfile = findViewById(R.id.btnProfile);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
+
+        //If User has no location set
+        ParseUser parseUser = ParseUser.getCurrentUser();
+        if(parseUser.getParseGeoPoint("location") == null){
+            goLocationActivity();
+        }
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -87,5 +94,11 @@ public class MainActivity extends AppCompatActivity {
         //setting default bottom nav view
         bottomNavigationView.setSelectedItemId(R.id.action_text);
 
+    }
+
+    private void goLocationActivity(){
+        Intent intent = new Intent(this,GetLocation.class);
+        startActivity(intent);
+        finish();
     }
 }
