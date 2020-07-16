@@ -2,7 +2,9 @@ package com.example.nearme.models;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,13 +16,21 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
+import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.nearme.R;
+import com.parse.GetDataCallback;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import java.util.List;
 
+
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
+import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
 
@@ -71,15 +81,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
             username.setText("@" +  parseUser.getUsername().toUpperCase());
             description.setText(post.getDescription());
 
-            int radius = 10; // corner radius, higher value = more rounded
-            int margin = 10; // crop margin, set to 0 for corners with no crop
-            int blur = 10;
+            int radius = 40; // corner radius, higher value = more rounded
+            int margin = 5; // crop margin, set to 0 for corners with no crop
+            int blur = 6;
 
-            //TODO: Image seems like not loading unless https
-            //TODO: Transformation, rounding, and slight blur
             Glide.with(context)
-//                    .load("https://near-me-marc.herokuapp.com/parse/files/near-me-marc/d05aaeb2cb2b8910acc2f5fc8832d1b4_takeout.jpeg")
                     .load(post.getImage().getUrl())
+                    .transform(new MultiTransformation<>(
+                            new CenterCrop(),
+                            new BlurTransformation(blur),
+                            new RoundedCornersTransformation(radius, margin)
+                    ))
                     .into(preview);
         }
     }

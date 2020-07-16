@@ -48,6 +48,8 @@ public class LoginActivity extends AppCompatActivity {
                 String username = String.valueOf(etUsername.getText());
                 String password = String.valueOf(etPassword.getText());
 
+                btnLogin.setEnabled(false);
+                btnRegister.setEnabled(false);
                 loginUser(username,password);
             }
         });
@@ -58,6 +60,8 @@ public class LoginActivity extends AppCompatActivity {
                 String username = String.valueOf(etUsername.getText());
                 String password = String.valueOf(etPassword.getText());
 
+                btnRegister.setEnabled(false);
+                btnLogin.setEnabled(false);
                 registerUser(username,password);
             }
         });
@@ -82,6 +86,8 @@ public class LoginActivity extends AppCompatActivity {
                     goMainActivity();
                 }else{
                     Log.e(TAG,"Registration failed",e);
+                    btnRegister.setEnabled(true);
+                    btnLogin.setEnabled(true);
                 }
             }
         });
@@ -95,6 +101,8 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     //TODO: Better error handling, informing user what's wrong
                     Log.e(TAG,"Login failed",e);
+                    btnLogin.setEnabled(true);
+                    btnRegister.setEnabled(true);
                 }
             }
         });

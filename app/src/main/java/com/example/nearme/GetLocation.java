@@ -55,6 +55,7 @@ public class GetLocation extends AppCompatActivity {
 
         btnCurrentLocation = findViewById(R.id.btnCurrentLocation);
 
+        //TODO: Loading button
         btnCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -77,6 +78,8 @@ public class GetLocation extends AppCompatActivity {
                         if (location != null) {
                             Log.i(TAG,"location found " + location.toString());
                             onLocation(location);
+                        }else{
+                            Log.e(TAG,"location null");
                         }
                     }
                 })
