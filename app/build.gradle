@@ -56,4 +56,7 @@ dependencies {
     implementation 'jp.co.cyberagent.android:gpuimage:2.0.4'
 
     implementation 'jp.wasabeef:recyclerview-animators:3.0.0'
+
+    implementation 'org.parceler:parceler-api:1.1.12'
+    annotationProcessor 'org.parceler:parceler:1.1.12'
 }

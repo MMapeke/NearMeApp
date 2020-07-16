@@ -1,6 +1,7 @@
 package com.example.nearme.models;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BlurMaskFilter;
@@ -18,11 +19,14 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
+import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.parse.GetDataCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
+
+import org.parceler.Parcels;
 
 import java.util.List;
 
@@ -73,6 +77,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
             preview = itemView.findViewById(R.id.post_preview);
             username = itemView.findViewById(R.id.post_user);
             description = itemView.findViewById(R.id.post_desc);
+
+            preview.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    int position = getAdapterPosition();
+                    Post post = posts.get(position);
+
+                    Intent intent = new Intent(context, PostDetails.class);
+                    intent.putExtra("post", Parcels.wrap(post));
+                    context.startActivity(intent);
+                }
+            });
         }
 
         public void bind(Post post) {

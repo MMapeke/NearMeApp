@@ -1,6 +1,7 @@
 package com.example.nearme.fragments;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.location.Location;
@@ -9,8 +10,10 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.util.Log;
@@ -19,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -37,7 +41,10 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+import org.parceler.Parcels;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import permissions.dispatcher.RuntimePermissions;
@@ -49,6 +56,7 @@ public class MapFragment extends Fragment{
     private GoogleMap mMap;
     private LatLng currLocation;
     private List<Post> posts;
+    private HashMap<String,Post> markers;
     SupportMapFragment mapFragment;
 
 
@@ -68,6 +76,7 @@ public class MapFragment extends Fragment{
         super.onViewCreated(view, savedInstanceState);
 
         posts = new ArrayList<>();
+        markers = new HashMap<>();
 
         //Grab Current User
         ParseUser parseUser = ParseUser.getCurrentUser();
@@ -110,10 +119,28 @@ public class MapFragment extends Fragment{
         //center on curr location
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation,17f));
 
-        mMap.addMarker(new MarkerOptions()
+        //marker on curr location
+        Marker currLocationMarker = mMap.addMarker(new MarkerOptions()
                 .position(currLocation)
                 .title("Current Location")
                 .icon(defaultMarker));
+
+        final String locationMarker = currLocationMarker.getId();
+
+        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+            @Override
+            public void onInfoWindowClick(Marker marker) {
+                Log.i(TAG,"info window clicked");
+
+                if(!marker.getId().equals(locationMarker)) {
+                    Intent intent = new Intent(getActivity(), PostDetails.class);
+                    Post post = markers.get(marker.getId());
+                    intent.putExtra("post", Parcels.wrap(post));
+
+                    startActivity(intent);
+                }
+            }
+        });
 
         queryPosts();
     }
@@ -125,11 +152,14 @@ public class MapFragment extends Fragment{
             ParseGeoPoint location = post.getLocation();
             LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
 
-            mMap.addMarker(new MarkerOptions()
+            Marker marker = mMap.addMarker(new MarkerOptions()
                 .position(latLng)
                 .snippet(description)
                 .title("@" + username)
                 .icon(defaultMarker));
+
+            //associating marker id with post
+            markers.put(marker.getId(),post);
         }
     }
 
