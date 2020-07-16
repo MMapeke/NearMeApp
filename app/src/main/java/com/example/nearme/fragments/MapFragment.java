@@ -20,23 +20,35 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.example.nearme.R;
+import com.example.nearme.models.Post;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MapStyleOptions;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.FindCallback;
+import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseQuery;
 import com.parse.ParseUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import permissions.dispatcher.RuntimePermissions;
 
 public class MapFragment extends Fragment{
 
     public static final String TAG = "MapFragment";
+    private BitmapDescriptor defaultMarker;
     private GoogleMap mMap;
     private LatLng currLocation;
+    private List<Post> posts;
     SupportMapFragment mapFragment;
 
 
@@ -54,6 +66,8 @@ public class MapFragment extends Fragment{
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        posts = new ArrayList<>();
 
         //Grab Current User
         ParseUser parseUser = ParseUser.getCurrentUser();
@@ -87,13 +101,58 @@ public class MapFragment extends Fragment{
 
     private void loadMap(GoogleMap map) {
         mMap = map;
+        defaultMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
+
         //setting max and min zoom levels
         mMap.setMinZoomPreference(10f);
         mMap.setMaxZoomPreference(20f);
 
-        // Add a marker in Sydney and move the camera
-        mMap.addMarker(new MarkerOptions().position(currLocation).title("Current Location"));
-
+        //center on curr location
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation,17f));
+
+        mMap.addMarker(new MarkerOptions()
+                .position(currLocation)
+                .title("Current Location")
+                .icon(defaultMarker));
+
+        queryPosts();
+    }
+
+    private void addMarkers() {
+        for(Post post: posts){
+            String description = post.getDescription();
+            String username = post.getUser().getUsername();
+            ParseGeoPoint location = post.getLocation();
+            LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+
+            mMap.addMarker(new MarkerOptions()
+                .position(latLng)
+                .snippet(description)
+                .title("@" + username)
+                .icon(defaultMarker));
+        }
+    }
+
+    private void queryPosts() {
+        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
+        query.include(Post.KEY_USER);
+        query.addDescendingOrder(Post.KEY_CREATED_AT);
+        query.setLimit(10);
+
+        query.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> objects, ParseException e) {
+                if(e == null){
+                    posts.addAll(objects);
+                    for(Post i:objects){
+                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
+                    }
+                    Log.i(TAG,"Posts queried");
+                    addMarkers();
+                }else{
+                    Log.e(TAG,"error while quering posts",e);
+                }
+            }
+        });
     }
 }

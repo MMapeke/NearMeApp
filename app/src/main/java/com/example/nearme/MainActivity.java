@@ -62,8 +62,6 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_map:
                         fragment = new MapFragment();
                         break;
-//                        Intent intent = new Intent(MainActivity.this,MapsActivity.class);
-//                        startActivity(intent);
                      default:
                         fragment = new ComposeFragment();
                         break;
