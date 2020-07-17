@@ -217,11 +217,6 @@ public class MapFragment extends Fragment{
             }
         });
 
-        //TODO:
-        //Add GeoQuerying within Box to TextFragment
-        //Fix InfoWindow Click Bug (need to change how storing, and dont delete/recreate markers still there
-        //?Default Behvaior b4 storing for Map and Text (when mainactivity created new), may move location to fragment, and add buttons to recenter
-
         map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {

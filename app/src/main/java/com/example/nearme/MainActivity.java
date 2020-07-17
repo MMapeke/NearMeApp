@@ -28,6 +28,9 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
+
+//TODO:
+//Fix InfoWindow Click Bug (need to change how storing, and dont delete/recreate markers still there
 public class MainActivity extends AppCompatActivity implements MapFragment.MapFragmentListener{
 
     public static final String TAG = "MainActivity";
