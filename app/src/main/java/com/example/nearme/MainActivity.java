@@ -23,17 +23,29 @@ import com.example.nearme.fragments.ComposeFragment;
 import com.example.nearme.fragments.MapFragment;
 import com.example.nearme.fragments.ProfileFragment;
 import com.example.nearme.fragments.TextFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MapFragment.MapFragmentListener{
 
     public static final String TAG = "MainActivity";
 
     final FragmentManager fragmentManager = getSupportFragmentManager();
     private BottomNavigationView bottomNavigationView;
+    LatLngBounds latLngBounds;
     ImageButton btnProfile;
     ImageButton btnLocation;
+
+    //Bounds of View
+    boolean boundsStored = false;
+//    double sw_lat;
+//    double sw_lng;
+//    double ne_lat;
+//    double ne_lng;
+    LatLng swBound;
+    LatLng neBound;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,10 +69,18 @@ public class MainActivity extends AppCompatActivity {
                 Fragment fragment;
                 switch (menuItem.getItemId()) {
                     case R.id.action_text:
-                        fragment = new TextFragment();
+                        if(boundsStored){
+                            fragment = TextFragment.newInstance(swBound,neBound);
+                        }else {
+                            fragment = new TextFragment();
+                        }
                         break;
                     case R.id.action_map:
-                        fragment = new MapFragment();
+                        if(boundsStored){
+                            fragment = MapFragment.newInstance(swBound,neBound);
+                        }else {
+                            fragment = new MapFragment();
+                        }
                         break;
                      default:
                         fragment = new ComposeFragment();
@@ -98,5 +118,13 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = new Intent(this,GetLocation.class);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void viewBoundChanged(LatLng swBound, LatLng neBound) {
+        this.swBound = swBound;
+        this.neBound = neBound;
+
+        boundsStored = true;
     }
 }

@@ -1,6 +1,7 @@
 package com.example.nearme.fragments;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -48,6 +49,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import permissions.dispatcher.RuntimePermissions;
 
@@ -59,11 +61,76 @@ public class MapFragment extends Fragment{
     private LatLng currLocation;
     private List<Post> posts;
     private HashMap<String,Post> markers;
-    SupportMapFragment mapFragment;
+    private SupportMapFragment mapFragment;
 
+    //Bounds of View
+    boolean havePrevBounds = false;
+    LatLng swBound;
+    LatLng neBound;
+
+//    double sw_lat;
+//    double sw_lng;
+//    double ne_lat;
+//    double ne_lng;
+
+    //Listener from activity instance
+    private MapFragmentListener listener;
+
+    public interface MapFragmentListener{
+        //Fired with bounds of view are changed
+//        public void viewBoundChanged(Double sw_lat, Double sw_lng, Double ne_lat, Double ne_lng);
+        public void viewBoundChanged(LatLng swBound, LatLng neBound);
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (context instanceof MapFragmentListener) {
+            listener = (MapFragmentListener) context;
+        } else {
+            throw new ClassCastException(context.toString()
+                    + " must implement MapFragment.OnViewChangedListener");
+        }
+    }
 
     public MapFragment() {
         // Required empty public constructor
+    }
+
+    // Creates a new  MapFragment given 2 LatLng Bounds (southwest,northeast)
+    public static MapFragment newInstance(
+//            Double sw_lat, Double sw_lng, Double ne_lat, Double ne_lng,
+            LatLng sw, LatLng ne) {
+        MapFragment mFragment = new MapFragment();
+        Bundle args = new Bundle();
+//        args.putDouble("sw_lat",sw_lat);
+//        args.putDouble("sw_lng",sw_lng);
+//        args.putDouble("ne_lat",ne_lat);
+//        args.putDouble("ne_lng",ne_lng);
+
+        args.putParcelable("sw", sw);
+        args.putParcelable("ne",ne);
+
+        mFragment.setArguments(args);
+        return mFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //Get Bound Argument If Exist
+        Bundle bundle = getArguments();
+        if(bundle != null){
+//            sw_lat = bundle.getDouble("sw_lat");
+//            sw_lng = bundle.getDouble("sw_lng");
+//            ne_lat = bundle.getDouble("ne_lat");
+//            ne_lng = bundle.getDouble("ne_lng");
+
+            swBound = bundle.getParcelable("sw");
+            neBound = bundle.getParcelable("ne");
+
+            havePrevBounds = true;
+        }
     }
 
     @Override
@@ -118,16 +185,22 @@ public class MapFragment extends Fragment{
         mMap.setMinZoomPreference(10f);
         mMap.setMaxZoomPreference(20f);
 
-        //center on curr location
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation,17f));
+        if(havePrevBounds){
+//            LatLng southwest = new LatLng(sw_lat,sw_lng);
+//            LatLng northeast = new LatLng(ne_lat,ne_lng);
 
-        //marker on curr location
-//        Marker currLocationMarker = mMap.addMarker(new MarkerOptions()
-//                .position(currLocation)
-//                .title("Current Location")
-//                .icon(defaultMarker));
+            //building bounds based off previous LatLng values
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(swBound);
+            builder.include(neBound);
 
-//        final String locationMarker = currLocationMarker.getId();
+            LatLngBounds newBounds = builder.build();
+
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds,0));
+        }else {
+            //center on curr location
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation, 17f));
+        }
 
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -145,7 +218,9 @@ public class MapFragment extends Fragment{
         });
 
         //TODO:
-        //COMMUNICATE BOUNDS WITH TEXTVIEW
+        //Add GeoQuerying within Box to TextFragment
+        //Fix InfoWindow Click Bug (need to change how storing, and dont delete/recreate markers still there
+        //?Default Behvaior b4 storing for Map and Text (when mainactivity created new), may move location to fragment, and add buttons to recenter
 
         map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
@@ -156,6 +231,10 @@ public class MapFragment extends Fragment{
                 LatLng sw = bounds.southwest;
                 ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude,ne.longitude);
                 ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude,sw.longitude);
+
+                //Notifying Parent Activity bounds have changed
+//                listener.viewBoundChanged(sw.latitude,sw.longitude,ne.latitude,ne.longitude);
+                listener.viewBoundChanged(sw,ne);
 
                 queryPostsInView(southwest,northeast);
             }

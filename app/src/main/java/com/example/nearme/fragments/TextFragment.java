@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.PostAdapter;
+import com.google.android.gms.maps.model.LatLng;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -35,8 +36,40 @@ public class TextFragment extends Fragment {
     PostAdapter postAdapter;
     RecyclerView recyclerView;
 
+    Boolean havePrevBounds = false;
+    ParseGeoPoint swBound;
+    ParseGeoPoint neBound;
+
     public TextFragment() {
         // Required empty public constructor
+    }
+
+    // Creates a TextFragment given 2 LatLng Bounds (southwest,northeast)
+    public static Fragment newInstance(LatLng sw, LatLng ne) {
+        TextFragment tFragment =  new TextFragment();
+        Bundle args = new Bundle();
+
+        args.putParcelable("sw",sw);
+        args.putParcelable("ne",ne);
+
+        tFragment.setArguments(args);
+        return tFragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //Get Bound Arguments if Exist
+        Bundle bundle = getArguments();
+        if(bundle != null){
+            LatLng sw = bundle.getParcelable("sw");
+            LatLng ne = bundle.getParcelable("ne");
+
+            swBound = new ParseGeoPoint(sw.latitude,sw.longitude);
+            neBound = new ParseGeoPoint(ne.latitude,ne.longitude);
+
+            havePrevBounds = true;
+        }
     }
 
     @Override
@@ -64,10 +97,10 @@ public class TextFragment extends Fragment {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
 
-        //query based on distance
-//        Double maxDistance = (Double) 0.1;
-//        ParseGeoPoint lastLocation = ParseUser.getCurrentUser().getParseGeoPoint("location");
-//        query.whereWithinMiles("location",lastLocation,maxDistance);
+        if(havePrevBounds){
+            //Query within Bounds
+            query.whereWithinGeoBox(Post.KEY_LOCATION, swBound, neBound);
+        }
 
         //Most recently created at top
         query.addDescendingOrder(Post.KEY_CREATED_AT);
