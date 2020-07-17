@@ -18,6 +18,7 @@ import com.example.nearme.models.Post;
 import com.example.nearme.models.PostAdapter;
 import com.parse.FindCallback;
 import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
@@ -62,6 +63,13 @@ public class TextFragment extends Fragment {
     private void queryPosts() {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
+
+        //query based on distance
+//        Double maxDistance = (Double) 0.1;
+//        ParseGeoPoint lastLocation = ParseUser.getCurrentUser().getParseGeoPoint("location");
+//        query.whereWithinMiles("location",lastLocation,maxDistance);
+
+        //Most recently created at top
         query.addDescendingOrder(Post.KEY_CREATED_AT);
         query.setLimit(10);
 

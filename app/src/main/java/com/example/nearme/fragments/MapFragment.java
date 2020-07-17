@@ -32,10 +32,12 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -120,29 +122,75 @@ public class MapFragment extends Fragment{
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation,17f));
 
         //marker on curr location
-        Marker currLocationMarker = mMap.addMarker(new MarkerOptions()
-                .position(currLocation)
-                .title("Current Location")
-                .icon(defaultMarker));
+//        Marker currLocationMarker = mMap.addMarker(new MarkerOptions()
+//                .position(currLocation)
+//                .title("Current Location")
+//                .icon(defaultMarker));
 
-        final String locationMarker = currLocationMarker.getId();
+//        final String locationMarker = currLocationMarker.getId();
 
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Log.i(TAG,"info window clicked");
 
-                if(!marker.getId().equals(locationMarker)) {
+//                if(!marker.getId().equals(locationMarker)) {
                     Intent intent = new Intent(getActivity(), PostDetails.class);
                     Post post = markers.get(marker.getId());
                     intent.putExtra("post", Parcels.wrap(post));
 
                     startActivity(intent);
-                }
+//                }
             }
         });
 
-        queryPosts();
+        //TODO:
+        //COMMUNICATE BOUNDS WITH TEXTVIEW
+
+        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+            @Override
+            public void onCameraIdle() {
+                Log.i(TAG,"Camera Idle");
+                LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                LatLng ne = bounds.northeast;
+                LatLng sw = bounds.southwest;
+                ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude,ne.longitude);
+                ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude,sw.longitude);
+
+                queryPostsInView(southwest,northeast);
+            }
+        });
+    }
+
+    private void queryPostsInView(ParseGeoPoint southwest, ParseGeoPoint northeast){
+        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
+        query.include(Post.KEY_USER);
+        query.addDescendingOrder(Post.KEY_CREATED_AT);
+        query.setLimit(10);
+
+        query.whereWithinGeoBox(Post.KEY_LOCATION,southwest,northeast);
+
+        query.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> objects, ParseException e) {
+                if(e == null){
+
+                    //Removing Old Markers and References
+                    mMap.clear();
+                    posts.clear();
+                    markers.clear();
+
+                    posts.addAll(objects);
+                    for(Post i:objects){
+                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
+                    }
+                    Log.i(TAG,"Posts queried");
+                    addMarkers();
+                }else{
+                    Log.e(TAG,"error while querying posts",e);
+                }
+            }
+        });
     }
 
     private void addMarkers() {
@@ -161,28 +209,8 @@ public class MapFragment extends Fragment{
             //associating marker id with post
             markers.put(marker.getId(),post);
         }
+        System.out.println("placeholder");
     }
 
-    private void queryPosts() {
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
-        query.addDescendingOrder(Post.KEY_CREATED_AT);
-        query.setLimit(10);
 
-        query.findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> objects, ParseException e) {
-                if(e == null){
-                    posts.addAll(objects);
-                    for(Post i:objects){
-                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
-                    }
-                    Log.i(TAG,"Posts queried");
-                    addMarkers();
-                }else{
-                    Log.e(TAG,"error while quering posts",e);
-                }
-            }
-        });
-    }
 }
