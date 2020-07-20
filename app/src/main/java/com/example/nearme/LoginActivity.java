@@ -40,7 +40,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
 
         //if already logged in
-        if(ParseUser.getCurrentUser() != null) goMainActivity();
+        if(ParseUser.getCurrentUser() != null) goLocationActivity();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -67,8 +67,8 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private void goMainActivity() {
-        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+    private void goLocationActivity() {
+        Intent intent = new Intent(LoginActivity.this,GetLocation.class);
         startActivity(intent);
         finish();
     }
@@ -83,7 +83,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void done(ParseException e) {
                 if(e == null){
-                    goMainActivity();
+                    goLocationActivity();
                 }else{
                     Log.e(TAG,"Registration failed",e);
                     btnRegister.setEnabled(true);
@@ -97,7 +97,7 @@ public class LoginActivity extends AppCompatActivity {
         ParseUser.logInInBackground(username, password, new LogInCallback() {
             public void done(ParseUser user, ParseException e) {
                 if (user != null) {
-                    goMainActivity();
+                    goLocationActivity();
                 } else {
                     //TODO: Better error handling, informing user what's wrong
                     Log.e(TAG,"Login failed",e);

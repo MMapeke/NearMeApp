@@ -2,21 +2,13 @@ package com.example.nearme;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.ListFragment;
 
 import android.content.Intent;
-import android.media.Image;
-import android.os.Build;
 import android.os.Bundle;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
-import android.view.WindowManager;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 
 import com.example.nearme.fragments.ComposeFragment;
@@ -29,8 +21,6 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
 
-//TODO:
-//Fix InfoWindow Click Bug (need to change how storing, and dont delete/recreate markers still there
 public class MainActivity extends AppCompatActivity implements MapFragment.MapFragmentListener{
 
     public static final String TAG = "MainActivity";
@@ -43,10 +33,6 @@ public class MainActivity extends AppCompatActivity implements MapFragment.MapFr
 
     //Bounds of View
     boolean boundsStored = false;
-//    double sw_lat;
-//    double sw_lng;
-//    double ne_lat;
-//    double ne_lng;
     LatLng swBound;
     LatLng neBound;
 

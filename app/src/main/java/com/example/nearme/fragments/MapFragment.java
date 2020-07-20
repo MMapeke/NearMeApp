@@ -1,27 +1,18 @@
 package com.example.nearme.fragments;
 
-import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.location.Location;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.app.ActivityCompat;
-import androidx.core.util.Pair;
 import androidx.fragment.app.Fragment;
 
-import android.os.Handler;
-import android.os.Looper;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
@@ -38,7 +29,6 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
@@ -46,12 +36,9 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-
-import permissions.dispatcher.RuntimePermissions;
 
 public class MapFragment extends Fragment{
 
@@ -59,8 +46,12 @@ public class MapFragment extends Fragment{
     private BitmapDescriptor defaultMarker;
     private GoogleMap mMap;
     private LatLng currLocation;
-    private List<Post> posts;
-    private HashMap<String,Post> markers;
+
+    private HashMap<String,Post> idToPost;
+
+    private HashMap<Marker,String> markerToPost;
+    private HashMap<String,Marker> postToMarker;
+
     private SupportMapFragment mapFragment;
 
     //Bounds of View
@@ -68,17 +59,11 @@ public class MapFragment extends Fragment{
     LatLng swBound;
     LatLng neBound;
 
-//    double sw_lat;
-//    double sw_lng;
-//    double ne_lat;
-//    double ne_lng;
-
     //Listener from activity instance
     private MapFragmentListener listener;
 
     public interface MapFragmentListener{
         //Fired with bounds of view are changed
-//        public void viewBoundChanged(Double sw_lat, Double sw_lng, Double ne_lat, Double ne_lng);
         public void viewBoundChanged(LatLng swBound, LatLng neBound);
     }
 
@@ -89,7 +74,7 @@ public class MapFragment extends Fragment{
             listener = (MapFragmentListener) context;
         } else {
             throw new ClassCastException(context.toString()
-                    + " must implement MapFragment.OnViewChangedListener");
+                    + " must implement MapFragment.MapFragmentListener");
         }
     }
 
@@ -103,10 +88,6 @@ public class MapFragment extends Fragment{
             LatLng sw, LatLng ne) {
         MapFragment mFragment = new MapFragment();
         Bundle args = new Bundle();
-//        args.putDouble("sw_lat",sw_lat);
-//        args.putDouble("sw_lng",sw_lng);
-//        args.putDouble("ne_lat",ne_lat);
-//        args.putDouble("ne_lng",ne_lng);
 
         args.putParcelable("sw", sw);
         args.putParcelable("ne",ne);
@@ -121,11 +102,6 @@ public class MapFragment extends Fragment{
         //Get Bound Argument If Exist
         Bundle bundle = getArguments();
         if(bundle != null){
-//            sw_lat = bundle.getDouble("sw_lat");
-//            sw_lng = bundle.getDouble("sw_lng");
-//            ne_lat = bundle.getDouble("ne_lat");
-//            ne_lng = bundle.getDouble("ne_lng");
-
             swBound = bundle.getParcelable("sw");
             neBound = bundle.getParcelable("ne");
 
@@ -144,8 +120,10 @@ public class MapFragment extends Fragment{
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        posts = new ArrayList<>();
-        markers = new HashMap<>();
+        idToPost = new HashMap<>();
+
+        markerToPost = new HashMap<>();
+        postToMarker = new HashMap<>();
 
         //Grab Current User
         ParseUser parseUser = ParseUser.getCurrentUser();
@@ -186,9 +164,6 @@ public class MapFragment extends Fragment{
         mMap.setMaxZoomPreference(20f);
 
         if(havePrevBounds){
-//            LatLng southwest = new LatLng(sw_lat,sw_lng);
-//            LatLng northeast = new LatLng(ne_lat,ne_lng);
-
             //building bounds based off previous LatLng values
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             builder.include(swBound);
@@ -206,14 +181,13 @@ public class MapFragment extends Fragment{
             @Override
             public void onInfoWindowClick(Marker marker) {
                 Log.i(TAG,"info window clicked");
+                String postID = markerToPost.get(marker);
+                Post post = idToPost.get(postID);
 
-//                if(!marker.getId().equals(locationMarker)) {
-                    Intent intent = new Intent(getActivity(), PostDetails.class);
-                    Post post = markers.get(marker.getId());
-                    intent.putExtra("post", Parcels.wrap(post));
+                Intent intent = new Intent(getActivity(), PostDetails.class);
+                intent.putExtra("post", Parcels.wrap(post));
 
-                    startActivity(intent);
-//                }
+                startActivity(intent);
             }
         });
 
@@ -227,8 +201,7 @@ public class MapFragment extends Fragment{
                 ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude,ne.longitude);
                 ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude,sw.longitude);
 
-                //Notifying Parent Activity bounds have changed
-//                listener.viewBoundChanged(sw.latitude,sw.longitude,ne.latitude,ne.longitude);
+                //Notifying Parent Activity bounds have changed\
                 listener.viewBoundChanged(sw,ne);
 
                 queryPostsInView(southwest,northeast);
@@ -248,18 +221,13 @@ public class MapFragment extends Fragment{
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if(e == null){
-
-                    //Removing Old Markers and References
-                    mMap.clear();
-                    posts.clear();
-                    markers.clear();
-
-                    posts.addAll(objects);
                     for(Post i:objects){
                         Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
                     }
                     Log.i(TAG,"Posts queried");
-                    addMarkers();
+                    addMarkers(objects);
+                    deleteOldMarkers(objects);
+                    Log.i(TAG,"Markers adjusted");
                 }else{
                     Log.e(TAG,"error while querying posts",e);
                 }
@@ -267,23 +235,51 @@ public class MapFragment extends Fragment{
         });
     }
 
-    private void addMarkers() {
-        for(Post post: posts){
-            String description = post.getDescription();
-            String username = post.getUser().getUsername();
-            ParseGeoPoint location = post.getLocation();
-            LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
-
-            Marker marker = mMap.addMarker(new MarkerOptions()
-                .position(latLng)
-                .snippet(description)
-                .title("@" + username)
-                .icon(defaultMarker));
-
-            //associating marker id with post
-            markers.put(marker.getId(),post);
+    private void deleteOldMarkers(List<Post> inp) {
+        HashSet<String> newPostsID = new HashSet<>();
+        for(Post post: inp){
+            newPostsID.add(post.getObjectId());
         }
-        System.out.println("placeholder");
+        HashSet<Marker> oldMarkers = new HashSet<>(markerToPost.keySet());
+
+        for(Marker marker: oldMarkers){
+            String postIDWithMarker = markerToPost.get(marker);
+            Post postWithMarker = idToPost.get(postIDWithMarker);
+            //Old Marker Not Associated w/ newly loaded post
+            if(!newPostsID.contains(postIDWithMarker)){
+                idToPost.remove(postIDWithMarker);
+                postToMarker.remove(postIDWithMarker);
+                markerToPost.remove(marker);
+
+                marker.remove();
+                Log.i(TAG,"Deleted with marker from post: " + postWithMarker.getDescription());
+            }
+        }
+    }
+
+    private void addMarkers(List<Post> inp) {
+        for(Post post: inp){
+            //if post does not have marker already
+            if(!postToMarker.containsKey(post.getObjectId())) {
+                String description = post.getDescription();
+                String username = post.getUser().getUsername();
+                ParseGeoPoint location = post.getLocation();
+                LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+
+                Marker marker = mMap.addMarker(new MarkerOptions()
+                        .position(latLng)
+                        .snippet(description)
+                        .title("@" + username)
+                        .icon(defaultMarker));
+
+                idToPost.put(post.getObjectId(),post);
+
+                postToMarker.put(post.getObjectId(), marker);
+                markerToPost.put(marker, post.getObjectId());
+
+                Log.i(TAG,"Created new marker from post: " + post.getDescription());
+            }
+        }
     }
 
 
