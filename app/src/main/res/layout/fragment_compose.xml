@@ -1,14 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".fragments.ComposeFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/compose_takePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        app:backgroundTint="@android:color/transparent"
+        android:background="@null"
+        android:clickable="true"
+        android:src="@drawable/ic_outline_photo_camera_24" />
+
+
+    <ImageView
+        android:id="@+id/compose_image"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:text="compose fragment" />
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_above="@+id/compose_textinputlayout"
+        android:scaleType="centerCrop"
+        tools:src="@tools:sample/avatars" />
 
-</FrameLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/compose_textinputlayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_above="@+id/compose_submit"
+        app:counterEnabled="true"
+        app:counterMaxLength="32">
+        <EditText
+            android:id="@+id/compose_desc"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="What's happening?"
+            android:inputType="textMultiLine"
+            android:minLines="1" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <Button
+        android:id="@+id/compose_submit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:text="Submit" />
+</RelativeLayout>
