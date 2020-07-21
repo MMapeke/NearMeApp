@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.example.nearme.R;
@@ -33,6 +34,7 @@ import com.parse.ParseFile;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -46,11 +48,13 @@ public class ComposeFragment extends Fragment {
     FloatingActionButton btnTakePic;
     FloatingActionButton btnChoosePic;
     Button btnSubmit;
+    ProgressBar pb;
 
     public final static int PICK_PHOTO_CODE = 1046;
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public String photoFileName = "photo.jpg";
     File photoFile;
+    ParseFile photoParseFile;
 
     public ComposeFragment() {
         // Required empty public constructor
@@ -72,6 +76,7 @@ public class ComposeFragment extends Fragment {
         btnTakePic = view.findViewById(R.id.compose_takePic);
         btnSubmit = view.findViewById(R.id.compose_submit);
         btnChoosePic = view.findViewById(R.id.compose_choosePic);
+        pb = view.findViewById(R.id.compose_pbLoading);
         
         btnTakePic.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,12 +102,12 @@ public class ComposeFragment extends Fragment {
                     Toast.makeText(getContext(),"Description can't be empty",Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(photoFile == null || image.getDrawable() == null){
+                if(image.getDrawable() == null){
                     Toast.makeText(getContext(),"Take an image",Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                savePost(description,currUser,photoFile);
+                savePost(description,currUser);
             }
         });
     }
@@ -116,7 +121,7 @@ public class ComposeFragment extends Fragment {
         // wrap File object into a content provider
         // required for API >= 24
         // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-        Uri fileProvider = FileProvider.getUriForFile(getContext(), "com.codepath.fileprovider", photoFile);
+        Uri fileProvider = FileProvider.getUriForFile(getContext(), "com.codepath.fileprovider.NearMe", photoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
         // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
@@ -141,11 +146,13 @@ public class ComposeFragment extends Fragment {
         }
     }
 
-    private void savePost(String description, ParseUser currUser, File photoFile) {
+    private void savePost(String description, ParseUser currUser) {
+        pb.setVisibility(ProgressBar.VISIBLE);
         Post post = new Post();
         post.setDescription(description);
-        post.setImage(new ParseFile(photoFile));
+        post.setImage(photoParseFile);
         post.setUser(currUser);
+        post.setLocation(currUser.getParseGeoPoint("location"));
 
         post.saveInBackground(new SaveCallback() {
             @Override
@@ -154,6 +161,7 @@ public class ComposeFragment extends Fragment {
                     Log.i(TAG,"Saving Post succesful");
                     etDesc.setText("");
                     image.setImageResource(0);
+                    pb.setVisibility(ProgressBar.INVISIBLE);
                 }else{
                     Log.e(TAG,"error while saving",e);
                     Toast.makeText(getContext(),"Error while saving post",Toast.LENGTH_SHORT);
@@ -171,6 +179,8 @@ public class ComposeFragment extends Fragment {
                 // RESIZE BITMAP, see section below
                 // Load the taken image into a preview
                 image.setImageBitmap(takenImage);
+
+                photoParseFile = new ParseFile(photoFile);
             } else { // Result was a failure
                 Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
@@ -180,6 +190,15 @@ public class ComposeFragment extends Fragment {
                 // Load the image located at photoUri into selectedImage
                 Bitmap selectedImage = loadFromUri(photoUri);
                 image.setImageBitmap(selectedImage);
+
+                //Making bitmap into ParseFile
+                // Convert it to byte
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                // Compress image to lower quality scale 1 - 100
+                selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                byte[] bytes = stream.toByteArray();
+                photoParseFile = new ParseFile("profile_pic.png",bytes);
+
             } else {
                 Toast.makeText(getContext(),"Picture wasn't selected!",Toast.LENGTH_SHORT).show();
             }

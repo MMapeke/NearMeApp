@@ -69,4 +69,11 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:text="Submit" />
+
+    <ProgressBar
+        android:id="@+id/compose_pbLoading"
+        android:visibility="invisible"
+        android:layout_width="128dp"
+        android:layout_height="128dp" />
+
 </RelativeLayout>

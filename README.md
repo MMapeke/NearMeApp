@@ -30,7 +30,7 @@ NearMe allows users to view short descriptions of events near them along with sh
 - [x] User can use current location
 - [x] User can view map of local posts
 - [x] User can view list of local and recent posts
-- [ ] User can post short info for local event w/ short desc, location, short vid
+- [x] User can post short info for local event w/ short desc, location, short vid
 - [ ] User can set input location
 
 
