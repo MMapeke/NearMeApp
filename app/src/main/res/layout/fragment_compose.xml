@@ -20,6 +20,19 @@
         android:clickable="true"
         android:src="@drawable/ic_outline_photo_camera_24" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/compose_choosePic"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_below="@+id/compose_takePic"
+        android:layout_alignParentEnd="true"
+        app:backgroundTint="@android:color/transparent"
+        android:background="@null"
+        android:clickable="true"
+        android:src="@drawable/ic_outline_image_search_24" />
+
 
     <ImageView
         android:id="@+id/compose_image"

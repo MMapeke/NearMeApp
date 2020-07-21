@@ -3,7 +3,9 @@ package com.example.nearme.fragments;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -32,6 +34,7 @@ import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
 import java.io.File;
+import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -41,8 +44,10 @@ public class ComposeFragment extends Fragment {
     ImageView image;
     EditText etDesc;
     FloatingActionButton btnTakePic;
+    FloatingActionButton btnChoosePic;
     Button btnSubmit;
 
+    public final static int PICK_PHOTO_CODE = 1046;
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
     public String photoFileName = "photo.jpg";
     File photoFile;
@@ -66,11 +71,19 @@ public class ComposeFragment extends Fragment {
         etDesc = view.findViewById(R.id.compose_desc);
         btnTakePic = view.findViewById(R.id.compose_takePic);
         btnSubmit = view.findViewById(R.id.compose_submit);
+        btnChoosePic = view.findViewById(R.id.compose_choosePic);
         
         btnTakePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onLaunchCamera();
+            }
+        });
+
+        btnChoosePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onPickPhoto();
             }
         });
 
@@ -90,27 +103,6 @@ public class ComposeFragment extends Fragment {
                 }
 
                 savePost(description,currUser,photoFile);
-            }
-        });
-    }
-
-    private void savePost(String description, ParseUser currUser, File photoFile) {
-        Post post = new Post();
-        post.setDescription(description);
-        post.setImage(new ParseFile(photoFile));
-        post.setUser(currUser);
-
-        post.saveInBackground(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if(e == null){
-                    Log.i(TAG,"Saving Post succesful");
-                    etDesc.setText("");
-                    image.setImageResource(0);
-                }else{
-                    Log.e(TAG,"error while saving",e);
-                    Toast.makeText(getContext(),"Error while saving post",Toast.LENGTH_SHORT);
-                }
             }
         });
     }
@@ -135,6 +127,65 @@ public class ComposeFragment extends Fragment {
         }
     }
 
+    // Trigger gallery selection for a photo
+    private void onPickPhoto() {
+        // Create intent for picking a photo from the gallery
+        Intent intent = new Intent(Intent.ACTION_PICK,
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+        // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+        // So as long as the result is not null, it's safe to use the intent.
+        if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+            // Bring up gallery to select a photo
+            startActivityForResult(intent, PICK_PHOTO_CODE);
+        }
+    }
+
+    private void savePost(String description, ParseUser currUser, File photoFile) {
+        Post post = new Post();
+        post.setDescription(description);
+        post.setImage(new ParseFile(photoFile));
+        post.setUser(currUser);
+
+        post.saveInBackground(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if(e == null){
+                    Log.i(TAG,"Saving Post succesful");
+                    etDesc.setText("");
+                    image.setImageResource(0);
+                }else{
+                    Log.e(TAG,"error while saving",e);
+                    Toast.makeText(getContext(),"Error while saving post",Toast.LENGTH_SHORT);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                // by this point we have the camera photo on disk
+                Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+                // RESIZE BITMAP, see section below
+                // Load the taken image into a preview
+                image.setImageBitmap(takenImage);
+            } else { // Result was a failure
+                Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+            }
+        } else if ((data != null) && requestCode == PICK_PHOTO_CODE){
+            if (resultCode == RESULT_OK){
+                Uri photoUri = data.getData();
+                // Load the image located at photoUri into selectedImage
+                Bitmap selectedImage = loadFromUri(photoUri);
+                image.setImageBitmap(selectedImage);
+            } else {
+                Toast.makeText(getContext(),"Picture wasn't selected!",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     // Returns the File for a photo stored on disk given the fileName
     public File getPhotoFileUri(String fileName) {
         // Get safe storage directory for photos
@@ -153,18 +204,21 @@ public class ComposeFragment extends Fragment {
         return file;
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                // by this point we have the camera photo on disk
-                Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
-                // RESIZE BITMAP, see section below
-                // Load the taken image into a preview
-                image.setImageBitmap(takenImage);
-            } else { // Result was a failure
-                Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+    public Bitmap loadFromUri(Uri photoUri) {
+        Bitmap image = null;
+        try {
+            // check version of Android on device
+            if(Build.VERSION.SDK_INT > 27){
+                // on newer versions of Android, use the new decodeBitmap method
+                ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), photoUri);
+                image = ImageDecoder.decodeBitmap(source);
+            } else {
+                // support older versions of Android by using getBitmap
+                image = MediaStore.Images.Media.getBitmap(getContext().getContentResolver(), photoUri);
             }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+        return image;
     }
 }
