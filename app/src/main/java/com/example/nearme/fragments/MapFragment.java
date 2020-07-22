@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -121,7 +122,6 @@ public class MapFragment extends Fragment{
         super.onViewCreated(view, savedInstanceState);
 
         idToPost = new HashMap<>();
-
         markerToPost = new HashMap<>();
         postToMarker = new HashMap<>();
 

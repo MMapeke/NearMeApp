@@ -31,19 +31,19 @@ NearMe allows users to view short descriptions of events near them along with sh
 - [x] User can view map of local posts
 - [x] User can view list of local and recent posts
 - [x] User can post short info for local event w/ short desc, location, short vid
-- [ ] User can set input location
-
-
+- [x] User can set input location
 
 **Optional Nice-to-have Stories**
 
 - [ ] Video Support
+- [ ] User can customize sorting of posts
+
 - [ ] Profile Configuration(Pics,Desc) / User Can Remove Post
 - [ ] Improve Map UI/ Group Posts Together
 - [ ] User can follow/unfollow and view profiles
 - [ ] User can like posts
 - [ ]  Notifications for Active Area
-- [ ] User can customize sorting of posts
+
 
 
 

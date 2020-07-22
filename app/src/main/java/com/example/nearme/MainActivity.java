@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.MapFr
         });
 
         //setting default bottom nav view
-        bottomNavigationView.setSelectedItemId(R.id.action_text);
+        bottomNavigationView.setSelectedItemId(R.id.action_map);
 
     }
 

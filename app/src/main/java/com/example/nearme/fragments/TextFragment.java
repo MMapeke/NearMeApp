@@ -7,11 +7,13 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
@@ -31,6 +33,8 @@ public class TextFragment extends Fragment {
     List<Post> posts;
     PostAdapter postAdapter;
     RecyclerView recyclerView;
+    TextView emptyMSG;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     Boolean havePrevBounds = false;
     ParseGeoPoint swBound;
@@ -79,12 +83,23 @@ public class TextFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        emptyMSG = view.findViewById(R.id.text_EmptyMessage);
         recyclerView = view.findViewById(R.id.rvPosts);
+        swipeRefreshLayout = view.findViewById(R.id.text_swipeContainer);
         posts = new ArrayList<>();
         postAdapter = new PostAdapter(getContext(),posts);
 
         recyclerView.setAdapter(postAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.i(TAG,"swipe fresh triggered");
+                posts.clear();
+                queryPosts();
+            }
+        });
 
         queryPosts();
     }
@@ -112,6 +127,15 @@ public class TextFragment extends Fragment {
                     }
                     Log.i(TAG,"Posts queried");
                     postAdapter.notifyDataSetChanged();
+
+                    //Showing default message if view empty
+                    if(objects.isEmpty()){
+                        emptyMSG.setVisibility(View.VISIBLE);
+                    }else{
+                        emptyMSG.setVisibility(View.GONE);
+                    }
+
+                    swipeRefreshLayout.setRefreshing(false);
                 }else{
                     Log.e(TAG,"error while quering posts",e);
                 }
