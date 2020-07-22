@@ -13,8 +13,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.nearme.EndlessRecyclerViewScrollListener;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.PostAdapter;
@@ -35,6 +37,7 @@ public class TextFragment extends Fragment {
     RecyclerView recyclerView;
     TextView emptyMSG;
     private SwipeRefreshLayout swipeRefreshLayout;
+    private EndlessRecyclerViewScrollListener scrollListener;
 
     Boolean havePrevBounds = false;
     ParseGeoPoint swBound;
@@ -90,7 +93,18 @@ public class TextFragment extends Fragment {
         postAdapter = new PostAdapter(getContext(),posts);
 
         recyclerView.setAdapter(postAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setLayoutManager(linearLayoutManager);
+
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                Log.i(TAG,"loading more posts");
+                queryMorePosts(totalItemsCount);
+            }
+        };
+
+        recyclerView.addOnScrollListener(scrollListener);
 
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
@@ -115,7 +129,7 @@ public class TextFragment extends Fragment {
 
         //Most recently created at top
         query.addDescendingOrder(Post.KEY_CREATED_AT);
-        query.setLimit(10);
+        query.setLimit(5);
 
         query.findInBackground(new FindCallback<Post>() {
             @Override
@@ -142,5 +156,45 @@ public class TextFragment extends Fragment {
             }
         });
 
+    }
+
+    private void queryMorePosts(int totalItemsCount) {
+        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
+        query.include(Post.KEY_USER);
+
+        if(havePrevBounds){
+            //Query within Bounds
+            query.whereWithinGeoBox(Post.KEY_LOCATION, swBound, neBound);
+        }
+
+        //Most recently created at top
+        query.addDescendingOrder(Post.KEY_CREATED_AT);
+        query.setLimit(5);
+        query.setSkip(totalItemsCount);
+
+        query.findInBackground(new FindCallback<Post>() {
+            @Override
+            public void done(List<Post> objects, ParseException e) {
+                if(e == null){
+                    posts.addAll(objects);
+                    for(Post i:objects){
+                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
+                    }
+                    Log.i(TAG,"More Posts queried");
+                    postAdapter.notifyDataSetChanged();
+
+                    //Showing default message if view empty
+                    if(objects.isEmpty()){
+                        emptyMSG.setVisibility(View.VISIBLE);
+                    }else{
+                        emptyMSG.setVisibility(View.GONE);
+                    }
+
+                    swipeRefreshLayout.setRefreshing(false);
+                }else{
+                    Log.e(TAG,"error while quering posts",e);
+                }
+            }
+        });
     }
 }
