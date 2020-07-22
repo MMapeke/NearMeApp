@@ -17,4 +17,9 @@
         android:icon="@drawable/ic_outline_create_24"
         android:title="Make a Post"
         app:showAsAction="always" />
+    <item
+        android:id="@+id/action_profile"
+        android:icon="@drawable/ic_outline_account_box_24"
+        android:title="Profile"
+        app:showAsAction="always" />
 </menu>

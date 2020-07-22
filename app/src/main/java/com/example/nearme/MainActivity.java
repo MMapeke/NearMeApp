@@ -2,6 +2,7 @@ package com.example.nearme;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -18,6 +19,7 @@ import com.example.nearme.fragments.TextFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.ParseUser;
 
 
@@ -28,8 +30,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.MapFr
     final FragmentManager fragmentManager = getSupportFragmentManager();
     private BottomNavigationView bottomNavigationView;
     LatLngBounds latLngBounds;
-    ImageButton btnProfile;
-    ImageButton btnLocation;
+    FloatingActionButton btnEditLocation;
 
     //Bounds of View
     boolean boundsStored = false;
@@ -41,9 +42,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.MapFr
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-
-        btnLocation = findViewById(R.id.btnLocation);
-        btnProfile = findViewById(R.id.btnProfile);
+        btnEditLocation = findViewById(R.id.main_btnLocation);
         bottomNavigationView = findViewById(R.id.bottom_navigation);
 
         //If User has no location set
@@ -71,7 +70,11 @@ public class MainActivity extends AppCompatActivity implements MapFragment.MapFr
                             fragment = new MapFragment();
                         }
                         break;
-                     default:
+                    case R.id.action_profile:
+                        fragment = new ProfileFragment();
+                        break;
+                    case R.id.action_post:
+                        default:
                         fragment = new ComposeFragment();
                         break;
                 }
@@ -82,15 +85,7 @@ public class MainActivity extends AppCompatActivity implements MapFragment.MapFr
             }
         });
 
-        btnProfile.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Fragment fragment = new ProfileFragment();
-                fragmentManager.beginTransaction().replace(R.id.frameContainer, fragment).commit();
-            }
-        });
-
-        btnLocation.setOnClickListener(new View.OnClickListener() {
+        btnEditLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent =  new Intent(MainActivity.this,GetLocation.class);

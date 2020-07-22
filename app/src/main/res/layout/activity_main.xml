@@ -7,38 +7,22 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".MainActivity">
 
-
-
-    <ImageButton
-        android:id="@+id/btnProfile"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_outline_account_box_24"
-        android:layout_marginLeft="16dp"
-        android:layout_marginTop="8dp"/>
-
-
-    <ImageButton
-        android:id="@+id/btnLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true"
-        android:background="@android:color/transparent"
-        android:src="@drawable/ic_outline_edit_location_24"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="8dp"/>
-
     <FrameLayout
         android:id="@+id/frameContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="4dp"
-        android:layout_above="@id/bottom_navigation"
-        android:layout_below="@id/btnProfile">
+        android:layout_above="@id/bottom_navigation">
     </FrameLayout>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/main_btnLocation"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:layout_alignParentRight="true"
+        android:layout_above="@+id/bottom_navigation"
+        android:src="@drawable/ic_outline_edit_location_24"
+        app:backgroundTint="@color/colorPrimary"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         app:labelVisibilityMode="unlabeled"
