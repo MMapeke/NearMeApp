@@ -5,12 +5,20 @@
     android:layout_height="match_parent"
     android:padding="16dp">
 
-    <SeekBar
-        android:id="@+id/bar_TimeWithin"
+    <TextView
+        android:id="@+id/dialog_text1"
+        android:layout_alignParentTop="true"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
+        android:layout_margin="8dp"
+        android:text="Hours Within: "/>
+
+    <SeekBar
+        android:id="@+id/bar_TimeWithin"
+        android:layout_below="@+id/dialog_text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
         android:max="24" />
 
 </RelativeLayout>

@@ -128,7 +128,7 @@ public class TextFragment extends Fragment {
                     postAdapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
 
-                    showEmptyMessage(posts.isEmpty());
+                    showEmptyMessage(objects.isEmpty());
 
                     Log.i(TAG,"Posts queried");
                 }else{

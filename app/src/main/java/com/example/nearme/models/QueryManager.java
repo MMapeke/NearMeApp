@@ -5,6 +5,8 @@ import com.parse.ParseQuery;
 
 import org.parceler.Parcel;
 
+import java.util.Date;
+
 
 @Parcel
 public class QueryManager {
@@ -15,7 +17,7 @@ public class QueryManager {
 
     ParseGeoPoint swBound;
     ParseGeoPoint neBound;
-    int hoursWithn;
+    Integer hoursWithn;
 
     public QueryManager(){
         //empty constructor for Parceler library
@@ -32,12 +34,24 @@ public class QueryManager {
 
         query.whereWithinGeoBox(Post.KEY_LOCATION,swBound,neBound);
 
+        if(hoursWithn != null){
+            query.whereGreaterThanOrEqualTo(Post.KEY_CREATED_AT,getEarliestDate());
+        }
+
         if(settings.equals(TEXT_FRAGMENT_SETTINGS)){
             query.addDescendingOrder(Post.KEY_CREATED_AT);
             query.setLimit(10);
         }
-
         return query;
+    }
+
+    private Date getEarliestDate(){
+        Date now = new Date();
+        long nowMillis = now.getTime();
+        long timeWithinInMills = hoursWithn * 3600000;
+        Date withinTimeFrame = new Date(nowMillis - timeWithinInMills);
+
+        return withinTimeFrame;
     }
 
 

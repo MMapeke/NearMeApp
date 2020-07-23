@@ -9,6 +9,7 @@ import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -37,10 +38,10 @@ import org.parceler.Parcels;
 
 import java.util.List;
 
-
-//TODO: Pass Filters from Settings to MainActivity/Settings somewhere else, then use in fragments,
-//      if filter not enalbed, if filters are use what is stored, important to make default bounds
-//      to act like a 'filter'
+//TODO: Bug: Empty Message Not Showing
+//TODO: UI keeping only 0-24 hours choice, or view all?
+//TODO: Visual Display of TimeWithin
+//TODO: Distance Filter
 //TODO: Refactor more
 
 public class MainActivity extends AppCompatActivity
@@ -55,15 +56,6 @@ public class MainActivity extends AppCompatActivity
 
     private QueryManager queryManager;
     private final float defaultViewRadiusInMeters = 175.0f;
-
-    //Bounds of View
-    private boolean boundsStored = false;
-    private LatLng swBound;
-    private LatLng neBound;
-
-    //Filters in Hidden Menu Options
-    private boolean filterEnabled = false;
-    private int hoursWithin;
 
     private Fragment fragment;
 
@@ -231,7 +223,7 @@ public class MainActivity extends AppCompatActivity
         startActivity(getIntent().putExtra("qm", Parcels.wrap(queryManager)));
         overridePendingTransition(0, 0);
 
-        Toast.makeText(this,"Now Showing all Posts",Toast.LENGTH_SHORT).show();
+        Log.i(TAG,"Main Activity Refreshed");
     }
 
     private void openFilterDialog() {
@@ -241,9 +233,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void applyFilter(int hours) {
-        filterEnabled = true;
+        //Update QueryManager to same hours
+        queryManager.setHoursWithn(hours);
+        //Refresh page
+        refreshMainActivity();
 
-        this.hoursWithin = hours;
         Toast.makeText(this ,"Now Filtering within: " + hours + " hours",Toast.LENGTH_SHORT).show();
     }
 
