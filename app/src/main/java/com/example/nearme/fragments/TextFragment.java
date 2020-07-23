@@ -13,18 +13,18 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.nearme.EndlessRecyclerViewScrollListener;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.PostAdapter;
-import com.google.android.gms.maps.model.LatLng;
+import com.example.nearme.models.QueryManager;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseQuery;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +32,7 @@ import java.util.List;
 public class TextFragment extends Fragment {
 
     public static final String TAG = "TextFragment";
+    private QueryManager queryManager;
     List<Post> posts;
     PostAdapter postAdapter;
     RecyclerView recyclerView;
@@ -48,12 +49,11 @@ public class TextFragment extends Fragment {
     }
 
     // Creates a TextFragment given 2 LatLng Bounds (southwest,northeast)
-    public static Fragment newInstance(LatLng sw, LatLng ne) {
+    public static Fragment newInstance(QueryManager qm) {
         TextFragment tFragment =  new TextFragment();
         Bundle args = new Bundle();
 
-        args.putParcelable("sw",sw);
-        args.putParcelable("ne",ne);
+        args.putParcelable("qm", Parcels.wrap(qm));
 
         tFragment.setArguments(args);
         return tFragment;
@@ -65,13 +65,13 @@ public class TextFragment extends Fragment {
         //Get Bound Arguments if Exist
         Bundle bundle = getArguments();
         if(bundle != null){
-            LatLng sw = bundle.getParcelable("sw");
-            LatLng ne = bundle.getParcelable("ne");
+//            LatLng sw = bundle.getParcelable("sw");
+//            LatLng ne = bundle.getParcelable("ne");
 
-            swBound = new ParseGeoPoint(sw.latitude,sw.longitude);
-            neBound = new ParseGeoPoint(ne.latitude,ne.longitude);
+            queryManager = Parcels.unwrap(bundle.getParcelable("qm"));
 
-            havePrevBounds = true;
+            swBound = queryManager.getSwBound();
+            neBound = queryManager.getNeBound();
         }
     }
 
@@ -119,80 +119,47 @@ public class TextFragment extends Fragment {
     }
 
     private void queryPosts() {
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
-
-        if(havePrevBounds){
-            //Query within Bounds
-            query.whereWithinGeoBox(Post.KEY_LOCATION, swBound, neBound);
-        }
-
-        //Most recently created at top
-        query.addDescendingOrder(Post.KEY_CREATED_AT);
-        query.setLimit(5);
-
-        query.findInBackground(new FindCallback<Post>() {
+        queryManager.getQuery(QueryManager.TEXT_FRAGMENT_SETTINGS)
+                .findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if(e == null){
                     posts.addAll(objects);
-                    for(Post i:objects){
-                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
-                    }
-                    Log.i(TAG,"Posts queried");
                     postAdapter.notifyDataSetChanged();
-
-                    //Showing default message if view empty
-                    if(objects.isEmpty()){
-                        emptyMSG.setVisibility(View.VISIBLE);
-                    }else{
-                        emptyMSG.setVisibility(View.GONE);
-                    }
-
                     swipeRefreshLayout.setRefreshing(false);
+
+                    showEmptyMessage(posts.isEmpty());
+
+                    Log.i(TAG,"Posts queried");
                 }else{
-                    Log.e(TAG,"error while quering posts",e);
+                    Log.e(TAG,"error while queruing posts",e);
                 }
             }
         });
+    }
 
+    private void showEmptyMessage(boolean empty) {
+        if(empty){
+            emptyMSG.setVisibility(View.VISIBLE);
+        }else{
+            emptyMSG.setVisibility(View.GONE);
+        }
     }
 
     private void queryMorePosts(int totalItemsCount) {
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
-
-        if(havePrevBounds){
-            //Query within Bounds
-            query.whereWithinGeoBox(Post.KEY_LOCATION, swBound, neBound);
-        }
-
-        //Most recently created at top
-        query.addDescendingOrder(Post.KEY_CREATED_AT);
-        query.setLimit(5);
-        query.setSkip(totalItemsCount);
-
-        query.findInBackground(new FindCallback<Post>() {
+        queryManager.getQuery(QueryManager.TEXT_FRAGMENT_SETTINGS).setSkip(totalItemsCount)
+                .findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if(e == null){
                     posts.addAll(objects);
-                    for(Post i:objects){
-                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
-                    }
-                    Log.i(TAG,"More Posts queried");
                     postAdapter.notifyDataSetChanged();
 
-                    //Showing default message if view empty
-                    if(objects.isEmpty()){
-                        emptyMSG.setVisibility(View.VISIBLE);
-                    }else{
-                        emptyMSG.setVisibility(View.GONE);
-                    }
+                    showEmptyMessage(objects.isEmpty());
 
-                    swipeRefreshLayout.setRefreshing(false);
+                    Log.i(TAG,"More Posts queried");
                 }else{
-                    Log.e(TAG,"error while quering posts",e);
+                    Log.e(TAG,"error while querying more posts",e);
                 }
             }
         });

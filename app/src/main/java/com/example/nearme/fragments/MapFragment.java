@@ -8,7 +8,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +17,7 @@ import android.view.ViewGroup;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
+import com.example.nearme.models.QueryManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,6 +35,7 @@ import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
+
 import org.parceler.Parcels;
 
 import java.util.HashMap;
@@ -44,6 +45,7 @@ import java.util.List;
 public class MapFragment extends Fragment{
 
     public static final String TAG = "MapFragment";
+    private QueryManager queryManager;
     private BitmapDescriptor defaultMarker;
     private GoogleMap mMap;
     private LatLng currLocation;
@@ -65,7 +67,7 @@ public class MapFragment extends Fragment{
 
     public interface MapFragmentListener{
         //Fired with bounds of view are changed
-        public void viewBoundChanged(LatLng swBound, LatLng neBound);
+        public void settingsChanged(QueryManager queryManager);
     }
 
     @Override
@@ -84,14 +86,11 @@ public class MapFragment extends Fragment{
     }
 
     // Creates a new  MapFragment given 2 LatLng Bounds (southwest,northeast)
-    public static MapFragment newInstance(
-//            Double sw_lat, Double sw_lng, Double ne_lat, Double ne_lng,
-            LatLng sw, LatLng ne) {
+    public static MapFragment newInstance(QueryManager qm) {
         MapFragment mFragment = new MapFragment();
         Bundle args = new Bundle();
 
-        args.putParcelable("sw", sw);
-        args.putParcelable("ne",ne);
+        args.putParcelable("qm", Parcels.wrap(qm));
 
         mFragment.setArguments(args);
         return mFragment;
@@ -103,10 +102,14 @@ public class MapFragment extends Fragment{
         //Get Bound Argument If Exist
         Bundle bundle = getArguments();
         if(bundle != null){
-            swBound = bundle.getParcelable("sw");
-            neBound = bundle.getParcelable("ne");
+            queryManager = Parcels.unwrap(bundle.getParcelable("qm"));
 
-            havePrevBounds = true;
+
+            ParseGeoPoint sw = queryManager.getSwBound();
+            ParseGeoPoint ne = queryManager.getNeBound();
+
+            swBound = new LatLng(sw.getLatitude(),sw.getLongitude());
+            neBound = new LatLng(ne.getLatitude(),ne.getLongitude());
         }
     }
 
@@ -160,22 +163,23 @@ public class MapFragment extends Fragment{
         defaultMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
 
         //setting max and min zoom levels
-        mMap.setMinZoomPreference(10f);
-        mMap.setMaxZoomPreference(20f);
+//        mMap.setMinZoomPreference(10f);
+//        mMap.setMaxZoomPreference(20f);
 
-        if(havePrevBounds){
+//        if(havePrevBounds){
             //building bounds based off previous LatLng values
+
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             builder.include(swBound);
             builder.include(neBound);
 
             LatLngBounds newBounds = builder.build();
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds,0));
-        }else {
-            //center on curr location
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation, 17f));
-        }
+            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds,30));
+//        }else {
+//            center on curr location
+//            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation, 17f));
+//        }
 
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -201,35 +205,27 @@ public class MapFragment extends Fragment{
                 ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude,ne.longitude);
                 ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude,sw.longitude);
 
-                //Notifying Parent Activity bounds have changed\
-                listener.viewBoundChanged(sw,ne);
+                queryManager.setSwBound(southwest);
+                queryManager.setNeBound(northeast);
 
-                queryPostsInView(southwest,northeast);
+                listener.settingsChanged(queryManager);
+
+                queryPosts();
             }
         });
     }
 
-    private void queryPostsInView(ParseGeoPoint southwest, ParseGeoPoint northeast){
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
-        query.addDescendingOrder(Post.KEY_CREATED_AT);
-        query.setLimit(10);
-
-        query.whereWithinGeoBox(Post.KEY_LOCATION,southwest,northeast);
-
-        query.findInBackground(new FindCallback<Post>() {
+    private void queryPosts(){
+        queryManager.getQuery(QueryManager.MAP_FRAGMENT_SETTINGS)
+                .findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if(e == null){
-                    for(Post i:objects){
-                        Log.i(TAG,i.getDescription() + " by: " + i.getUser().getUsername());
-                    }
-                    Log.i(TAG,"Posts queried");
                     addMarkers(objects);
                     deleteOldMarkers(objects);
-                    Log.i(TAG,"Markers adjusted");
+                    Log.i(TAG,"Posts queried");
                 }else{
-                    Log.e(TAG,"error while querying posts",e);
+                    Log.e(TAG,"error while querying",e);
                 }
             }
         });
@@ -255,6 +251,7 @@ public class MapFragment extends Fragment{
                 Log.i(TAG,"Deleted with marker from post: " + postWithMarker.getDescription());
             }
         }
+        Log.i(TAG,"Old Markers Deleted");
     }
 
     private void addMarkers(List<Post> inp) {
@@ -280,6 +277,7 @@ public class MapFragment extends Fragment{
                 Log.i(TAG,"Created new marker from post: " + post.getDescription());
             }
         }
+        Log.i(TAG,"New Markers Added");
     }
 
 
