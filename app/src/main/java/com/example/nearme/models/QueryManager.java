@@ -1,5 +1,8 @@
 package com.example.nearme.models;
 
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.maps.android.SphericalUtil;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 
@@ -11,31 +14,61 @@ import java.util.Date;
 @Parcel
 public class QueryManager {
 
-    public static final String TAG = "QueryManager";
+    public enum Filter {
+        VIEWALL,
+        DEFAULT
+    }
+
+    private static final String TAG = "QueryManager";
     public static final String TEXT_FRAGMENT_SETTINGS = "text";
     public static final String MAP_FRAGMENT_SETTINGS = "map";
+
+
+    Filter currentState;
+    ParseGeoPoint userLocation;
 
     ParseGeoPoint swBound;
     ParseGeoPoint neBound;
     Integer hoursWithn;
 
+    private final float defaultBoundsRadiusInMeters = 175.0f;
+
     public QueryManager(){
         //empty constructor for Parceler library
     }
 
-    public QueryManager(ParseGeoPoint swBound, ParseGeoPoint neBound){
-        this.swBound = swBound;
-        this.neBound = neBound;
+    public QueryManager(ParseGeoPoint userLocation){
+        this.userLocation = userLocation;
+        this.currentState = Filter.DEFAULT;
+        initDefaultBounds();
+    }
+
+    private void initDefaultBounds() {
+        LatLng latLng = new LatLng(userLocation.getLatitude(),userLocation.getLongitude());
+
+        LatLngBounds latLngBounds = calculateBounds(latLng,defaultBoundsRadiusInMeters);
+        LatLng southwest = latLngBounds.southwest;
+        LatLng northeast = latLngBounds.northeast;
+
+        this.swBound = new ParseGeoPoint(southwest.latitude,southwest.longitude);
+        this.neBound = new ParseGeoPoint(northeast.latitude,northeast.longitude);
+    }
+
+    public LatLngBounds calculateBounds(LatLng center, double radiusInMeters) {
+        double distanceFromCenterToCorner = radiusInMeters * Math.sqrt(2.0);
+        LatLng southwestCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
+        LatLng northeastCorner =
+                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
+        return new LatLngBounds(southwestCorner, northeastCorner);
     }
 
     public ParseQuery<Post> getQuery(String settings){
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
 
-        query.whereWithinGeoBox(Post.KEY_LOCATION,swBound,neBound);
-
-        if(hoursWithn != null){
-            query.whereGreaterThanOrEqualTo(Post.KEY_CREATED_AT,getEarliestDate());
+        if(currentState != Filter.VIEWALL) {
+            query.whereWithinGeoBox(Post.KEY_LOCATION, swBound, neBound);
         }
 
         if(settings.equals(TEXT_FRAGMENT_SETTINGS)){
@@ -77,5 +110,13 @@ public class QueryManager {
 
     public void setHoursWithn(int hoursWithn) {
         this.hoursWithn = hoursWithn;
+    }
+
+    public Filter getCurrentState() {
+        return currentState;
+    }
+
+    public void setCurrentState(Filter currentState) {
+        this.currentState = currentState;
     }
 }

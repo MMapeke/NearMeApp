@@ -65,9 +65,6 @@ public class TextFragment extends Fragment {
         //Get Bound Arguments if Exist
         Bundle bundle = getArguments();
         if(bundle != null){
-//            LatLng sw = bundle.getParcelable("sw");
-//            LatLng ne = bundle.getParcelable("ne");
-
             queryManager = Parcels.unwrap(bundle.getParcelable("qm"));
 
             swBound = queryManager.getSwBound();
@@ -110,15 +107,25 @@ public class TextFragment extends Fragment {
             @Override
             public void onRefresh() {
                 Log.i(TAG,"swipe fresh triggered");
-                posts.clear();
                 queryPosts();
             }
         });
-
         queryPosts();
     }
 
-    private void queryPosts() {
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(!hidden){
+            Log.i(TAG,"No Longer Hidden");
+            queryPosts();
+        }
+    }
+
+    public void queryPosts() {
+        Log.i(TAG,"Querying posts");
+        posts.clear();
+
         queryManager.getQuery(QueryManager.TEXT_FRAGMENT_SETTINGS)
                 .findInBackground(new FindCallback<Post>() {
             @Override
@@ -130,9 +137,9 @@ public class TextFragment extends Fragment {
 
                     showEmptyMessage(objects.isEmpty());
 
-                    Log.i(TAG,"Posts queried");
+                    Log.i(TAG,"Posts queried: " + objects.size());
                 }else{
-                    Log.e(TAG,"error while queruing posts",e);
+                    Log.e(TAG,"error while querying posts",e);
                 }
             }
         });
@@ -157,7 +164,7 @@ public class TextFragment extends Fragment {
 
                     showEmptyMessage(objects.isEmpty());
 
-                    Log.i(TAG,"More Posts queried");
+                    Log.i(TAG,"More Posts queried: " + objects.size());
                 }else{
                     Log.e(TAG,"error while querying more posts",e);
                 }

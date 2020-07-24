@@ -4,12 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,45 +19,39 @@ import com.example.nearme.fragments.FilterDialog;
 import com.example.nearme.fragments.MapFragment;
 import com.example.nearme.fragments.ProfileFragment;
 import com.example.nearme.fragments.TextFragment;
-import com.example.nearme.models.Post;
 import com.example.nearme.models.QueryManager;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.maps.android.SphericalUtil;
-import com.parse.FindCallback;
-import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
-import java.util.List;
+//Removed QUery Change Listener b/c was useless
+//Added ENUM State
+//Changed Fragment Nav to showing and hiding
+//Button switching between view all and normal view
 
-//TODO: Bug: Empty Message Not Showing
-//TODO: UI keeping only 0-24 hours choice, or view all?
-//TODO: Visual Display of TimeWithin
-//TODO: Distance Filter
-//TODO: Refactor more
+//TODO: [Bug] Empty Message Not Showing
+//TODO: Change Time Filter to Options, so Easy Selection
+//TODO: [BUG] If By Default Load Text Fragment + Load Map In Background -> View All, crashes
 
-public class MainActivity extends AppCompatActivity
-        implements MapFragment.MapFragmentListener, FilterDialog.FilterDialogListener {
+public class MainActivity extends AppCompatActivity implements FilterDialog.FilterDialogListener {
 
     public static final String TAG = "MainActivity";
 
-    final FragmentManager fragmentManager = getSupportFragmentManager();
     private BottomNavigationView bottomNavigationView;
     FloatingActionButton btnEditLocation;
 
 
     private QueryManager queryManager;
-    private final float defaultViewRadiusInMeters = 175.0f;
 
-    private Fragment fragment;
+    final FragmentManager fragmentManager = getSupportFragmentManager();
+    private int fragmentContainer;
 
+    private MapFragment mapFragment;
+    private TextFragment textFragment;
+    private ComposeFragment composeFragment;
+    private ProfileFragment profileFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,40 +75,48 @@ public class MainActivity extends AppCompatActivity
 
         //Initialize Query Settings
         if(oldQueryManager == null){
-            initQueryManager();
+            queryManager = new QueryManager(parseUser.getParseGeoPoint("location"));
         } else {
             queryManager = oldQueryManager;
         }
+
+        fragmentContainer = R.id.frameContainer;
+        textFragment = (TextFragment) TextFragment.newInstance(queryManager);
+        mapFragment = (MapFragment) MapFragment.newInstance(queryManager);
+        profileFragment = (ProfileFragment) new ProfileFragment();
+        composeFragment = (ComposeFragment) new ComposeFragment();
+
+        //Loading up Text Fragment to so settings don't break
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.add(fragmentContainer,textFragment,"Text");
+        fragmentTransaction.hide(textFragment);
+
+        fragmentTransaction.commit();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_text:
-                            fragment = TextFragment.newInstance(queryManager);
+                        displayTextFragment();
                         break;
                     case R.id.action_map:
-                            fragment = MapFragment.newInstance(queryManager);
+                        displayMapFragment();
                         break;
                     case R.id.action_profile:
-                        fragment = new ProfileFragment();
+                        displayProfileFragment();
                         break;
                     case R.id.action_post:
                         default:
-                        fragment = new ComposeFragment();
+                            displayComposeFragment();
                         break;
-                }
-                if(fragment != null) {
-                    fragmentManager.beginTransaction()
-                            .replace(R.id.frameContainer, fragment)
-                            .commit();
                 }
                 return true;
             }
         });
 
         //setting default bottom nav view
-        bottomNavigationView.setSelectedItemId(R.id.action_text);
+        bottomNavigationView.setSelectedItemId(R.id.action_map);
 
         btnEditLocation.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -126,29 +127,74 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private void initQueryManager() {
-        //Find Default GeoPoint Bounds
-        ParseUser parseUser = ParseUser.getCurrentUser();
-        ParseGeoPoint location = parseUser.getParseGeoPoint("location");
-        LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
 
-        LatLngBounds latLngBounds = calculateBounds(latLng,defaultViewRadiusInMeters);
-        LatLng southwest = latLngBounds.southwest;
-        LatLng northeast = latLngBounds.northeast;
+    //may have to make fragment transaction local each time
+    private void displayTextFragment() {
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        //Set Equal to QueryManager Fields
-        ParseGeoPoint swBound = new ParseGeoPoint(southwest.latitude,southwest.longitude);
-        ParseGeoPoint neBound = new ParseGeoPoint(northeast.latitude,northeast.longitude);
-        this.queryManager = new QueryManager(swBound,neBound);
+        if(textFragment.isAdded()){
+            fragmentTransaction.show(textFragment);
+        } else {
+            fragmentTransaction.add(fragmentContainer,textFragment,"Text");
+        }
+
+        //Hide Other Fragments
+        if(mapFragment.isAdded()) fragmentTransaction.hide(mapFragment);
+        if(profileFragment.isAdded()) fragmentTransaction.hide(profileFragment);
+        if(composeFragment.isAdded()) fragmentTransaction.hide(composeFragment);
+
+        fragmentTransaction.commit();
     }
 
-    public LatLngBounds calculateBounds(LatLng center, double radiusInMeters) {
-        double distanceFromCenterToCorner = radiusInMeters * Math.sqrt(2.0);
-        LatLng southwestCorner =
-                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
-        LatLng northeastCorner =
-                SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 45.0);
-        return new LatLngBounds(southwestCorner, northeastCorner);
+    private void displayMapFragment(){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        if(mapFragment.isAdded()){
+            fragmentTransaction.show(mapFragment);
+        } else {
+            fragmentTransaction.add(fragmentContainer,mapFragment,"Map");
+        }
+
+        //Hide Other Fragments
+        if(textFragment.isAdded()) fragmentTransaction.hide((textFragment));
+        if(profileFragment.isAdded()) fragmentTransaction.hide(profileFragment);
+        if(composeFragment.isAdded()) fragmentTransaction.hide(composeFragment);
+
+        fragmentTransaction.commit();
+    }
+
+    private void displayProfileFragment(){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        if(profileFragment.isAdded()){
+            fragmentTransaction.show(profileFragment);
+        } else {
+            fragmentTransaction.add(fragmentContainer,profileFragment,"Profile");
+        }
+
+        //Hide Other Fragments
+        if(textFragment.isAdded()) fragmentTransaction.hide(textFragment);
+        if(mapFragment.isAdded()) fragmentTransaction.hide(mapFragment);
+        if(composeFragment.isAdded()) fragmentTransaction.hide(composeFragment);
+
+        fragmentTransaction.commit();
+    }
+
+    private void displayComposeFragment(){
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+        if(composeFragment.isAdded()){
+            fragmentTransaction.show(composeFragment);
+        } else {
+            fragmentTransaction.add(fragmentContainer,composeFragment,"Compose");
+        }
+
+        //Hide Other Fragments
+        if(textFragment.isAdded()) fragmentTransaction.hide(textFragment);
+        if(mapFragment.isAdded()) fragmentTransaction.hide(mapFragment);
+        if(profileFragment.isAdded()) fragmentTransaction.hide(profileFragment);
+
+        fragmentTransaction.commit();
     }
 
     private void goLocationActivity(){
@@ -181,49 +227,27 @@ public class MainActivity extends AppCompatActivity
             case R.id.viewAll:
                 viewAll();
                 return true;
+            case R.id.defaultView:
+                defaultView();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    private void viewAll() {
-        //Querying All Posts to Make Bounds that include all posts
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
+    private void defaultView() {
+        queryManager.setCurrentState(QueryManager.Filter.DEFAULT);
 
-        query.findInBackground(new FindCallback<Post>() {
-                    @Override
-                    public void done(List<Post> objects, ParseException e) {
-
-                        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-
-                        for(Post post: objects) {
-                            ParseGeoPoint parseGeoPoint = post.getLocation();
-                            LatLng latLng = new LatLng(parseGeoPoint.getLatitude(),parseGeoPoint.getLongitude());
-                            builder.include(latLng);
-                        }
-
-                        LatLngBounds allBounds = builder.build();
-                        ParseGeoPoint sw = new ParseGeoPoint(allBounds.southwest.latitude
-                                ,allBounds.southwest.longitude);
-                        ParseGeoPoint ne = new ParseGeoPoint(allBounds.northeast.latitude,
-                                allBounds.northeast.longitude);
-
-                        queryManager.setSwBound(sw);
-                        queryManager.setNeBound(ne);
-
-                        refreshMainActivity();
-                    }
-                });
+        textFragment.queryPosts();
+        mapFragment.reCenter();
+        mapFragment.queryPosts();
     }
 
-    private void refreshMainActivity() {
-        finish();
-        overridePendingTransition(0, 0);
-        startActivity(getIntent().putExtra("qm", Parcels.wrap(queryManager)));
-        overridePendingTransition(0, 0);
+    private void viewAll(){
+        queryManager.setCurrentState(QueryManager.Filter.VIEWALL);
 
-        Log.i(TAG,"Main Activity Refreshed");
+        textFragment.queryPosts();
+        mapFragment.queryPosts();
     }
 
     private void openFilterDialog() {
@@ -235,14 +259,8 @@ public class MainActivity extends AppCompatActivity
     public void applyFilter(int hours) {
         //Update QueryManager to same hours
         queryManager.setHoursWithn(hours);
-        //Refresh page
-        refreshMainActivity();
+        //Refresh Fragments by requery and updating queryManager
 
         Toast.makeText(this ,"Now Filtering within: " + hours + " hours",Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void settingsChanged(QueryManager queryManager) {
-        this.queryManager = queryManager;
     }
 }

@@ -1,6 +1,5 @@
 package com.example.nearme.fragments;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -32,7 +31,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseQuery;
 import com.parse.ParseUser;
 
 
@@ -56,30 +54,11 @@ public class MapFragment extends Fragment{
     private HashMap<String,Marker> postToMarker;
 
     private SupportMapFragment mapFragment;
+    Marker lastOpenned = null;
 
     //Bounds of View
-    boolean havePrevBounds = false;
     LatLng swBound;
     LatLng neBound;
-
-    //Listener from activity instance
-    private MapFragmentListener listener;
-
-    public interface MapFragmentListener{
-        //Fired with bounds of view are changed
-        public void settingsChanged(QueryManager queryManager);
-    }
-
-    @Override
-    public void onAttach(@NonNull Context context) {
-        super.onAttach(context);
-        if (context instanceof MapFragmentListener) {
-            listener = (MapFragmentListener) context;
-        } else {
-            throw new ClassCastException(context.toString()
-                    + " must implement MapFragment.MapFragmentListener");
-        }
-    }
 
     public MapFragment() {
         // Required empty public constructor
@@ -103,7 +82,6 @@ public class MapFragment extends Fragment{
         Bundle bundle = getArguments();
         if(bundle != null){
             queryManager = Parcels.unwrap(bundle.getParcelable("qm"));
-
 
             ParseGeoPoint sw = queryManager.getSwBound();
             ParseGeoPoint ne = queryManager.getNeBound();
@@ -158,28 +136,47 @@ public class MapFragment extends Fragment{
         }
     }
 
+
     private void loadMap(GoogleMap map) {
         mMap = map;
         defaultMarker = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
 
-        //setting max and min zoom levels
-//        mMap.setMinZoomPreference(10f);
-//        mMap.setMaxZoomPreference(20f);
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        builder.include(swBound);
+        builder.include(neBound);
 
-//        if(havePrevBounds){
-            //building bounds based off previous LatLng values
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels;
 
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            builder.include(swBound);
-            builder.include(neBound);
+        LatLngBounds newBounds = builder.build();
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds,width,height,16));
 
-            LatLngBounds newBounds = builder.build();
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            public boolean onMarkerClick(Marker marker) {
+                // Check if there is an open info window
+                if (lastOpenned != null) {
+                    // Close the info window
+                    lastOpenned.hideInfoWindow();
 
-            mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds,30));
-//        }else {
-//            center on curr location
-//            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currLocation, 17f));
-//        }
+                    // Is the marker the same marker that was already open
+                    if (lastOpenned.equals(marker)) {
+                        // Nullify the lastOpenned object
+                        lastOpenned = null;
+                        // Return so that the info window isn't openned again
+                        return true;
+                    }
+                }
+
+                // Open the info window for the marker
+                marker.showInfoWindow();
+                // Re-assign the last openned such that we can close it later
+                lastOpenned = marker;
+
+                // Event was handled by our code do not launch default behaviour.
+                return true;
+            }
+        });
+
 
         map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
             @Override
@@ -199,36 +196,85 @@ public class MapFragment extends Fragment{
             @Override
             public void onCameraIdle() {
                 Log.i(TAG,"Camera Idle");
-                LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                LatLng ne = bounds.northeast;
-                LatLng sw = bounds.southwest;
-                ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude,ne.longitude);
-                ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude,sw.longitude);
 
-                queryManager.setSwBound(southwest);
-                queryManager.setNeBound(northeast);
+                QueryManager.Filter currState = queryManager.getCurrentState();
 
-                listener.settingsChanged(queryManager);
+                if(currState == QueryManager.Filter.VIEWALL){
+                    mMap.getUiSettings().setAllGesturesEnabled(false);
+                } else if(currState == QueryManager.Filter.DEFAULT) {
+                    mMap.getUiSettings().setAllGesturesEnabled(true);
+                    LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                    LatLng ne = bounds.northeast;
+                    LatLng sw = bounds.southwest;
+                    ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
+                    ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
 
-                queryPosts();
+                    queryManager.setSwBound(southwest);
+                    queryManager.setNeBound(northeast);
+
+                    queryPosts();
+                }
             }
         });
     }
 
-    private void queryPosts(){
+    public void queryPosts(){
+        Log.i(TAG,"Querying Posts");
         queryManager.getQuery(QueryManager.MAP_FRAGMENT_SETTINGS)
                 .findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if(e == null){
+
+                    if(queryManager.getCurrentState() == QueryManager.Filter.VIEWALL){
+                        zoomMapOutForMarkers(objects);
+                    }
+
                     addMarkers(objects);
                     deleteOldMarkers(objects);
-                    Log.i(TAG,"Posts queried");
+                    Log.i(TAG,"Posts queried: " + objects.size());
                 }else{
                     Log.e(TAG,"error while querying",e);
                 }
             }
         });
+    }
+
+    public void reCenter(){
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        ParseGeoPoint prevNE = queryManager.getNeBound();
+        ParseGeoPoint prevSW = queryManager.getSwBound();
+        LatLng ne = new LatLng(prevNE.getLatitude(),prevNE.getLongitude());
+        LatLng sw = new LatLng(prevSW.getLatitude(),prevSW.getLongitude());
+
+        builder.include(ne);
+        builder.include(sw);
+
+        LatLngBounds bounds = builder.build();
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds,16));
+    }
+
+    //zoom map out to fit all markers in view
+    private void zoomMapOutForMarkers(List<Post> objects) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+
+        for(Post post: objects) {
+            ParseGeoPoint parseGeoPoint = post.getLocation();
+            LatLng latLng = new LatLng(parseGeoPoint.getLatitude(),parseGeoPoint.getLongitude());
+            builder.include(latLng);
+        }
+
+        LatLngBounds allBounds = builder.build();
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds,64));
+        Log.i(TAG,"Zoom out to view all markers");
+
+        ParseGeoPoint sw = new ParseGeoPoint(allBounds.southwest.latitude
+                                ,allBounds.southwest.longitude);
+        ParseGeoPoint ne = new ParseGeoPoint(allBounds.northeast.latitude,
+                                allBounds.northeast.longitude);
     }
 
     private void deleteOldMarkers(List<Post> inp) {
@@ -279,6 +325,4 @@ public class MapFragment extends Fragment{
         }
         Log.i(TAG,"New Markers Added");
     }
-
-
 }

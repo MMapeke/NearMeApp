@@ -10,10 +10,17 @@
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         />
 
+
     <item
         android:id="@+id/viewAll"
         android:title="View all"
         app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/defaultView"
+        android:title="Back to Normal"
+        app:showAsAction="never"
+        />
 
     <item
         android:id="@+id/sort"
