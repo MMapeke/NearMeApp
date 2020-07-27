@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.example.nearme.fragments.ComposeFragment;
-import com.example.nearme.fragments.FilterDialog;
 import com.example.nearme.fragments.MapFragment;
 import com.example.nearme.fragments.ProfileFragment;
 import com.example.nearme.fragments.TextFragment;
@@ -26,15 +25,10 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
-//Removed QUery Change Listener b/c was useless
-//Added ENUM State
-//Changed Fragment Nav to showing and hiding
-//Button switching between view all and normal view
-
-//TODO: Change Time Filter to Options, so Easy Selection
 //TODO: [BUG] If By Default Load Text Fragment + Load Map In Background -> View All, crashes
+//TODO: [BUG] If GO to Location w/ no Posts, Text Fragment shows empty toast
 
-public class MainActivity extends AppCompatActivity implements FilterDialog.FilterDialogListener {
+public class MainActivity extends AppCompatActivity{
 
     public static final String TAG = "MainActivity";
 
@@ -218,9 +212,6 @@ public class MainActivity extends AppCompatActivity implements FilterDialog.Filt
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
-            case R.id.sort:
-                openFilterDialog();
-                return true;
             case R.id.recommend:
                 return true;
             case R.id.viewAll:
@@ -247,19 +238,5 @@ public class MainActivity extends AppCompatActivity implements FilterDialog.Filt
 
         textFragment.queryPosts();
         mapFragment.queryPosts();
-    }
-
-    private void openFilterDialog() {
-        FilterDialog filterDialog = new FilterDialog();
-        filterDialog.show(fragmentManager,"filter dialog");
-    }
-
-    @Override
-    public void applyFilter(int hours) {
-        //Update QueryManager to same hours
-        queryManager.setHoursWithn(hours);
-        //Refresh Fragments by requery and updating queryManager
-
-        Toast.makeText(this ,"Now Filtering within: " + hours + " hours",Toast.LENGTH_SHORT).show();
     }
 }

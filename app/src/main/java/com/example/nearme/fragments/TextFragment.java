@@ -83,7 +83,6 @@ public class TextFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        emptyMSG = view.findViewById(R.id.text_EmptyMessage);
         recyclerView = view.findViewById(R.id.rvPosts);
         swipeRefreshLayout = view.findViewById(R.id.text_swipeContainer);
         posts = new ArrayList<>();
@@ -147,7 +146,7 @@ public class TextFragment extends Fragment {
     private void showEmptyMessage(boolean empty) {
         if(empty){
             Log.i(TAG,"Showing Empty MSG");
-            Toast.makeText(getContext(),"No Posts to Show",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(),"No Posts to Show",Toast.LENGTH_SHORT).show();
         }
     }
 
