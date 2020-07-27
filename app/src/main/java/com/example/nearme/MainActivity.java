@@ -1,22 +1,19 @@
 package com.example.nearme;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
-import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.example.nearme.fragments.ComposeFragment;
 import com.example.nearme.fragments.MapFragment;
@@ -25,19 +22,17 @@ import com.example.nearme.fragments.TextFragment;
 import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
-import org.parceler.Parcels;
+//TODO: Field Naming
+//TODO: JavaDocs for all classes + private,non self-explanatory methods
+//TODO: FAB -> toolbar
+//TODO: Profiles
 
-import java.io.ByteArrayOutputStream;
-
-//TODO: [BUG] If By Default Load Text Fragment + Load Map In Background -> View All, crashes
-//TODO: [BUG] If GO to Location w/ no Posts, Text Fragment shows empty toast
-
-public class MainActivity extends AppCompatActivity{
+/**
+ * Main Entry for app, responsible for setting up and handling nav between everything
+ */
+public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
 
@@ -56,6 +51,8 @@ public class MainActivity extends AppCompatActivity{
     private ComposeFragment composeFragment;
     private ProfileFragment profileFragment;
 
+    private FilterChanged currFragmentWithFilter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,50 +66,36 @@ public class MainActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //If User has no location set
-        if(parseUser.getParseGeoPoint("location") == null){
+        if (parseUser.getParseGeoPoint("location") == null) {
             goLocationActivity();
         }
 
-        setDefaultPFP();
+        queryManager = new QueryManager(parseUser.getParseGeoPoint("location"));
 
-        QueryManager oldQueryManager = Parcels.unwrap(getIntent().getParcelableExtra("qm"));
-
-        //Initialize Query Settings
-        if(oldQueryManager == null){
-            queryManager = new QueryManager(parseUser.getParseGeoPoint("location"));
-        } else {
-            queryManager = oldQueryManager;
-        }
-
-        fragmentContainer = R.id.frameContainer;
-        textFragment = (TextFragment) TextFragment.newInstance(queryManager);
-        mapFragment = (MapFragment) MapFragment.newInstance(queryManager);
-        profileFragment = (ProfileFragment) new ProfileFragment();
-        composeFragment = (ComposeFragment) new ComposeFragment();
-
-        //Loading up Text Fragment to so settings don't break
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.add(fragmentContainer,textFragment,"Text");
-        fragmentTransaction.hide(textFragment);
-
-        fragmentTransaction.commit();
+        initFragments();
+        //Preloading fragments to improve UI/flow
+        addAndHideAllFragments();
 
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_text:
-                        displayTextFragment();
+                        displayFragment(textFragment);
+                        currFragmentWithFilter = textFragment;
                         break;
                     case R.id.action_map:
-                        displayMapFragment();
+                        displayFragment(mapFragment);
+                        currFragmentWithFilter = mapFragment;
                         break;
                     case R.id.action_profile:
-                        displayProfileFragment();
+                        displayFragment(profileFragment);
+                        currFragmentWithFilter = null;
                         break;
                     case R.id.action_post:
-                        default:
-                            displayComposeFragment();
+                    default:
+                        displayFragment(composeFragment);
+                        currFragmentWithFilter = null;
                         break;
                 }
                 return true;
@@ -125,116 +108,58 @@ public class MainActivity extends AppCompatActivity{
         btnEditLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent =  new Intent(MainActivity.this,GetLocation.class);
+                Intent intent = new Intent(MainActivity.this, GetLocation.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
 
-    private void setDefaultPFP() {
-        //if curr user has no image set default
-        ParseFile pfp = parseUser.getParseFile("profilePic");
-        if(pfp == null){
-            //set to default avatar
-            Bitmap picture = BitmapFactory.decodeResource(getResources(), R.drawable.default_pic);
-
-            //Making bitmap into ParseFile
-            // Convert it to byte
-            ByteArrayOutputStream stream = new ByteArrayOutputStream();
-            // Compress image to lower quality scale 1 - 100
-            picture.compress(Bitmap.CompressFormat.PNG, 100, stream);
-            byte[] image = stream.toByteArray();
-            ParseFile parseFile = new ParseFile("profile_pic.png",image);
-
-            parseUser.put("profilePic",parseFile);
-            parseUser.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if(e != null){
-                        Log.e(TAG,"setting default pfp no work",e);
-                    }
-                    Log.i(TAG,"default pfp pic uploaded");
-                }
-            });
-        }
+    private void initFragments() {
+        fragmentContainer = R.id.frameContainer;
+        textFragment = (TextFragment) new TextFragment();
+        textFragment.setQueryManager(queryManager);
+        mapFragment = (MapFragment) new MapFragment();
+        mapFragment.setQueryManager(queryManager);
+        profileFragment = (ProfileFragment) new ProfileFragment();
+        composeFragment = (ComposeFragment) new ComposeFragment();
     }
 
-    //TODO: REfactor display + hiding with one method w/ arg for frag
-    //may have to make fragment transaction local each time
-    private void displayTextFragment() {
-        btnEditLocation.show();
+    private void addAndHideAllFragments() {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-        if(textFragment.isAdded()){
-            fragmentTransaction.show(textFragment);
-        } else {
-            fragmentTransaction.add(fragmentContainer,textFragment,"Text");
-        }
+        fragmentTransaction.add(fragmentContainer, textFragment, "Text");
+        fragmentTransaction.hide(textFragment);
 
-        //Hide Other Fragments
-        if(mapFragment.isAdded()) fragmentTransaction.hide(mapFragment);
-        if(profileFragment.isAdded()) fragmentTransaction.hide(profileFragment);
-        if(composeFragment.isAdded()) fragmentTransaction.hide(composeFragment);
+        fragmentTransaction.add(fragmentContainer, profileFragment, "Profile");
+        fragmentTransaction.hide(profileFragment);
+
+        fragmentTransaction.add(fragmentContainer, mapFragment, "Map");
+        fragmentTransaction.hide(mapFragment);
+
+        fragmentTransaction.add(fragmentContainer, composeFragment, "Compose");
+        fragmentTransaction.hide(composeFragment);
 
         fragmentTransaction.commit();
     }
 
-    private void displayMapFragment(){
-        btnEditLocation.show();
+    private void displayFragment(Fragment inp) {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        fragmentTransaction.show(inp);
 
-        if(mapFragment.isAdded()){
-            fragmentTransaction.show(mapFragment);
-        } else {
-            fragmentTransaction.add(fragmentContainer,mapFragment,"Map");
-        }
 
-        //Hide Other Fragments
-        if(textFragment.isAdded()) fragmentTransaction.hide((textFragment));
-        if(profileFragment.isAdded()) fragmentTransaction.hide(profileFragment);
-        if(composeFragment.isAdded()) fragmentTransaction.hide(composeFragment);
+        //Hiding Other Fragments
+        if (inp != textFragment) fragmentTransaction.hide(textFragment);
+        if (inp != mapFragment) fragmentTransaction.hide(mapFragment);
+        if (inp != profileFragment) fragmentTransaction.hide(profileFragment);
+        if (inp != composeFragment) fragmentTransaction.hide(composeFragment);
 
         fragmentTransaction.commit();
+        Log.i(TAG, "New Fragment Displayed");
     }
 
-    private void displayProfileFragment(){
-        btnEditLocation.hide();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        if(profileFragment.isAdded()){
-            fragmentTransaction.show(profileFragment);
-        } else {
-            fragmentTransaction.add(fragmentContainer,profileFragment,"Profile");
-        }
-
-        //Hide Other Fragments
-        if(textFragment.isAdded()) fragmentTransaction.hide(textFragment);
-        if(mapFragment.isAdded()) fragmentTransaction.hide(mapFragment);
-        if(composeFragment.isAdded()) fragmentTransaction.hide(composeFragment);
-
-        fragmentTransaction.commit();
-    }
-
-    private void displayComposeFragment(){
-        btnEditLocation.show();
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-
-        if(composeFragment.isAdded()){
-            fragmentTransaction.show(composeFragment);
-        } else {
-            fragmentTransaction.add(fragmentContainer,composeFragment,"Compose");
-        }
-
-        //Hide Other Fragments
-        if(textFragment.isAdded()) fragmentTransaction.hide(textFragment);
-        if(mapFragment.isAdded()) fragmentTransaction.hide(mapFragment);
-        if(profileFragment.isAdded()) fragmentTransaction.hide(profileFragment);
-
-        fragmentTransaction.commit();
-    }
-
-    private void goLocationActivity(){
-        Intent intent = new Intent(this,GetLocation.class);
+    private void goLocationActivity() {
+        Intent intent = new Intent(this, GetLocation.class);
         startActivity(intent);
         finish();
     }
@@ -254,7 +179,7 @@ public class MainActivity extends AppCompatActivity{
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch(item.getItemId()) {
+        switch (item.getItemId()) {
             case R.id.recommend:
                 return true;
             case R.id.viewAll:
@@ -274,7 +199,7 @@ public class MainActivity extends AppCompatActivity{
     private void logOut() {
         ParseUser.logOut();
 
-        Intent intent = new Intent(this,LoginActivity.class);
+        Intent intent = new Intent(this, LoginActivity.class);
         startActivity(intent);
         finish();
     }
@@ -282,15 +207,16 @@ public class MainActivity extends AppCompatActivity{
     private void defaultView() {
         queryManager.setCurrentState(QueryManager.Filter.DEFAULT);
 
-        textFragment.queryPosts();
-        mapFragment.reCenter();
-        mapFragment.queryPosts();
+        if (currFragmentWithFilter != null) {
+            currFragmentWithFilter.filterChanged();
+        }
     }
 
-    private void viewAll(){
+    private void viewAll() {
         queryManager.setCurrentState(QueryManager.Filter.VIEWALL);
 
-        textFragment.queryPosts();
-        mapFragment.queryPosts();
+        if (currFragmentWithFilter != null) {
+            currFragmentWithFilter.filterChanged();
+        }
     }
 }

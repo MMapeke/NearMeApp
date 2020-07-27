@@ -1,9 +1,5 @@
 package com.example.nearme;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.Manifest;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -12,14 +8,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 
-import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AppCompatActivity;
+
 import com.parse.LogInCallback;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
-
-import permissions.dispatcher.NeedsPermission;
-import permissions.dispatcher.RuntimePermissions;
 
 public class LoginActivity extends AppCompatActivity {
     public static final String TAG = "LoginActivity";
@@ -40,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         etPassword = findViewById(R.id.etPassword);
 
         //if already logged in
-        if(ParseUser.getCurrentUser() != null) goLocationActivity();
+        if (ParseUser.getCurrentUser() != null) goLocationActivity();
 
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -50,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 btnLogin.setEnabled(false);
                 btnRegister.setEnabled(false);
-                loginUser(username,password);
+                loginUser(username, password);
             }
         });
 
@@ -62,13 +56,13 @@ public class LoginActivity extends AppCompatActivity {
 
                 btnRegister.setEnabled(false);
                 btnLogin.setEnabled(false);
-                registerUser(username,password);
+                registerUser(username, password);
             }
         });
     }
 
     private void goLocationActivity() {
-        Intent intent = new Intent(LoginActivity.this,GetLocation.class);
+        Intent intent = new Intent(LoginActivity.this, GetLocation.class);
         startActivity(intent);
         finish();
     }
@@ -82,10 +76,10 @@ public class LoginActivity extends AppCompatActivity {
         user.signUpInBackground(new SignUpCallback() {
             @Override
             public void done(ParseException e) {
-                if(e == null){
+                if (e == null) {
                     goLocationActivity();
-                }else{
-                    Log.e(TAG,"Registration failed",e);
+                } else {
+                    Log.e(TAG, "Registration failed", e);
                     btnRegister.setEnabled(true);
                     btnLogin.setEnabled(true);
                 }
@@ -100,7 +94,7 @@ public class LoginActivity extends AppCompatActivity {
                     goLocationActivity();
                 } else {
                     //TODO: Better error handling, informing user what's wrong
-                    Log.e(TAG,"Login failed",e);
+                    Log.e(TAG, "Login failed", e);
                     btnLogin.setEnabled(true);
                     btnRegister.setEnabled(true);
                 }

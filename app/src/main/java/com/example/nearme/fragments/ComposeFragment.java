@@ -7,12 +7,6 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.FileProvider;
-import androidx.fragment.app.Fragment;
-
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -25,10 +19,14 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.textfield.TextInputLayout;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -60,7 +58,7 @@ public class ComposeFragment extends Fragment {
         // Required empty public constructor
     }
 
-     @Override
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -77,18 +75,18 @@ public class ComposeFragment extends Fragment {
         btnSubmit = view.findViewById(R.id.compose_submit);
         btnChoosePic = view.findViewById(R.id.compose_choosePic);
         pb = view.findViewById(R.id.compose_pbLoading);
-        
+
         btnTakePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onLaunchCamera();
+                launchCamera();
             }
         });
 
         btnChoosePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onPickPhoto();
+                openGallery();
             }
         });
 
@@ -98,21 +96,21 @@ public class ComposeFragment extends Fragment {
                 String description = etDesc.getText().toString();
                 ParseUser currUser = ParseUser.getCurrentUser();
 
-                if(description.isEmpty()){
-                    Toast.makeText(getContext(),"Description can't be empty",Toast.LENGTH_SHORT).show();
+                if (description.isEmpty()) {
+                    Toast.makeText(getContext(), "Description can't be empty", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if(image.getDrawable() == null){
-                    Toast.makeText(getContext(),"Take an image",Toast.LENGTH_SHORT).show();
+                if (image.getDrawable() == null) {
+                    Toast.makeText(getContext(), "Take an image", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                savePost(description,currUser);
+                savePost(description, currUser);
             }
         });
     }
 
-    private void onLaunchCamera() {
+    private void launchCamera() {
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Create a File reference for future access
@@ -133,7 +131,7 @@ public class ComposeFragment extends Fragment {
     }
 
     // Trigger gallery selection for a photo
-    private void onPickPhoto() {
+    private void openGallery() {
         // Create intent for picking a photo from the gallery
         Intent intent = new Intent(Intent.ACTION_PICK,
                 MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -157,14 +155,14 @@ public class ComposeFragment extends Fragment {
         post.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                if(e == null){
-                    Log.i(TAG,"Saving Post succesful");
+                if (e == null) {
+                    Log.i(TAG, "Saving Post succesful");
                     etDesc.setText("");
                     image.setImageResource(0);
                     pb.setVisibility(ProgressBar.INVISIBLE);
-                }else{
-                    Log.e(TAG,"error while saving",e);
-                    Toast.makeText(getContext(),"Error while saving post",Toast.LENGTH_SHORT);
+                } else {
+                    Log.e(TAG, "error while saving", e);
+                    Toast.makeText(getContext(), "Error while saving post", Toast.LENGTH_SHORT);
                 }
             }
         });
@@ -184,8 +182,8 @@ public class ComposeFragment extends Fragment {
             } else { // Result was a failure
                 Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
-        } else if ((data != null) && requestCode == PICK_PHOTO_CODE){
-            if (resultCode == RESULT_OK){
+        } else if ((data != null) && requestCode == PICK_PHOTO_CODE) {
+            if (resultCode == RESULT_OK) {
                 Uri photoUri = data.getData();
                 // Load the image located at photoUri into selectedImage
                 Bitmap selectedImage = loadFromUri(photoUri);
@@ -197,10 +195,10 @@ public class ComposeFragment extends Fragment {
                 // Compress image to lower quality scale 1 - 100
                 selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] bytes = stream.toByteArray();
-                photoParseFile = new ParseFile("profile_pic.png",bytes);
+                photoParseFile = new ParseFile("profile_pic.png", bytes);
 
             } else {
-                Toast.makeText(getContext(),"Picture wasn't selected!",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Picture wasn't selected!", Toast.LENGTH_SHORT).show();
             }
         }
     }
@@ -213,7 +211,7 @@ public class ComposeFragment extends Fragment {
         File mediaStorageDir = new File(getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
 
         // Create the storage directory if it does not exist
-        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()){
+        if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
             Log.d(TAG, "failed to create directory");
         }
 
@@ -227,7 +225,7 @@ public class ComposeFragment extends Fragment {
         Bitmap image = null;
         try {
             // check version of Android on device
-            if(Build.VERSION.SDK_INT > 27){
+            if (Build.VERSION.SDK_INT > 27) {
                 // on newer versions of Android, use the new decodeBitmap method
                 ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), photoUri);
                 image = ImageDecoder.decodeBitmap(source);

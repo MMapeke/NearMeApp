@@ -40,7 +40,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+//TODO: Click on Username, go to Profile
+//TODO: Search for Profiles
 public class ProfileFragment extends Fragment {
 
     public static final String TAG = "ProfileFragment";
@@ -60,7 +61,7 @@ public class ProfileFragment extends Fragment {
         // Required empty public constructor
     }
 
-     @Override
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -80,10 +81,10 @@ public class ProfileFragment extends Fragment {
         rvPosts = view.findViewById(R.id.profile_rvPosts);
         posts = new ArrayList<>();
 
-        profileAdapter = new ProfileAdapter(getContext(),posts);
+        profileAdapter = new ProfileAdapter(getContext(), posts);
         rvPosts.setAdapter(profileAdapter);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(),LinearLayoutManager.HORIZONTAL,false);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         rvPosts.setLayoutManager(linearLayoutManager);
 
         //Setting Username
@@ -113,21 +114,28 @@ public class ProfileFragment extends Fragment {
     }
 
 
-
     private void loadProfilePic() {
         ParseFile pfp = parseUser.getParseFile("profilePic");
 
-        Glide.with(this)
-                .load(pfp.getUrl())
-                .circleCrop()
-                .into(pfpPic);
+        if (pfp == null) {
+            Glide.with(this)
+                    .load(R.drawable.default_pic)
+                    .circleCrop()
+                    .into(pfpPic);
+        } else {
+            Glide.with(this)
+                    .load(pfp.getUrl())
+                    .circleCrop()
+                    .into(pfpPic);
+        }
     }
+
 
     public Bitmap loadFromUri(Uri photoUri) {
         Bitmap image = null;
         try {
             // check version of Android on device
-            if(Build.VERSION.SDK_INT > 27){
+            if (Build.VERSION.SDK_INT > 27) {
                 // on newer versions of Android, use the new decodeBitmap method
                 ImageDecoder.Source source = ImageDecoder.createSource(getContext().getContentResolver(), photoUri);
                 image = ImageDecoder.decodeBitmap(source);
@@ -157,27 +165,27 @@ public class ProfileFragment extends Fragment {
             // Compress image to lower quality scale 1 - 100
             selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
             byte[] image = stream.toByteArray();
-            ParseFile parseFile = new ParseFile("profile_pic.png",image);
+            ParseFile parseFile = new ParseFile("profile_pic.png", image);
 
             // Update User w/ the selected image into Parse
             ParseUser parseUser = ParseUser.getCurrentUser();
-            parseUser.put("profilePic",parseFile);
+            parseUser.put("profilePic", parseFile);
             parseUser.saveInBackground(new SaveCallback() {
                 @Override
                 public void done(ParseException e) {
-                    if(e != null){
-                        Log.e(TAG,"uploaded pc no work",e);
+                    if (e != null) {
+                        Log.e(TAG, "uploaded pc no work", e);
                         loadProfilePic();
                     }
-                    Log.i(TAG,"pic worked");
-                    Toast.makeText(getContext(),"Profile Picture Changed",Toast.LENGTH_SHORT).show();
+                    Log.i(TAG, "pic worked");
+                    Toast.makeText(getContext(), "Profile Picture Changed", Toast.LENGTH_SHORT).show();
                 }
             });
 
         }
     }
 
-    private void queryAllUserPosts(){
+    private void queryAllUserPosts() {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
         query.addDescendingOrder(Post.KEY_CREATED_AT);
@@ -186,12 +194,12 @@ public class ProfileFragment extends Fragment {
         query.findInBackground(new FindCallback<Post>() {
             @Override
             public void done(List<Post> objects, ParseException e) {
-                if(e == null){
+                if (e == null) {
                     posts.addAll(objects);
                     profileAdapter.notifyDataSetChanged();
-                    Log.i(TAG,"query successful");
-                }else{
-                    Log.e(TAG,"error while querying",e);
+                    Log.i(TAG, "query successful");
+                } else {
+                    Log.e(TAG, "error while querying", e);
                 }
             }
         });

@@ -1,9 +1,5 @@
 package com.example.nearme;
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.content.Intent;
 import android.location.Location;
@@ -11,6 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
@@ -48,7 +48,7 @@ public class GetLocation extends AppCompatActivity {
         setContentView(R.layout.activity_get_location);
 
         //Init Places
-        Places.initialize(getApplicationContext(),getResources().getString(R.string.google_maps_api_key));
+        Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_api_key));
 
         btnCurrentLocation = findViewById(R.id.btnCurrentLocation);
         btnChooseLocation = findViewById(R.id.btnChooseLocation);
@@ -57,11 +57,11 @@ public class GetLocation extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //Initialize place field list
-                List<Place.Field> fieldList =  Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG);
+                List<Place.Field> fieldList = Arrays.asList(Place.Field.NAME, Place.Field.LAT_LNG);
 
-                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN,fieldList)
+                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.FULLSCREEN, fieldList)
                         .build(GetLocation.this);
-                startActivityForResult(intent,AUTOCOMPLETE_REQUEST_CODE);
+                startActivityForResult(intent, AUTOCOMPLETE_REQUEST_CODE);
             }
         });
 
@@ -69,7 +69,7 @@ public class GetLocation extends AppCompatActivity {
         btnCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Log.i(TAG,"btn curr location clicked");
+                Log.i(TAG, "btn curr location clicked");
                 GetLocationPermissionsDispatcher.getLastLocationWithPermissionCheck(GetLocation.this);
             }
         });
@@ -78,13 +78,13 @@ public class GetLocation extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == AUTOCOMPLETE_REQUEST_CODE){
-            if(resultCode == RESULT_OK){
+        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
                 Place place = Autocomplete.getPlaceFromIntent(data);
-                Log.i(TAG,"Place received: " + place.getName());
+                Log.i(TAG, "Place received: " + place.getName());
                 onLocation(place.getLatLng());
-            }else{
-                Log.e(TAG,"error on activity result");
+            } else {
+                Log.e(TAG, "error on activity result");
             }
         }
     }
@@ -100,11 +100,11 @@ public class GetLocation extends AppCompatActivity {
                     public void onSuccess(Location location) {
                         // GPS location can be null if GPS is switched off
                         if (location != null) {
-                            Log.i(TAG,"location found " + location.toString());
-                            LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+                            Log.i(TAG, "location found " + location.toString());
+                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                             onLocation(latLng);
-                        }else{
-                            Log.e(TAG,"location null");
+                        } else {
+                            Log.e(TAG, "location null");
                         }
                     }
                 })
@@ -120,25 +120,25 @@ public class GetLocation extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         // NOTE: delegate the permission handling to generated method
-        GetLocationPermissionsDispatcher.onRequestPermissionsResult(this,requestCode,grantResults);
+        GetLocationPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    public void onLocation(LatLng inp){
+    public void onLocation(LatLng inp) {
         String msg = "Location: " + (inp.latitude) + "," + (inp.longitude);
-        Log.i(TAG,msg);
+        Log.i(TAG, msg);
 
         //Grab Current User
         ParseUser parseUser = ParseUser.getCurrentUser();
         //Update GeoPoint
-        ParseGeoPoint parseGeoPoint = new ParseGeoPoint(inp.latitude,inp.longitude);
-        parseUser.put("location",parseGeoPoint);
+        ParseGeoPoint parseGeoPoint = new ParseGeoPoint(inp.latitude, inp.longitude);
+        parseUser.put("location", parseGeoPoint);
         parseUser.saveInBackground(new SaveCallback() {
             @Override
             public void done(ParseException e) {
-                if(e == null){
-                    Log.i(TAG,"location updated");
-                }else{
-                    Log.e(TAG,"location not updated");
+                if (e == null) {
+                    Log.i(TAG, "location updated");
+                } else {
+                    Log.e(TAG, "location not updated");
                 }
             }
         });
@@ -148,7 +148,7 @@ public class GetLocation extends AppCompatActivity {
     }
 
     private void goMainActivity() {
-        Intent intent = new Intent(this,MainActivity.class);
+        Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
         finish();
     }

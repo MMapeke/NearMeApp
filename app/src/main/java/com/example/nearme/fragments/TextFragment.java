@@ -1,6 +1,11 @@
 package com.example.nearme.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,67 +14,33 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
-import android.widget.Toast;
-
 import com.example.nearme.EndlessRecyclerViewScrollListener;
+import com.example.nearme.FilterChanged;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.PostAdapter;
 import com.example.nearme.models.QueryManager;
 import com.parse.FindCallback;
 import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
-
-import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class TextFragment extends Fragment {
+public class TextFragment extends Fragment implements FilterChanged {
 
     public static final String TAG = "TextFragment";
     private QueryManager queryManager;
-    List<Post> posts;
     PostAdapter postAdapter;
     RecyclerView recyclerView;
-    TextView emptyMSG;
     private SwipeRefreshLayout swipeRefreshLayout;
     private EndlessRecyclerViewScrollListener scrollListener;
-
-    ParseGeoPoint swBound;
-    ParseGeoPoint neBound;
 
     public TextFragment() {
         // Required empty public constructor
     }
 
-    // Creates a TextFragment given 2 LatLng Bounds (southwest,northeast)
-    public static Fragment newInstance(QueryManager qm) {
-        TextFragment tFragment =  new TextFragment();
-        Bundle args = new Bundle();
-
-        args.putParcelable("qm", Parcels.wrap(qm));
-
-        tFragment.setArguments(args);
-        return tFragment;
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        //Get Bound Arguments if Exist
-        Bundle bundle = getArguments();
-        if(bundle != null){
-            queryManager = Parcels.unwrap(bundle.getParcelable("qm"));
-
-            swBound = queryManager.getSwBound();
-            neBound = queryManager.getNeBound();
-        }
+    public void setQueryManager(QueryManager queryManager) {
+        this.queryManager = queryManager;
     }
 
     @Override
@@ -85,8 +56,7 @@ public class TextFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.rvPosts);
         swipeRefreshLayout = view.findViewById(R.id.text_swipeContainer);
-        posts = new ArrayList<>();
-        postAdapter = new PostAdapter(getContext(),posts);
+        postAdapter = new PostAdapter(getContext(), new ArrayList<Post>());
 
         recyclerView.setAdapter(postAdapter);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext());
@@ -95,7 +65,7 @@ public class TextFragment extends Fragment {
         scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                Log.i(TAG,"loading more posts");
+                Log.i(TAG, "loading more posts");
                 queryMorePosts(totalItemsCount);
             }
         };
@@ -105,7 +75,7 @@ public class TextFragment extends Fragment {
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                Log.i(TAG,"swipe fresh triggered");
+                Log.i(TAG, "swipe fresh triggered");
                 queryPosts();
             }
         });
@@ -115,55 +85,63 @@ public class TextFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if(!hidden){
-            Log.i(TAG,"No Longer Hidden");
+        if (!hidden) {
+            Log.i(TAG, "No Longer Hidden");
             queryPosts();
         }
     }
 
     public void queryPosts() {
-        Log.i(TAG,"Querying posts");
-        posts.clear();
+        Log.i(TAG, "Querying posts");
+        postAdapter.clearAll();
 
-        queryManager.getQuery(QueryManager.TEXT_FRAGMENT_SETTINGS)
+        queryManager.getQuery(10)
                 .findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> objects, ParseException e) {
-                if(e == null){
-                    posts.addAll(objects);
-                    postAdapter.notifyDataSetChanged();
-                    swipeRefreshLayout.setRefreshing(false);
+                    @Override
+                    public void done(List<Post> objects, ParseException e) {
+                        if (e == null) {
+                            postAdapter.addAll(objects);
 
-                    Log.i(TAG,"Posts queried: " + objects.size());
-                    showEmptyMessage(objects.isEmpty());
-                }else{
-                    Log.e(TAG,"error while querying posts",e);
-                }
-            }
-        });
-    }
+                            swipeRefreshLayout.setRefreshing(false);
 
-    private void showEmptyMessage(boolean empty) {
-        if(empty){
-            Log.i(TAG,"Showing Empty MSG");
-            Toast.makeText(getActivity(),"No Posts to Show",Toast.LENGTH_SHORT).show();
-        }
+                            Log.i(TAG, "Posts queried: " + objects.size());
+                            if (objects.isEmpty()) {
+                                Toast.makeText(getActivity(), "No Posts to Show", Toast.LENGTH_SHORT).show();
+                            }
+                        } else {
+                            Log.e(TAG, "error while querying posts", e);
+                        }
+                    }
+                });
     }
 
     private void queryMorePosts(int totalItemsCount) {
-        queryManager.getQuery(QueryManager.TEXT_FRAGMENT_SETTINGS).setSkip(totalItemsCount)
+        queryManager.getQuery(10)
+                .setSkip(totalItemsCount)
                 .findInBackground(new FindCallback<Post>() {
-            @Override
-            public void done(List<Post> objects, ParseException e) {
-                if(e == null){
-                    posts.addAll(objects);
-                    postAdapter.notifyDataSetChanged();
+                    @Override
+                    public void done(List<Post> objects, ParseException e) {
+                        if (e == null) {
+                            postAdapter.addAll(objects);
 
-                    Log.i(TAG,"More Posts queried: " + objects.size());
-                }else{
-                    Log.e(TAG,"error while querying more posts",e);
-                }
-            }
-        });
+                            Log.i(TAG, "More Posts queried: " + objects.size());
+                        } else {
+                            Log.e(TAG, "error while querying more posts", e);
+                        }
+                    }
+                });
+    }
+
+    @Override
+    public void filterChanged() {
+        QueryManager.Filter currentFilter = queryManager.getCurrentState();
+
+        if (currentFilter == QueryManager.Filter.VIEWALL) {
+            queryPosts();
+        }
+
+        if (currentFilter == QueryManager.Filter.DEFAULT) {
+            queryPosts();
+        }
     }
 }

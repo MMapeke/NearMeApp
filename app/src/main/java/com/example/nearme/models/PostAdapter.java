@@ -2,10 +2,6 @@ package com.example.nearme.models;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.BlurMaskFilter;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,25 +14,18 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
-import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
-import com.parse.GetDataCallback;
-import com.parse.ParseException;
-import com.parse.ParseFile;
 import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
 import java.util.List;
 
-
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
-import static androidx.constraintlayout.widget.Constraints.TAG;
-
-public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
+public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     private List<Post> posts;
     Context context;
@@ -49,7 +38,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.text_post,parent,false);
+        View view = LayoutInflater.from(context).inflate(R.layout.text_post, parent, false);
         return new ViewHolder(view);
     }
 
@@ -64,7 +53,17 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
         return posts.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public void clearAll() {
+        posts.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(List<Post> posts) {
+        this.posts.addAll(posts);
+        notifyDataSetChanged();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView preview;
         private TextView username;
@@ -94,7 +93,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder>{
         public void bind(Post post) {
             parseUser = post.getUser();
 
-            username.setText("@" +  parseUser.getUsername().toUpperCase());
+            username.setText("@" + parseUser.getUsername().toUpperCase());
             description.setText(post.getDescription());
 
             int radius = 40; // corner radius, higher value = more rounded

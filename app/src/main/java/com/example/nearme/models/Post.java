@@ -17,39 +17,50 @@ public class Post extends ParseObject {
     public static final String KEY_DESCRIPTION = "desc";
     public static final String KEY_USER = "user";
 
-    public Post(){
+    public Post() {
         super();
     }
 
-   public ParseGeoPoint getLocation(){
+    public ParseGeoPoint getLocation() {
         return getParseGeoPoint(KEY_LOCATION);
-   }
+    }
 
-   public ParseFile getImage(){
+    public ParseFile getImage() {
         return getParseFile(KEY_IMAGE);
-   }
+    }
 
-   public String getDescription(){
+    public String getDescription() {
         return getString(KEY_DESCRIPTION);
-   }
+    }
 
-    public ParseUser getUser(){
+    public ParseUser getUser() {
         return getParseUser(KEY_USER);
-   }
+    }
 
-   public void setLocation(ParseGeoPoint inp){
-        put(KEY_LOCATION,inp);
-   }
+    public void setLocation(ParseGeoPoint inp) {
+        put(KEY_LOCATION, inp);
+    }
 
-   public void setImage(ParseFile inp){
-        put(KEY_IMAGE,inp);
-   }
+    public void setImage(ParseFile inp) {
+        put(KEY_IMAGE, inp);
+    }
 
-   public void setDescription(String inp){
-        put(KEY_DESCRIPTION,inp);
-   }
+    public void setDescription(String inp) {
+        put(KEY_DESCRIPTION, inp);
+    }
 
-   public void setUser(ParseUser inp){
-        put(KEY_USER,inp);
-   }
+    public void setUser(ParseUser inp) {
+        put(KEY_USER, inp);
+    }
+
+    public boolean isEqual(Post inp) {
+        //Checking UserID
+        if (this.getUser().getObjectId() != inp.getUser().getObjectId()) return false;
+        //Checking Time Created At
+        if (!this.getCreatedAt().equals(inp.getCreatedAt())) return false;
+        //Checking Description
+        if (!this.getDescription().equals(inp.getDescription())) return false;
+
+        return true;
+    }
 }
