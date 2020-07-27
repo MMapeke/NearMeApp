@@ -31,7 +31,6 @@ import org.parceler.Parcels;
 //Changed Fragment Nav to showing and hiding
 //Button switching between view all and normal view
 
-//TODO: [Bug] Empty Message Not Showing
 //TODO: Change Time Filter to Options, so Easy Selection
 //TODO: [BUG] If By Default Load Text Fragment + Load Map In Background -> View All, crashes
 
@@ -127,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements FilterDialog.Filt
         });
     }
 
-
+    //TODO: REfactor display + hiding with one method w/ arg for frag
     //may have to make fragment transaction local each time
     private void displayTextFragment() {
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

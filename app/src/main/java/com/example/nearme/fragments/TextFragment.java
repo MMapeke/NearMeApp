@@ -14,6 +14,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.nearme.EndlessRecyclerViewScrollListener;
 import com.example.nearme.R;
@@ -40,7 +41,6 @@ public class TextFragment extends Fragment {
     private SwipeRefreshLayout swipeRefreshLayout;
     private EndlessRecyclerViewScrollListener scrollListener;
 
-    Boolean havePrevBounds = false;
     ParseGeoPoint swBound;
     ParseGeoPoint neBound;
 
@@ -135,9 +135,8 @@ public class TextFragment extends Fragment {
                     postAdapter.notifyDataSetChanged();
                     swipeRefreshLayout.setRefreshing(false);
 
-                    showEmptyMessage(objects.isEmpty());
-
                     Log.i(TAG,"Posts queried: " + objects.size());
+                    showEmptyMessage(objects.isEmpty());
                 }else{
                     Log.e(TAG,"error while querying posts",e);
                 }
@@ -147,9 +146,8 @@ public class TextFragment extends Fragment {
 
     private void showEmptyMessage(boolean empty) {
         if(empty){
-            emptyMSG.setVisibility(View.VISIBLE);
-        }else{
-            emptyMSG.setVisibility(View.GONE);
+            Log.i(TAG,"Showing Empty MSG");
+            Toast.makeText(getContext(),"No Posts to Show",Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -161,8 +159,6 @@ public class TextFragment extends Fragment {
                 if(e == null){
                     posts.addAll(objects);
                     postAdapter.notifyDataSetChanged();
-
-                    showEmptyMessage(objects.isEmpty());
 
                     Log.i(TAG,"More Posts queried: " + objects.size());
                 }else{

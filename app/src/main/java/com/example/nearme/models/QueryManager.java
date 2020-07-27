@@ -10,7 +10,6 @@ import org.parceler.Parcel;
 
 import java.util.Date;
 
-
 @Parcel
 public class QueryManager {
 
