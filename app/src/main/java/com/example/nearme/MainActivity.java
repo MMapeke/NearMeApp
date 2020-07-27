@@ -7,8 +7,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -21,9 +25,14 @@ import com.example.nearme.fragments.TextFragment;
 import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.parse.ParseException;
+import com.parse.ParseFile;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.parceler.Parcels;
+
+import java.io.ByteArrayOutputStream;
 
 //TODO: [BUG] If By Default Load Text Fragment + Load Map In Background -> View All, crashes
 //TODO: [BUG] If GO to Location w/ no Posts, Text Fragment shows empty toast
@@ -37,6 +46,7 @@ public class MainActivity extends AppCompatActivity{
 
 
     private QueryManager queryManager;
+    ParseUser parseUser = ParseUser.getCurrentUser();
 
     final FragmentManager fragmentManager = getSupportFragmentManager();
     private int fragmentContainer;
@@ -59,10 +69,11 @@ public class MainActivity extends AppCompatActivity{
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //If User has no location set
-        ParseUser parseUser = ParseUser.getCurrentUser();
         if(parseUser.getParseGeoPoint("location") == null){
             goLocationActivity();
         }
+
+        setDefaultPFP();
 
         QueryManager oldQueryManager = Parcels.unwrap(getIntent().getParcelableExtra("qm"));
 
@@ -120,9 +131,38 @@ public class MainActivity extends AppCompatActivity{
         });
     }
 
+    private void setDefaultPFP() {
+        //if curr user has no image set default
+        ParseFile pfp = parseUser.getParseFile("profilePic");
+        if(pfp == null){
+            //set to default avatar
+            Bitmap picture = BitmapFactory.decodeResource(getResources(), R.drawable.default_pic);
+
+            //Making bitmap into ParseFile
+            // Convert it to byte
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            // Compress image to lower quality scale 1 - 100
+            picture.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] image = stream.toByteArray();
+            ParseFile parseFile = new ParseFile("profile_pic.png",image);
+
+            parseUser.put("profilePic",parseFile);
+            parseUser.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if(e != null){
+                        Log.e(TAG,"setting default pfp no work",e);
+                    }
+                    Log.i(TAG,"default pfp pic uploaded");
+                }
+            });
+        }
+    }
+
     //TODO: REfactor display + hiding with one method w/ arg for frag
     //may have to make fragment transaction local each time
     private void displayTextFragment() {
+        btnEditLocation.show();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         if(textFragment.isAdded()){
@@ -140,6 +180,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void displayMapFragment(){
+        btnEditLocation.show();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         if(mapFragment.isAdded()){
@@ -157,6 +198,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void displayProfileFragment(){
+        btnEditLocation.hide();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         if(profileFragment.isAdded()){
@@ -174,6 +216,7 @@ public class MainActivity extends AppCompatActivity{
     }
 
     private void displayComposeFragment(){
+        btnEditLocation.show();
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
         if(composeFragment.isAdded()){

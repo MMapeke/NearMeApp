@@ -30,7 +30,7 @@ public class QueryManager {
     ParseGeoPoint neBound;
     Integer hoursWithn;
 
-    private final float defaultBoundsRadiusInMeters = 175.0f;
+    public final float defaultBoundsRadiusInMeters = 175.0f;
 
     public QueryManager(){
         //empty constructor for Parceler library
