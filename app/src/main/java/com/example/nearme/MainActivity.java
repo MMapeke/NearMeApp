@@ -263,9 +263,20 @@ public class MainActivity extends AppCompatActivity{
             case R.id.defaultView:
                 defaultView();
                 return true;
+            case R.id.logout:
+                logOut();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void logOut() {
+        ParseUser.logOut();
+
+        Intent intent = new Intent(this,LoginActivity.class);
+        startActivity(intent);
+        finish();
     }
 
     private void defaultView() {
