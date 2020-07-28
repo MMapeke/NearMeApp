@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,7 +29,6 @@ import com.bumptech.glide.Glide;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.ProfileAdapter;
-import com.example.nearme.models.QueryManager;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -40,8 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-//TODO: Click on Username, go to Profile
-//TODO: Search for Profiles
+
 public class ProfileFragment extends Fragment {
 
     public static final String TAG = "ProfileFragment";
@@ -55,7 +55,7 @@ public class ProfileFragment extends Fragment {
 
     RecyclerView rvPosts;
     ProfileAdapter profileAdapter;
-    List<Post> posts;
+//    List<Post> posts;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -79,9 +79,9 @@ public class ProfileFragment extends Fragment {
 
         //Initializing RecyclerView and Adapter
         rvPosts = view.findViewById(R.id.profile_rvPosts);
-        posts = new ArrayList<>();
+//        posts = new ArrayList<>();
 
-        profileAdapter = new ProfileAdapter(getContext(), posts);
+        profileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(),true);
         rvPosts.setAdapter(profileAdapter);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -195,14 +195,22 @@ public class ProfileFragment extends Fragment {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
-                    posts.addAll(objects);
-                    profileAdapter.notifyDataSetChanged();
+                    profileAdapter.addAll(objects);
+//                    profileAdapter.notifyDataSetChanged();
                     Log.i(TAG, "query successful");
                 } else {
                     Log.e(TAG, "error while querying", e);
                 }
             }
         });
+    }
 
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(!hidden){
+            Log.i(TAG,"No Longer Hidden");
+            queryAllUserPosts();
+        }
     }
 }

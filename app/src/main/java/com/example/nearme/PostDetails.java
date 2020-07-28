@@ -1,7 +1,9 @@
 package com.example.nearme;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -9,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.nearme.models.Post;
+import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
@@ -42,5 +45,24 @@ public class PostDetails extends AppCompatActivity {
                     .into(picture);
             description.setText(post.getDescription());
         }
+
+        username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                goToUserProfile();
+            }
+        });
+    }
+
+    private void goToUserProfile() {
+        ParseUser parseUser = post.getUser();
+
+        if(!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+            //If Profile Clicked on Is Not Own
+            Intent intent = new Intent(this,OtherProfile.class);
+            intent.putExtra("user",Parcels.wrap(parseUser));
+            startActivity(intent);
+        }
+
     }
 }

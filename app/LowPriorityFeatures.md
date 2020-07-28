@@ -1,5 +1,6 @@
 **Random Stories**
 
+- User descriptions on profiles, with edits, following, unfollowing mock buttons
 - Grouping posts in same location and viewing multiple stories, displaying better as well
 - Move Location to Fragment, for better interaction with views
 - Add Button to ReCenter on Location, View All

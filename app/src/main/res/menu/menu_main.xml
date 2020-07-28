@@ -13,8 +13,9 @@
 
     <item
         android:id="@+id/viewAll"
+        android:checkable="false"
         android:title="View all"
-        app:showAsAction="never"/>
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/defaultView"

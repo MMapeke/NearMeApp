@@ -29,6 +29,10 @@ import com.parse.ParseUser;
 //TODO: FAB -> toolbar
 //TODO: Profiles
 
+//TODO: Lots of Activity Stacking with all the profile moving around
+//TODO: All that java stuff stuff
+//TODO: research for recommendation algo
+
 /**
  * Main Entry for app, responsible for setting up and handling nav between everything
  */

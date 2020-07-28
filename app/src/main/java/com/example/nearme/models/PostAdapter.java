@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.example.nearme.OtherProfile;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.parse.ParseUser;
@@ -88,6 +89,27 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     context.startActivity(intent);
                 }
             });
+
+            username.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    goToUserProfile();
+                }
+            });
+        }
+
+        private void goToUserProfile() {
+            Post post = posts.get(getAdapterPosition());
+
+            ParseUser parseUser = post.getUser();
+
+            if(!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+                //If Profile Clicked on Is Not Own
+                Intent intent = new Intent(context, OtherProfile.class);
+                intent.putExtra("user",Parcels.wrap(parseUser));
+                context.startActivity(intent);
+            }
+
         }
 
         public void bind(Post post) {

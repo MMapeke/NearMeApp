@@ -5,45 +5,48 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.ProfileFragment">
+    tools:context=".OtherProfile">
 
     <TextView
-        android:id="@+id/profile_username"
+        android:id="@+id/other_profile_username"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:text="Username"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:layout_toRightOf="@+id/profile_pic"
+        android:layout_toRightOf="@+id/other_profile_pic"
         android:textStyle="bold" />
 
+    <Button
+        android:id="@+id/other_profile_follow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Follow"
+        android:layout_below="@+id/other_profile_pic"
+        />
+
     <ImageView
-        android:id="@+id/profile_pic"
+        android:id="@+id/other_profile_pic"
         android:layout_width="200dp"
         android:layout_height="200dp"
         android:layout_alignParentTop="true"
         android:scaleType="centerCrop"
         android:src="@drawable/default_pic" />
 
-    <Button
-        android:id="@+id/profile_btnEditProfilePic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/profile_pic"
-        android:text="Change Profile Pic" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/profile_rvPosts"
+        android:id="@+id/other_profile_rvPosts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/profile_btnEditProfilePic"
+        android:layout_below="@id/other_profile_follow"
         android:layout_alignParentBottom="true" />
 
     <TextView
         android:id="@+id/profile_following"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/profile_username"
-        android:layout_toRightOf="@id/profile_pic"
+        android:layout_below="@+id/other_profile_username"
+        android:layout_toRightOf="@id/other_profile_pic"
         android:text="Following XX People" />
+
 </RelativeLayout>
