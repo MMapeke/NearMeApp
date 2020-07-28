@@ -9,6 +9,9 @@ import com.parse.ParseObject;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 
+/**
+ * Class/Application handling Parse backend
+ */
 public class ParseApplication extends Application {
     @Override
     public void onCreate() {

@@ -26,71 +26,74 @@ import java.util.List;
 import jp.wasabeef.glide.transformations.BlurTransformation;
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
+/**
+ * Adapter responsible for controlling and displaying posts on TextFragment
+ */
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
-    private List<Post> posts;
-    Context context;
+    private List<Post> mPosts;
+    private Context mContext;
 
     public PostAdapter(Context context, List<Post> posts) {
-        this.posts = posts;
-        this.context = context;
+        this.mPosts = posts;
+        this.mContext = context;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.text_post, parent, false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.text_post, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Post post = posts.get(position);
+        Post post = mPosts.get(position);
         holder.bind(post);
     }
 
     @Override
     public int getItemCount() {
-        return posts.size();
+        return mPosts.size();
     }
 
     public void clearAll() {
-        posts.clear();
+        mPosts.clear();
         notifyDataSetChanged();
     }
 
     public void addAll(List<Post> posts) {
-        this.posts.addAll(posts);
+        this.mPosts.addAll(posts);
         notifyDataSetChanged();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
 
-        private ImageView preview;
-        private TextView username;
-        private TextView description;
-        private ParseUser parseUser;
+        private ImageView mPreview;
+        private TextView mUsername;
+        private TextView mDescription;
+        private ParseUser mParseUser;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
 
-            preview = itemView.findViewById(R.id.post_preview);
-            username = itemView.findViewById(R.id.post_user);
-            description = itemView.findViewById(R.id.post_desc);
+            mPreview = itemView.findViewById(R.id.post_preview);
+            mUsername = itemView.findViewById(R.id.post_user);
+            mDescription = itemView.findViewById(R.id.post_desc);
 
-            preview.setOnClickListener(new View.OnClickListener() {
+            mPreview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int position = getAdapterPosition();
-                    Post post = posts.get(position);
+                    Post post = mPosts.get(position);
 
-                    Intent intent = new Intent(context, PostDetails.class);
+                    Intent intent = new Intent(mContext, PostDetails.class);
                     intent.putExtra("post", Parcels.wrap(post));
-                    context.startActivity(intent);
+                    mContext.startActivity(intent);
                 }
             });
 
-            username.setOnClickListener(new View.OnClickListener() {
+            mUsername.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     goToUserProfile();
@@ -98,38 +101,40 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             });
         }
 
+        /**
+         * Navigates user to clicked on profile
+         */
         private void goToUserProfile() {
-            Post post = posts.get(getAdapterPosition());
+            Post post = mPosts.get(getAdapterPosition());
 
             ParseUser parseUser = post.getUser();
 
-            if(!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+            if (!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
                 //If Profile Clicked on Is Not Own
-                Intent intent = new Intent(context, OtherProfile.class);
-                intent.putExtra("user",Parcels.wrap(parseUser));
-                context.startActivity(intent);
+                Intent intent = new Intent(mContext, OtherProfile.class);
+                intent.putExtra("user", Parcels.wrap(parseUser));
+                mContext.startActivity(intent);
             }
-
         }
 
         public void bind(Post post) {
-            parseUser = post.getUser();
+            mParseUser = post.getUser();
 
-            username.setText("@" + parseUser.getUsername().toUpperCase());
-            description.setText(post.getDescription());
+            mUsername.setText("@" + mParseUser.getUsername().toUpperCase());
+            mDescription.setText(post.getDescription());
 
             int radius = 40; // corner radius, higher value = more rounded
             int margin = 5; // crop margin, set to 0 for corners with no crop
             int blur = 6;
 
-            Glide.with(context)
+            Glide.with(mContext)
                     .load(post.getImage().getUrl())
                     .transform(new MultiTransformation<>(
                             new CenterCrop(),
                             new BlurTransformation(blur),
                             new RoundedCornersTransformation(radius, margin)
                     ))
-                    .into(preview);
+                    .into(mPreview);
         }
     }
 }

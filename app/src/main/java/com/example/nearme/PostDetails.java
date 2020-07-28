@@ -17,36 +17,39 @@ import org.parceler.Parcels;
 
 import java.util.Date;
 
+/**
+ * Class/Activity responsible for showing more details about posts
+ */
 public class PostDetails extends AppCompatActivity {
 
-    private Post post;
-    private TextView username;
-    private TextView relativeTime;
-    private ImageView picture;
-    private TextView description;
+    private Post mPost;
+    private TextView mUsername;
+    private TextView mRelativeTime;
+    private ImageView mPicture;
+    private TextView mDescription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post_details);
 
-        username = findViewById(R.id.details_username);
-        relativeTime = findViewById(R.id.details_time);
-        picture = findViewById(R.id.details_pic);
-        description = findViewById(R.id.details_desc);
-        post = Parcels.unwrap(getIntent().getParcelableExtra("post"));
+        mUsername = findViewById(R.id.details_username);
+        mRelativeTime = findViewById(R.id.details_time);
+        mPicture = findViewById(R.id.details_pic);
+        mDescription = findViewById(R.id.details_desc);
+        mPost = Parcels.unwrap(getIntent().getParcelableExtra("post"));
 
-        if (post != null) {
-            username.setText("@" + post.getUser().getUsername());
-            Date date = post.getCreatedAt();
-            relativeTime.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
+        if (mPost != null) {
+            mUsername.setText("@" + mPost.getUser().getUsername());
+            Date date = mPost.getCreatedAt();
+            mRelativeTime.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
             Glide.with(this)
-                    .load(post.getImage().getUrl())
-                    .into(picture);
-            description.setText(post.getDescription());
+                    .load(mPost.getImage().getUrl())
+                    .into(mPicture);
+            mDescription.setText(mPost.getDescription());
         }
 
-        username.setOnClickListener(new View.OnClickListener() {
+        mUsername.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 goToUserProfile();
@@ -54,13 +57,16 @@ public class PostDetails extends AppCompatActivity {
         });
     }
 
+    /**
+     * Navigates to User Profile, if it is a different user than current
+     */
     private void goToUserProfile() {
-        ParseUser parseUser = post.getUser();
+        ParseUser parseUser = mPost.getUser();
 
-        if(!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+        if (!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
             //If Profile Clicked on Is Not Own
-            Intent intent = new Intent(this,OtherProfile.class);
-            intent.putExtra("user",Parcels.wrap(parseUser));
+            Intent intent = new Intent(this, OtherProfile.class);
+            intent.putExtra("user", Parcels.wrap(parseUser));
             startActivity(intent);
         }
 

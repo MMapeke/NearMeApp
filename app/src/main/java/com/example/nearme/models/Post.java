@@ -8,6 +8,9 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcel;
 
+/**
+ * Class representing Post model used throughout application
+ */
 @ParseClassName("Post")
 @Parcel(analyze = {Post.class})
 public class Post extends ParseObject {
@@ -51,16 +54,5 @@ public class Post extends ParseObject {
 
     public void setUser(ParseUser inp) {
         put(KEY_USER, inp);
-    }
-
-    public boolean isEqual(Post inp) {
-        //Checking UserID
-        if (this.getUser().getObjectId() != inp.getUser().getObjectId()) return false;
-        //Checking Time Created At
-        if (!this.getCreatedAt().equals(inp.getCreatedAt())) return false;
-        //Checking Description
-        if (!this.getDescription().equals(inp.getDescription())) return false;
-
-        return true;
     }
 }

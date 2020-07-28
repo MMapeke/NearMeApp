@@ -16,60 +16,62 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
-import com.example.nearme.fragments.ProfileFragment;
 import com.parse.DeleteCallback;
 import com.parse.ParseException;
 
 import org.parceler.Parcels;
-import org.w3c.dom.Text;
 
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Adapter responsible for controlling and displaying posts in Any User Profile
+ */
 public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHolder> {
 
     public static final String TAG = "ProfileAdapter";
-    private List<Post> posts;
-    Context context;
-    Boolean viewingOwnProfile;
 
-    public ProfileAdapter(Context context, List<Post> posts, boolean viewingOwnProfile){
-        this.posts = posts;
-        this.context = context;
-        this.viewingOwnProfile = viewingOwnProfile;
+    private List<Post> mPosts;
+    private Context mContext;
+    private Boolean mViewingOwnProfile;
+
+    public ProfileAdapter(Context context, List<Post> posts, boolean viewingOwnProfile) {
+        this.mPosts = posts;
+        this.mContext = context;
+        this.mViewingOwnProfile = viewingOwnProfile;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(context).inflate(R.layout.profile_post,parent,false);
+        View view = LayoutInflater.from(mContext).inflate(R.layout.profile_post, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public int getItemCount() {
-        return posts.size();
+        return mPosts.size();
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Post post = posts.get(position);
+        Post post = mPosts.get(position);
         holder.bind(post);
     }
 
     private void deletePost(int adapterPosition) {
-        Post post = posts.get(adapterPosition);
+        Post post = mPosts.get(adapterPosition);
 
         //Delete locally
-        posts.remove(adapterPosition);
+        mPosts.remove(adapterPosition);
         //Delete from Parse
         post.deleteInBackground(new DeleteCallback() {
             @Override
             public void done(ParseException e) {
-                if(e == null){
-                    Log.i(TAG,"deleted succesfully");
-                }else {
-                    Log.e(TAG,"deleteing error",e);
+                if (e == null) {
+                    Log.i(TAG, "deleted succesfully");
+                } else {
+                    Log.e(TAG, "deleteing error", e);
                 }
             }
         });
@@ -77,13 +79,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
         notifyDataSetChanged();
     }
 
-    public void addAll(List<Post> inp){
-        posts.clear();
-        posts.addAll(inp);
+    public void addAll(List<Post> inp) {
+        mPosts.clear();
+        mPosts.addAll(inp);
         notifyDataSetChanged();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder {
 
         private ImageView preview;
         private ImageView delete;
@@ -96,22 +98,22 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
             createdAgo = itemView.findViewById(R.id.profile_post_imageTimeAgo);
             delete = itemView.findViewById(R.id.profile_trash);
 
-            if(!viewingOwnProfile) delete.setVisibility(View.GONE);
+            if (!mViewingOwnProfile) delete.setVisibility(View.GONE);
 
 
             preview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     int position = getAdapterPosition();
-                    Post post = posts.get(position);
+                    Post post = mPosts.get(position);
 
-                    Intent intent = new Intent(context, PostDetails.class);
+                    Intent intent = new Intent(mContext, PostDetails.class);
                     intent.putExtra("post", Parcels.wrap(post));
-                    context.startActivity(intent);
+                    mContext.startActivity(intent);
                 }
             });
 
-            if(viewingOwnProfile) {
+            if (mViewingOwnProfile) {
                 delete.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -123,7 +125,7 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
         public void bind(Post post) {
             //Setting Image
-            Glide.with(context)
+            Glide.with(mContext)
                     .load(post.getImage().getUrl())
                     .into(preview);
 

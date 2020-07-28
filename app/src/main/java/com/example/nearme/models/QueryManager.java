@@ -8,6 +8,9 @@ import com.parse.ParseQuery;
 
 import org.parceler.Parcel;
 
+/**
+ * Class responsible for controlling and keeping track of query settings
+ */
 @Parcel
 public class QueryManager {
 
@@ -16,38 +19,48 @@ public class QueryManager {
         DEFAULT
     }
 
-    private static final String TAG = "QueryManager";
+    public static final String TAG = "QueryManager";
+    private final float sDefaultBoundsRadiusInMeters = 175.0f;
 
-    Filter currentState;
-    ParseGeoPoint userLocation;
+    private Filter mCurrentState;
+    private ParseGeoPoint mUserLocation;
 
-    ParseGeoPoint swBound;
-    ParseGeoPoint neBound;
+    private ParseGeoPoint mSwBound;
+    private ParseGeoPoint mNeBound;
 
-    public final float defaultBoundsRadiusInMeters = 175.0f;
 
     public QueryManager() {
         //empty constructor for Parceler library
     }
 
     public QueryManager(ParseGeoPoint userLocation) {
-        this.userLocation = userLocation;
-        this.currentState = Filter.DEFAULT;
+        this.mUserLocation = userLocation;
+        this.mCurrentState = Filter.DEFAULT;
         initDefaultBounds();
     }
 
+    /**
+     * Sets bounds for the query manager with location as center
+     */
     private void initDefaultBounds() {
-        LatLng latLng = new LatLng(userLocation.getLatitude(), userLocation.getLongitude());
+        LatLng latLng = new LatLng(mUserLocation.getLatitude(), mUserLocation.getLongitude());
 
-        LatLngBounds latLngBounds = calculateBounds(latLng, defaultBoundsRadiusInMeters);
+        LatLngBounds latLngBounds = calculateBounds(latLng, sDefaultBoundsRadiusInMeters);
         LatLng southwest = latLngBounds.southwest;
         LatLng northeast = latLngBounds.northeast;
 
-        this.swBound = new ParseGeoPoint(southwest.latitude, southwest.longitude);
-        this.neBound = new ParseGeoPoint(northeast.latitude, northeast.longitude);
+        this.mSwBound = new ParseGeoPoint(southwest.latitude, southwest.longitude);
+        this.mNeBound = new ParseGeoPoint(northeast.latitude, northeast.longitude);
     }
 
-    public LatLngBounds calculateBounds(LatLng center, double radiusInMeters) {
+    /**
+     * Calculates rectangular bounds based off radius and center point
+     *
+     * @param center         - LatLng, representing center of bounds
+     * @param radiusInMeters - double, representing distance around center to be shown, in meters
+     * @return LatLngBounds, representing rectangular bounds that hold all points
+     */
+    private LatLngBounds calculateBounds(LatLng center, double radiusInMeters) {
         double distanceFromCenterToCorner = radiusInMeters * Math.sqrt(2.0);
         LatLng southwestCorner =
                 SphericalUtil.computeOffset(center, distanceFromCenterToCorner, 225.0);
@@ -62,34 +75,34 @@ public class QueryManager {
         query.addDescendingOrder(Post.KEY_CREATED_AT);
         query.setLimit(limit);
 
-        if (currentState != Filter.VIEWALL) {
-            query.whereWithinGeoBox(Post.KEY_LOCATION, swBound, neBound);
+        if (mCurrentState != Filter.VIEWALL) {
+            query.whereWithinGeoBox(Post.KEY_LOCATION, mSwBound, mNeBound);
         }
 
         return query;
     }
 
     public ParseGeoPoint getSwBound() {
-        return swBound;
+        return mSwBound;
     }
 
     public void setSwBound(ParseGeoPoint swBound) {
-        this.swBound = swBound;
+        this.mSwBound = swBound;
     }
 
     public ParseGeoPoint getNeBound() {
-        return neBound;
+        return mNeBound;
     }
 
     public void setNeBound(ParseGeoPoint neBound) {
-        this.neBound = neBound;
+        this.mNeBound = neBound;
     }
 
     public Filter getCurrentState() {
-        return currentState;
+        return mCurrentState;
     }
 
     public void setCurrentState(Filter currentState) {
-        this.currentState = currentState;
+        this.mCurrentState = currentState;
     }
 }

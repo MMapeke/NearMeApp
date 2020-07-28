@@ -24,14 +24,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.ParseUser;
 
-//TODO: Field Naming
-//TODO: JavaDocs for all classes + private,non self-explanatory methods
-//TODO: FAB -> toolbar
-//TODO: Profiles
 
 //TODO: Lots of Activity Stacking with all the profile moving around
-//TODO: All that java stuff stuff
-//TODO: research for recommendation algo
+//TODO: FAB -> toolbar
 
 /**
  * Main Entry for app, responsible for setting up and handling nav between everything
@@ -39,67 +34,67 @@ import com.parse.ParseUser;
 public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "MainActivity";
-
-    private BottomNavigationView bottomNavigationView;
-    FloatingActionButton btnEditLocation;
+    private final FragmentManager sFragmentManager = getSupportFragmentManager();
 
 
-    private QueryManager queryManager;
-    ParseUser parseUser = ParseUser.getCurrentUser();
+    private BottomNavigationView mBottomNavView;
+    private FloatingActionButton mBtnEditLocation;
 
-    final FragmentManager fragmentManager = getSupportFragmentManager();
-    private int fragmentContainer;
+    private QueryManager mQueryManager;
+    private ParseUser mParseUser = ParseUser.getCurrentUser();
 
-    private MapFragment mapFragment;
-    private TextFragment textFragment;
-    private ComposeFragment composeFragment;
-    private ProfileFragment profileFragment;
+    private int mFragmentContainer;
 
-    private FilterChanged currFragmentWithFilter;
+    private MapFragment mMapFragment;
+    private TextFragment mTextFragment;
+    private ComposeFragment mComposeFragment;
+    private ProfileFragment mProfileFragment;
+
+    private FilterChanged mCurrentFragmentWithFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnEditLocation = findViewById(R.id.main_btnLocation);
-        bottomNavigationView = findViewById(R.id.bottom_navigation);
+        mBtnEditLocation = findViewById(R.id.main_btnLocation);
+        mBottomNavView = findViewById(R.id.bottom_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         //If User has no location set
-        if (parseUser.getParseGeoPoint("location") == null) {
+        if (mParseUser.getParseGeoPoint("location") == null) {
             goLocationActivity();
         }
 
-        queryManager = new QueryManager(parseUser.getParseGeoPoint("location"));
+        mQueryManager = new QueryManager(mParseUser.getParseGeoPoint("location"));
 
         initFragments();
         //Preloading fragments to improve UI/flow
         addAndHideAllFragments();
 
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        mBottomNavView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                 switch (menuItem.getItemId()) {
                     case R.id.action_text:
-                        displayFragment(textFragment);
-                        currFragmentWithFilter = textFragment;
+                        displayFragment(mTextFragment);
+                        mCurrentFragmentWithFilter = mTextFragment;
                         break;
                     case R.id.action_map:
-                        displayFragment(mapFragment);
-                        currFragmentWithFilter = mapFragment;
+                        displayFragment(mMapFragment);
+                        mCurrentFragmentWithFilter = mMapFragment;
                         break;
                     case R.id.action_profile:
-                        displayFragment(profileFragment);
-                        currFragmentWithFilter = null;
+                        displayFragment(mProfileFragment);
+                        mCurrentFragmentWithFilter = null;
                         break;
                     case R.id.action_post:
                     default:
-                        displayFragment(composeFragment);
-                        currFragmentWithFilter = null;
+                        displayFragment(mComposeFragment);
+                        mCurrentFragmentWithFilter = null;
                         break;
                 }
                 return true;
@@ -107,9 +102,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //setting default bottom nav view
-        bottomNavigationView.setSelectedItemId(R.id.action_map);
+        mBottomNavView.setSelectedItemId(R.id.action_map);
 
-        btnEditLocation.setOnClickListener(new View.OnClickListener() {
+        mBtnEditLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent = new Intent(MainActivity.this, GetLocation.class);
@@ -119,49 +114,63 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Initializes fragments
+     */
     private void initFragments() {
-        fragmentContainer = R.id.frameContainer;
-        textFragment = (TextFragment) new TextFragment();
-        textFragment.setQueryManager(queryManager);
-        mapFragment = (MapFragment) new MapFragment();
-        mapFragment.setQueryManager(queryManager);
-        profileFragment = (ProfileFragment) new ProfileFragment();
-        composeFragment = (ComposeFragment) new ComposeFragment();
+        mFragmentContainer = R.id.frameContainer;
+        mTextFragment = (TextFragment) new TextFragment();
+        mTextFragment.setQueryManager(mQueryManager);
+        mMapFragment = (MapFragment) new MapFragment();
+        mMapFragment.setQueryManager(mQueryManager);
+        mProfileFragment = (ProfileFragment) new ProfileFragment();
+        mComposeFragment = (ComposeFragment) new ComposeFragment();
     }
 
+    /**
+     * Adds and Hides all fragments to container
+     */
     private void addAndHideAllFragments() {
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        FragmentTransaction fragmentTransaction = sFragmentManager.beginTransaction();
 
-        fragmentTransaction.add(fragmentContainer, textFragment, "Text");
-        fragmentTransaction.hide(textFragment);
+        fragmentTransaction.add(mFragmentContainer, mTextFragment, "Text");
+        fragmentTransaction.hide(mTextFragment);
 
-        fragmentTransaction.add(fragmentContainer, profileFragment, "Profile");
-        fragmentTransaction.hide(profileFragment);
+        fragmentTransaction.add(mFragmentContainer, mProfileFragment, "Profile");
+        fragmentTransaction.hide(mProfileFragment);
 
-        fragmentTransaction.add(fragmentContainer, mapFragment, "Map");
-        fragmentTransaction.hide(mapFragment);
+        fragmentTransaction.add(mFragmentContainer, mMapFragment, "Map");
+        fragmentTransaction.hide(mMapFragment);
 
-        fragmentTransaction.add(fragmentContainer, composeFragment, "Compose");
-        fragmentTransaction.hide(composeFragment);
+        fragmentTransaction.add(mFragmentContainer, mComposeFragment, "Compose");
+        fragmentTransaction.hide(mComposeFragment);
 
         fragmentTransaction.commit();
     }
 
+    /**
+     * Displays fragment and hides others
+     *
+     * @param inp - Fragment, fragment to show
+     */
     private void displayFragment(Fragment inp) {
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        FragmentTransaction fragmentTransaction = sFragmentManager.beginTransaction();
         fragmentTransaction.show(inp);
 
 
         //Hiding Other Fragments
-        if (inp != textFragment) fragmentTransaction.hide(textFragment);
-        if (inp != mapFragment) fragmentTransaction.hide(mapFragment);
-        if (inp != profileFragment) fragmentTransaction.hide(profileFragment);
-        if (inp != composeFragment) fragmentTransaction.hide(composeFragment);
+        if (inp != mTextFragment) fragmentTransaction.hide(mTextFragment);
+        if (inp != mMapFragment) fragmentTransaction.hide(mMapFragment);
+        if (inp != mProfileFragment) fragmentTransaction.hide(mProfileFragment);
+        if (inp != mComposeFragment) fragmentTransaction.hide(mComposeFragment);
 
         fragmentTransaction.commit();
         Log.i(TAG, "New Fragment Displayed");
     }
 
+    /**
+     * Navigates User to Location Activity
+     */
     private void goLocationActivity() {
         Intent intent = new Intent(this, GetLocation.class);
         startActivity(intent);
@@ -200,6 +209,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * Logs Out User
+     */
     private void logOut() {
         ParseUser.logOut();
 
@@ -208,19 +220,25 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    /**
+     * Switches QueryManager State back to Default
+     */
     private void defaultView() {
-        queryManager.setCurrentState(QueryManager.Filter.DEFAULT);
+        mQueryManager.setCurrentState(QueryManager.Filter.DEFAULT);
 
-        if (currFragmentWithFilter != null) {
-            currFragmentWithFilter.filterChanged();
+        if (mCurrentFragmentWithFilter != null) {
+            mCurrentFragmentWithFilter.filterChanged();
         }
     }
 
+    /**
+     * Switches QueryManager State to viewAll
+     */
     private void viewAll() {
-        queryManager.setCurrentState(QueryManager.Filter.VIEWALL);
+        mQueryManager.setCurrentState(QueryManager.Filter.VIEWALL);
 
-        if (currFragmentWithFilter != null) {
-            currFragmentWithFilter.filterChanged();
+        if (mCurrentFragmentWithFilter != null) {
+            mCurrentFragmentWithFilter.filterChanged();
         }
     }
 }

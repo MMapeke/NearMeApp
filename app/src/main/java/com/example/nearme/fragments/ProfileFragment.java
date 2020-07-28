@@ -6,24 +6,21 @@ import android.graphics.ImageDecoder;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.nearme.R;
@@ -41,21 +38,22 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
+/**
+ * Fragment responsible for viewing current user profile
+ */
 public class ProfileFragment extends Fragment {
 
     public static final String TAG = "ProfileFragment";
     public final static int PICK_PHOTO_CODE = 1046;
 
-    ParseUser parseUser;
+    private ParseUser mParseUser;
 
-    Button btnEditProfilePic;
-    ImageView pfpPic;
-    TextView username;
+    private Button mBtnEditProfilePic;
+    private ImageView mProfilePic;
+    private TextView mUsername;
 
-    RecyclerView rvPosts;
-    ProfileAdapter profileAdapter;
-//    List<Post> posts;
+    private RecyclerView mRvPosts;
+    private ProfileAdapter mProfileAdapter;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -72,29 +70,27 @@ public class ProfileFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        parseUser = ParseUser.getCurrentUser();
-        btnEditProfilePic = view.findViewById(R.id.profile_btnEditProfilePic);
-        pfpPic = view.findViewById(R.id.profile_pic);
-        username = view.findViewById(R.id.profile_username);
+        mParseUser = ParseUser.getCurrentUser();
+        mBtnEditProfilePic = view.findViewById(R.id.profile_btnEditProfilePic);
+        mProfilePic = view.findViewById(R.id.profile_pic);
+        mUsername = view.findViewById(R.id.profile_username);
 
-        //Initializing RecyclerView and Adapter
-        rvPosts = view.findViewById(R.id.profile_rvPosts);
-//        posts = new ArrayList<>();
+        mRvPosts = view.findViewById(R.id.profile_rvPosts);
 
-        profileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(),true);
-        rvPosts.setAdapter(profileAdapter);
+        mProfileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(), true);
+        mRvPosts.setAdapter(mProfileAdapter);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-        rvPosts.setLayoutManager(linearLayoutManager);
+        mRvPosts.setLayoutManager(linearLayoutManager);
 
         //Setting Username
-        username.setText(parseUser.getUsername());
+        mUsername.setText(mParseUser.getUsername());
 
         //Setting Profile Pic
         loadProfilePic();
 
         //Setting Edit Pfp Pic Button
-        btnEditProfilePic.setOnClickListener(new View.OnClickListener() {
+        mBtnEditProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 // Create intent for picking a photo from the gallery
@@ -114,24 +110,27 @@ public class ProfileFragment extends Fragment {
     }
 
 
+    /**
+     * Loads profile pic into imageView
+     */
     private void loadProfilePic() {
-        ParseFile pfp = parseUser.getParseFile("profilePic");
+        ParseFile pfp = mParseUser.getParseFile("profilePic");
 
         if (pfp == null) {
             Glide.with(this)
                     .load(R.drawable.default_pic)
                     .circleCrop()
-                    .into(pfpPic);
+                    .into(mProfilePic);
         } else {
             Glide.with(this)
                     .load(pfp.getUrl())
                     .circleCrop()
-                    .into(pfpPic);
+                    .into(mProfilePic);
         }
     }
 
 
-    public Bitmap loadFromUri(Uri photoUri) {
+    private Bitmap loadFromUri(Uri photoUri) {
         Bitmap image = null;
         try {
             // check version of Android on device
@@ -185,6 +184,9 @@ public class ProfileFragment extends Fragment {
         }
     }
 
+    /**
+     * Loads all posts of current user
+     */
     private void queryAllUserPosts() {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
@@ -195,8 +197,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
-                    profileAdapter.addAll(objects);
-//                    profileAdapter.notifyDataSetChanged();
+                    mProfileAdapter.addAll(objects);
                     Log.i(TAG, "query successful");
                 } else {
                     Log.e(TAG, "error while querying", e);
@@ -208,8 +209,8 @@ public class ProfileFragment extends Fragment {
     @Override
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
-        if(!hidden){
-            Log.i(TAG,"No Longer Hidden");
+        if (!hidden) {
+            Log.i(TAG, "No Longer Hidden");
             queryAllUserPosts();
         }
     }

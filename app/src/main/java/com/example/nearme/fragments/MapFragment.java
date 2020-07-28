@@ -31,34 +31,31 @@ import com.google.android.gms.maps.model.Marker;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseUser;
 
 import org.parceler.Parcels;
 
 import java.util.List;
 
+/**
+ * Fragment
+ */
 public class MapFragment extends Fragment implements FilterChanged {
 
     public static final String TAG = "MapFragment";
-
-    private QueryManager queryManager;
-
     public static BitmapDescriptor DEFAULT_MARKER;
+
+    private QueryManager mQueryManager;
     private GoogleMap mMap;
-    private LatLng currLocation;
-
-    //Used to keep connections between posts and markers
-    private PostsAndMarkers postsAndMarkers;
-
-    private SupportMapFragment mapFragment;
-    Marker lastOpenedMarker = null;
+    private PostsAndMarkers mPostsAndMarkers;
+    private SupportMapFragment mMapFragment;
+    private Marker mLastOpenedMarker = null;
 
     public MapFragment() {
         // Required empty public constructor
     }
 
-    public void setQueryManager(QueryManager queryManager) {
-        this.queryManager = queryManager;
+    public void setQueryManager(QueryManager mQueryManager) {
+        this.mQueryManager = mQueryManager;
     }
 
     @Override
@@ -72,19 +69,12 @@ public class MapFragment extends Fragment implements FilterChanged {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        //Grab Current User
-        ParseUser parseUser = ParseUser.getCurrentUser();
-        ParseGeoPoint parseGeoPoint = parseUser.getParseGeoPoint("location");
-
-        //Store Last Location
-        currLocation = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
-
         // Do a null check to confirm that we have not already instantiated the map.
-        if (mapFragment == null) {
-            mapFragment = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
+        if (mMapFragment == null) {
+            mMapFragment = ((SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map));
             // Check if we were successful in obtaining the map.
-            if (mapFragment != null) {
-                mapFragment.getMapAsync(new OnMapReadyCallback() {
+            if (mMapFragment != null) {
+                mMapFragment.getMapAsync(new OnMapReadyCallback() {
                     @Override
                     public void onMapReady(GoogleMap map) {
                         try {
@@ -95,7 +85,7 @@ public class MapFragment extends Fragment implements FilterChanged {
                         } catch (Resources.NotFoundException e) {
                             Log.e(TAG, "Can't find style. Error: ", e);
                         }
-                        postsAndMarkers = new PostsAndMarkers(map);
+                        mPostsAndMarkers = new PostsAndMarkers(map);
                         loadMap(map);
                     }
                 });
@@ -110,8 +100,8 @@ public class MapFragment extends Fragment implements FilterChanged {
         mMap = map;
         DEFAULT_MARKER = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
 
-        ParseGeoPoint sw = queryManager.getSwBound();
-        ParseGeoPoint ne = queryManager.getNeBound();
+        ParseGeoPoint sw = mQueryManager.getSwBound();
+        ParseGeoPoint ne = mQueryManager.getNeBound();
 
         LatLng swBound = new LatLng(sw.getLatitude(), sw.getLongitude());
         LatLng neBound = new LatLng(ne.getLatitude(), ne.getLongitude());
@@ -130,23 +120,22 @@ public class MapFragment extends Fragment implements FilterChanged {
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             public boolean onMarkerClick(Marker marker) {
                 // Check if there is an open info window
-                if (lastOpenedMarker != null) {
+                if (mLastOpenedMarker != null) {
                     // Close the info window
-                    lastOpenedMarker.hideInfoWindow();
+                    mLastOpenedMarker.hideInfoWindow();
 
                     // Is the marker the same marker that was already open
-                    if (lastOpenedMarker.equals(marker)) {
+                    if (mLastOpenedMarker.equals(marker)) {
                         // Nullify the lastOpenned object
-                        lastOpenedMarker = null;
+                        mLastOpenedMarker = null;
                         // Return so that the info window isn't openned again
                         return true;
                     }
                 }
-
                 // Open the info window for the marker
                 marker.showInfoWindow();
                 // Re-assign the last openned such that we can close it later
-                lastOpenedMarker = marker;
+                mLastOpenedMarker = marker;
 
                 // Event was handled by our code do not launch default behaviour.
                 return true;
@@ -159,7 +148,7 @@ public class MapFragment extends Fragment implements FilterChanged {
             public void onInfoWindowClick(Marker marker) {
                 Log.i(TAG, "info window clicked");
 
-                Post post = postsAndMarkers.getPost(marker);
+                Post post = mPostsAndMarkers.getPost(marker);
 
                 Intent intent = new Intent(getActivity(), PostDetails.class);
                 intent.putExtra("post", Parcels.wrap(post));
@@ -173,7 +162,7 @@ public class MapFragment extends Fragment implements FilterChanged {
             public void onCameraIdle() {
                 Log.i(TAG, "Camera Idle");
 
-                QueryManager.Filter currState = queryManager.getCurrentState();
+                QueryManager.Filter currState = mQueryManager.getCurrentState();
 
                 if (currState == QueryManager.Filter.VIEWALL) {
                     //TODO: Communicate in ViewAll Map Can't Be Moved
@@ -186,8 +175,8 @@ public class MapFragment extends Fragment implements FilterChanged {
                     ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
                     ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
 
-                    queryManager.setSwBound(southwest);
-                    queryManager.setNeBound(northeast);
+                    mQueryManager.setSwBound(southwest);
+                    mQueryManager.setNeBound(northeast);
 
                     queryPosts();
                 }
@@ -195,19 +184,22 @@ public class MapFragment extends Fragment implements FilterChanged {
         });
     }
 
-    public void queryPosts() {
+    /**
+     * Querys posts to display in mapFragment
+     */
+    private void queryPosts() {
         Log.i(TAG, "Querying Posts");
-        queryManager.getQuery(100)
+        mQueryManager.getQuery(100)
                 .findInBackground(new FindCallback<Post>() {
                     @Override
                     public void done(List<Post> objects, ParseException e) {
                         if (e == null) {
 
-                            if (queryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
+                            if (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
                                 zoomMapOutForMarkers(objects);
                             }
 
-                            postsAndMarkers.addNewAndDeleteOldMarkers(objects);
+                            mPostsAndMarkers.addNewAndDeleteOldMarkers(objects);
 
                             Log.i(TAG, "Posts queried: " + objects.size());
                         } else {
@@ -217,11 +209,14 @@ public class MapFragment extends Fragment implements FilterChanged {
                 });
     }
 
-    public void reCenter() {
+    /**
+     * REcenters Map View on Last View stored in queryManager
+     */
+    private void reCenter() {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
-        ParseGeoPoint prevNE = queryManager.getNeBound();
-        ParseGeoPoint prevSW = queryManager.getSwBound();
+        ParseGeoPoint prevNE = mQueryManager.getNeBound();
+        ParseGeoPoint prevSW = mQueryManager.getSwBound();
         LatLng ne = new LatLng(prevNE.getLatitude(), prevNE.getLongitude());
         LatLng sw = new LatLng(prevSW.getLatitude(), prevSW.getLongitude());
 
@@ -233,7 +228,11 @@ public class MapFragment extends Fragment implements FilterChanged {
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 16));
     }
 
-    //zoom map out to fit all markers in view
+    /**
+     * Zooms out the map view to fit all points on map
+     *
+     * @param objects - List of Posts, representing posts queried and to be shown
+     */
     private void zoomMapOutForMarkers(List<Post> objects) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
@@ -251,7 +250,7 @@ public class MapFragment extends Fragment implements FilterChanged {
 
     @Override
     public void filterChanged() {
-        QueryManager.Filter currentFilter = queryManager.getCurrentState();
+        QueryManager.Filter currentFilter = mQueryManager.getCurrentState();
 
         if (currentFilter == QueryManager.Filter.VIEWALL) {
             queryPosts();

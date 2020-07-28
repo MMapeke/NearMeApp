@@ -33,14 +33,17 @@ import permissions.dispatcher.RuntimePermissions;
 
 import static com.google.android.gms.location.LocationServices.getFusedLocationProviderClient;
 
+/**
+ * Class/Activity responsible for collecting user location
+ */
 @RuntimePermissions
 public class GetLocation extends AppCompatActivity {
 
     public static final String TAG = "GetLocation";
     public static final int AUTOCOMPLETE_REQUEST_CODE = 100;
 
-    private Button btnCurrentLocation;
-    private Button btnChooseLocation;
+    private Button mBtnCurrentLocation;
+    private Button mBtnChooseLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,10 +53,10 @@ public class GetLocation extends AppCompatActivity {
         //Init Places
         Places.initialize(getApplicationContext(), getResources().getString(R.string.google_maps_api_key));
 
-        btnCurrentLocation = findViewById(R.id.btnCurrentLocation);
-        btnChooseLocation = findViewById(R.id.btnChooseLocation);
+        mBtnCurrentLocation = findViewById(R.id.btnCurrentLocation);
+        mBtnChooseLocation = findViewById(R.id.btnChooseLocation);
 
-        btnChooseLocation.setOnClickListener(new View.OnClickListener() {
+        mBtnChooseLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //Initialize place field list
@@ -66,7 +69,7 @@ public class GetLocation extends AppCompatActivity {
         });
 
         //TODO: Loading button
-        btnCurrentLocation.setOnClickListener(new View.OnClickListener() {
+        mBtnCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Log.i(TAG, "btn curr location clicked");
@@ -123,7 +126,12 @@ public class GetLocation extends AppCompatActivity {
         GetLocationPermissionsDispatcher.onRequestPermissionsResult(this, requestCode, grantResults);
     }
 
-    public void onLocation(LatLng inp) {
+    /**
+     * Saves location in the background for the user
+     *
+     * @param inp - LatLng, representing location
+     */
+    private void onLocation(LatLng inp) {
         String msg = "Location: " + (inp.latitude) + "," + (inp.longitude);
         Log.i(TAG, msg);
 
@@ -137,16 +145,19 @@ public class GetLocation extends AppCompatActivity {
             public void done(ParseException e) {
                 if (e == null) {
                     Log.i(TAG, "location updated");
+                    //TODO: Definitely Add Loading Button
+                    //Go to Main Activity
+                    goMainActivity();
                 } else {
                     Log.e(TAG, "location not updated");
                 }
             }
         });
-
-        //Go to Main Activity
-        goMainActivity();
     }
 
+    /**
+     * Navigates User to MainActivity
+     */
     private void goMainActivity() {
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);

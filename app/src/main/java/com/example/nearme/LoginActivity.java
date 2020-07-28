@@ -15,58 +15,72 @@ import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SignUpCallback;
 
+/**
+ * Class/Activity responsible for handling User login/registration
+ */
 public class LoginActivity extends AppCompatActivity {
+
     public static final String TAG = "LoginActivity";
-    LinearLayout linearLayout;
-    EditText etUsername;
-    EditText etPassword;
-    Button btnLogin;
-    Button btnRegister;
+
+    private LinearLayout mLinearLayout;
+    private EditText mEditUsername;
+    private EditText mEditPassword;
+    private Button mBtnLogin;
+    private Button mBtnRegister;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        linearLayout = findViewById(R.id.loginParent);
+        mLinearLayout = findViewById(R.id.loginParent);
         setContentView(R.layout.activity_login);
-        btnLogin = findViewById(R.id.btnLogin);
-        btnRegister = findViewById(R.id.btnSignUp);
-        etUsername = findViewById(R.id.etUsername);
-        etPassword = findViewById(R.id.etPassword);
+        mBtnLogin = findViewById(R.id.btnLogin);
+        mBtnRegister = findViewById(R.id.btnSignUp);
+        mEditUsername = findViewById(R.id.etUsername);
+        mEditPassword = findViewById(R.id.etPassword);
 
         //if already logged in
         if (ParseUser.getCurrentUser() != null) goLocationActivity();
 
-        btnLogin.setOnClickListener(new View.OnClickListener() {
+        mBtnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String username = String.valueOf(etUsername.getText());
-                String password = String.valueOf(etPassword.getText());
+                String username = String.valueOf(mEditUsername.getText());
+                String password = String.valueOf(mEditPassword.getText());
 
-                btnLogin.setEnabled(false);
-                btnRegister.setEnabled(false);
+                mBtnLogin.setEnabled(false);
+                mBtnRegister.setEnabled(false);
                 loginUser(username, password);
             }
         });
 
-        btnRegister.setOnClickListener(new View.OnClickListener() {
+        mBtnRegister.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String username = String.valueOf(etUsername.getText());
-                String password = String.valueOf(etPassword.getText());
+                String username = String.valueOf(mEditUsername.getText());
+                String password = String.valueOf(mEditPassword.getText());
 
-                btnRegister.setEnabled(false);
-                btnLogin.setEnabled(false);
+                mBtnRegister.setEnabled(false);
+                mBtnLogin.setEnabled(false);
                 registerUser(username, password);
             }
         });
     }
 
+    /**
+     * Navigates to Location Activity
+     */
     private void goLocationActivity() {
         Intent intent = new Intent(LoginActivity.this, GetLocation.class);
         startActivity(intent);
         finish();
     }
 
+    /**
+     * Registers User in background
+     *
+     * @param username - String, representing username
+     * @param password - String, representing password
+     */
     private void registerUser(String username, String password) {
         ParseUser user = new ParseUser();
 
@@ -80,13 +94,19 @@ public class LoginActivity extends AppCompatActivity {
                     goLocationActivity();
                 } else {
                     Log.e(TAG, "Registration failed", e);
-                    btnRegister.setEnabled(true);
-                    btnLogin.setEnabled(true);
+                    mBtnRegister.setEnabled(true);
+                    mBtnLogin.setEnabled(true);
                 }
             }
         });
     }
 
+    /**
+     * Logs In User
+     *
+     * @param username - String, representing username
+     * @param password - String, representing password
+     */
     private void loginUser(String username, String password) {
         ParseUser.logInInBackground(username, password, new LogInCallback() {
             public void done(ParseUser user, ParseException e) {
@@ -95,8 +115,8 @@ public class LoginActivity extends AppCompatActivity {
                 } else {
                     //TODO: Better error handling, informing user what's wrong
                     Log.e(TAG, "Login failed", e);
-                    btnLogin.setEnabled(true);
-                    btnRegister.setEnabled(true);
+                    mBtnLogin.setEnabled(true);
+                    mBtnRegister.setEnabled(true);
                 }
             }
         });

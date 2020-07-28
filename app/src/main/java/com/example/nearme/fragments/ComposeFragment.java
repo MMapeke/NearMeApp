@@ -38,21 +38,24 @@ import java.io.IOException;
 
 import static android.app.Activity.RESULT_OK;
 
+/**
+ * Fragment responsible for composing and posting posts
+ */
 public class ComposeFragment extends Fragment {
 
     public static final String TAG = "ComposeFragment";
-    ImageView image;
-    EditText etDesc;
-    FloatingActionButton btnTakePic;
-    FloatingActionButton btnChoosePic;
-    Button btnSubmit;
-    ProgressBar pb;
-
     public final static int PICK_PHOTO_CODE = 1046;
     public final static int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 1034;
-    public String photoFileName = "photo.jpg";
-    File photoFile;
-    ParseFile photoParseFile;
+
+    private ImageView mImage;
+    private EditText mEditDesc;
+    private FloatingActionButton mBtnTakePic;
+    private FloatingActionButton mBtnChoosePic;
+    private Button mBtnSubmit;
+    private ProgressBar mProgressBar;
+    private String mPhotoFileName = "photo.jpg";
+    private File mPhotoFile;
+    private ParseFile mPhotoParseFile;
 
     public ComposeFragment() {
         // Required empty public constructor
@@ -69,38 +72,38 @@ public class ComposeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        image = view.findViewById(R.id.compose_image);
-        etDesc = view.findViewById(R.id.compose_desc);
-        btnTakePic = view.findViewById(R.id.compose_takePic);
-        btnSubmit = view.findViewById(R.id.compose_submit);
-        btnChoosePic = view.findViewById(R.id.compose_choosePic);
-        pb = view.findViewById(R.id.compose_pbLoading);
+        mImage = view.findViewById(R.id.compose_image);
+        mEditDesc = view.findViewById(R.id.compose_desc);
+        mBtnTakePic = view.findViewById(R.id.compose_takePic);
+        mBtnSubmit = view.findViewById(R.id.compose_submit);
+        mBtnChoosePic = view.findViewById(R.id.compose_choosePic);
+        mProgressBar = view.findViewById(R.id.compose_pbLoading);
 
-        btnTakePic.setOnClickListener(new View.OnClickListener() {
+        mBtnTakePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 launchCamera();
             }
         });
 
-        btnChoosePic.setOnClickListener(new View.OnClickListener() {
+        mBtnChoosePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 openGallery();
             }
         });
 
-        btnSubmit.setOnClickListener(new View.OnClickListener() {
+        mBtnSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String description = etDesc.getText().toString();
+                String description = mEditDesc.getText().toString();
                 ParseUser currUser = ParseUser.getCurrentUser();
 
                 if (description.isEmpty()) {
                     Toast.makeText(getContext(), "Description can't be empty", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                if (image.getDrawable() == null) {
+                if (mImage.getDrawable() == null) {
                     Toast.makeText(getContext(), "Take an image", Toast.LENGTH_SHORT).show();
                     return;
                 }
@@ -114,12 +117,12 @@ public class ComposeFragment extends Fragment {
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // Create a File reference for future access
-        photoFile = getPhotoFileUri(photoFileName);
+        mPhotoFile = getPhotoFileUri(mPhotoFileName);
 
         // wrap File object into a content provider
         // required for API >= 24
         // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-        Uri fileProvider = FileProvider.getUriForFile(getContext(), "com.codepath.fileprovider.NearMe", photoFile);
+        Uri fileProvider = FileProvider.getUriForFile(getContext(), "com.codepath.fileprovider.NearMe", mPhotoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
         // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
@@ -144,11 +147,17 @@ public class ComposeFragment extends Fragment {
         }
     }
 
+    /**
+     * Saves post in background
+     *
+     * @param description - string, representing post description
+     * @param currUser    - ParseUser, representing user to assoicate with post
+     */
     private void savePost(String description, ParseUser currUser) {
-        pb.setVisibility(ProgressBar.VISIBLE);
+        mProgressBar.setVisibility(ProgressBar.VISIBLE);
         Post post = new Post();
         post.setDescription(description);
-        post.setImage(photoParseFile);
+        post.setImage(mPhotoParseFile);
         post.setUser(currUser);
         post.setLocation(currUser.getParseGeoPoint("location"));
 
@@ -157,9 +166,9 @@ public class ComposeFragment extends Fragment {
             public void done(ParseException e) {
                 if (e == null) {
                     Log.i(TAG, "Saving Post succesful");
-                    etDesc.setText("");
-                    image.setImageResource(0);
-                    pb.setVisibility(ProgressBar.INVISIBLE);
+                    mEditDesc.setText("");
+                    mImage.setImageResource(0);
+                    mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 } else {
                     Log.e(TAG, "error while saving", e);
                     Toast.makeText(getContext(), "Error while saving post", Toast.LENGTH_SHORT);
@@ -173,12 +182,12 @@ public class ComposeFragment extends Fragment {
         if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 // by this point we have the camera photo on disk
-                Bitmap takenImage = BitmapFactory.decodeFile(photoFile.getAbsolutePath());
+                Bitmap takenImage = BitmapFactory.decodeFile(mPhotoFile.getAbsolutePath());
                 // RESIZE BITMAP, see section below
                 // Load the taken image into a preview
-                image.setImageBitmap(takenImage);
+                mImage.setImageBitmap(takenImage);
 
-                photoParseFile = new ParseFile(photoFile);
+                mPhotoParseFile = new ParseFile(mPhotoFile);
             } else { // Result was a failure
                 Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
             }
@@ -187,7 +196,7 @@ public class ComposeFragment extends Fragment {
                 Uri photoUri = data.getData();
                 // Load the image located at photoUri into selectedImage
                 Bitmap selectedImage = loadFromUri(photoUri);
-                image.setImageBitmap(selectedImage);
+                mImage.setImageBitmap(selectedImage);
 
                 //Making bitmap into ParseFile
                 // Convert it to byte
@@ -195,7 +204,7 @@ public class ComposeFragment extends Fragment {
                 // Compress image to lower quality scale 1 - 100
                 selectedImage.compress(Bitmap.CompressFormat.PNG, 100, stream);
                 byte[] bytes = stream.toByteArray();
-                photoParseFile = new ParseFile("profile_pic.png", bytes);
+                mPhotoParseFile = new ParseFile("profile_pic.png", bytes);
 
             } else {
                 Toast.makeText(getContext(), "Picture wasn't selected!", Toast.LENGTH_SHORT).show();
@@ -203,8 +212,12 @@ public class ComposeFragment extends Fragment {
         }
     }
 
-    // Returns the File for a photo stored on disk given the fileName
-    public File getPhotoFileUri(String fileName) {
+    /**
+     * Returns the File for a photo stored on disk given the fileName
+     * @param fileName
+     * @return
+     */
+    private File getPhotoFileUri(String fileName) {
         // Get safe storage directory for photos
         // Use `getExternalFilesDir` on Context to access package-specific directories.
         // This way, we don't need to request external read/write runtime permissions.
@@ -221,7 +234,7 @@ public class ComposeFragment extends Fragment {
         return file;
     }
 
-    public Bitmap loadFromUri(Uri photoUri) {
+    private Bitmap loadFromUri(Uri photoUri) {
         Bitmap image = null;
         try {
             // check version of Android on device
