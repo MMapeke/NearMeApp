@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.nearme.FilterChanged;
+import com.example.nearme.MainActivity;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
@@ -152,6 +153,7 @@ public class MapFragment extends Fragment implements FilterChanged {
 
                 Intent intent = new Intent(getActivity(), PostDetails.class);
                 intent.putExtra("post", Parcels.wrap(post));
+                intent.putExtra("flag", MainActivity.TAG);
 
                 startActivity(intent);
             }

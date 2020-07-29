@@ -14,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.nearme.MainActivity;
+import com.example.nearme.OtherProfile;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.parse.DeleteCallback;
@@ -109,6 +111,13 @@ public class ProfileAdapter extends RecyclerView.Adapter<ProfileAdapter.ViewHold
 
                     Intent intent = new Intent(mContext, PostDetails.class);
                     intent.putExtra("post", Parcels.wrap(post));
+
+                    if(!mViewingOwnProfile){
+                        intent.putExtra("flag", OtherProfile.TAG);
+                    }else{
+                        intent.putExtra("flag", MainActivity.TAG);
+                    }
+
                     mContext.startActivity(intent);
                 }
             });

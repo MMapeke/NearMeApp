@@ -3,6 +3,7 @@ package com.example.nearme;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,11 +23,14 @@ import java.util.Date;
  */
 public class PostDetails extends AppCompatActivity {
 
+    public static final String TAG = "PostDetails";
+
     private Post mPost;
     private TextView mUsername;
     private TextView mRelativeTime;
     private ImageView mPicture;
     private TextView mDescription;
+    private String checkFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +41,10 @@ public class PostDetails extends AppCompatActivity {
         mRelativeTime = findViewById(R.id.details_time);
         mPicture = findViewById(R.id.details_pic);
         mDescription = findViewById(R.id.details_desc);
-        mPost = Parcels.unwrap(getIntent().getParcelableExtra("post"));
+
+        Intent intent = getIntent();
+        mPost = Parcels.unwrap(intent.getParcelableExtra("post"));
+        checkFlag = intent.getStringExtra("flag");
 
         if (mPost != null) {
             mUsername.setText("@" + mPost.getUser().getUsername());
@@ -66,8 +73,31 @@ public class PostDetails extends AppCompatActivity {
         if (!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
             //If Profile Clicked on Is Not Own
             Intent intent = new Intent(this, OtherProfile.class);
+
+            if (checkFlag.equals(OtherProfile.TAG)) {
+                //preventing stacking of profile and post detail activiies
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            }
+
             intent.putExtra("user", Parcels.wrap(parseUser));
             startActivity(intent);
+
+//            if (checkFlag.equals(MainActivity.TAG)) {
+                //improving activity flow for user
+                finish();
+//            }
+        } else {
+            //If Clicked on Own Profile/Username
+            if(checkFlag.equals(MainActivity.TAG)){
+                Log.i(TAG,"Clicked on own profile");
+                //Nav back to mainactivity
+                Intent intent = new Intent(this,MainActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+                intent.putExtra("nav",R.id.action_profile);
+
+                startActivity(intent);
+                finish();
+            }
         }
 
     }

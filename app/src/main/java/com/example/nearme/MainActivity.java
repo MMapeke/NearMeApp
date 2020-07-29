@@ -25,8 +25,11 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.ParseUser;
 
 
-//TODO: Lots of Activity Stacking with all the profile moving around
+//TODO: Read about array types parse/Recommendation
+
 //TODO: FAB -> toolbar
+//TODO: Improve REadMe + better description of feature
+
 
 /**
  * Main Entry for app, responsible for setting up and handling nav between everything
@@ -54,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i(TAG,"new main activity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -112,6 +116,30 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
+    }
+
+    public void setSelectedBottomNav(int inp){
+        mBottomNavView.setSelectedItemId(inp);
+    }
+
+    //Needed to override to allow onResume to accept new intents
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        setIntent(intent);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.i(TAG,"RESUMED");
+        int navigateTo = getIntent().getIntExtra("nav",0);
+
+        if(navigateTo != 0){
+            setSelectedBottomNav(navigateTo);
+            //Removes extra, so behavior doesnt continue next time resuming MainActivity
+            getIntent().removeExtra("nav");
+        }
     }
 
     /**

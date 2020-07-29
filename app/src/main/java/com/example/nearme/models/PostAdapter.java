@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.MultiTransformation;
 import com.bumptech.glide.load.resource.bitmap.CenterCrop;
+import com.example.nearme.MainActivity;
 import com.example.nearme.OtherProfile;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
@@ -89,6 +90,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
                     Intent intent = new Intent(mContext, PostDetails.class);
                     intent.putExtra("post", Parcels.wrap(post));
+                    intent.putExtra("flag", MainActivity.TAG);
                     mContext.startActivity(intent);
                 }
             });
@@ -114,6 +116,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 Intent intent = new Intent(mContext, OtherProfile.class);
                 intent.putExtra("user", Parcels.wrap(parseUser));
                 mContext.startActivity(intent);
+            }else{
+                //If clicked on own profile
+                ((MainActivity) mContext).setSelectedBottomNav(R.id.action_profile);
             }
         }
 
