@@ -17,6 +17,7 @@ import com.example.nearme.MainActivity;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
+import com.example.nearme.models.PostMarker;
 import com.example.nearme.models.PostsAndMarkers;
 import com.example.nearme.models.QueryManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -29,12 +30,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
+import com.google.maps.android.clustering.Cluster;
+import com.google.maps.android.clustering.ClusterManager;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
+import com.parse.ParseQuery;
 
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -49,6 +55,7 @@ public class MapFragment extends Fragment implements FilterChanged {
     private GoogleMap mMap;
     private PostsAndMarkers mPostsAndMarkers;
     private SupportMapFragment mMapFragment;
+    private ClusterManager<PostMarker> mClusterManager;
     private Marker mLastOpenedMarker = null;
 
     public MapFragment() {
@@ -118,38 +125,23 @@ public class MapFragment extends Fragment implements FilterChanged {
         LatLngBounds newBounds = builder.build();
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds, width, height, 16));
 
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            public boolean onMarkerClick(Marker marker) {
-                // Check if there is an open info window
-                if (mLastOpenedMarker != null) {
-                    // Close the info window
-                    mLastOpenedMarker.hideInfoWindow();
 
-                    // Is the marker the same marker that was already open
-                    if (mLastOpenedMarker.equals(marker)) {
-                        // Nullify the lastOpenned object
-                        mLastOpenedMarker = null;
-                        // Return so that the info window isn't openned again
-                        return true;
-                    }
-                }
-                // Open the info window for the marker
-                marker.showInfoWindow();
-                // Re-assign the last openned such that we can close it later
-                mLastOpenedMarker = marker;
+        //START OF CLUSTER STUFF
+        //TODO: Need to move all other logic into cluster logic
 
-                // Event was handled by our code do not launch default behaviour.
-                return true;
-            }
-        });
+        // Init the manager with context and the map
+        mClusterManager = new ClusterManager<PostMarker>(getContext(),mMap);
+
+        mMap.setOnMarkerClickListener(mClusterManager);
+//        mMap.setOnCameraIdleListener(mClusterManager);
 
 
-        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+        mClusterManager.setOnClusterItemInfoWindowClickListener(new ClusterManager.OnClusterItemInfoWindowClickListener<PostMarker>() {
             @Override
-            public void onInfoWindowClick(Marker marker) {
+            public void onClusterItemInfoWindowClick(PostMarker item) {
                 Log.i(TAG, "info window clicked");
 
-                Post post = mPostsAndMarkers.getPost(marker);
+                Post post = item.getmPost();
 
                 Intent intent = new Intent(getActivity(), PostDetails.class);
                 intent.putExtra("post", Parcels.wrap(post));
@@ -159,28 +151,93 @@ public class MapFragment extends Fragment implements FilterChanged {
             }
         });
 
-        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+
+        queryPostsTemp();
+
+
+        //END OF CLUSTER STUFF
+
+//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//            public boolean onMarkerClick(Marker marker) {
+//                // Check if there is an open info window
+//                if (mLastOpenedMarker != null) {
+//                    // Close the info window
+//                    mLastOpenedMarker.hideInfoWindow();
+//
+//                    // Is the marker the same marker that was already open
+//                    if (mLastOpenedMarker.equals(marker)) {
+//                        // Nullify the lastOpenned object
+//                        mLastOpenedMarker = null;
+//                        // Return so that the info window isn't openned again
+//                        return true;
+//                    }
+//                }
+//                // Open the info window for the marker
+//                marker.showInfoWindow();
+//                // Re-assign the last openned such that we can close it later
+//                mLastOpenedMarker = marker;
+//
+//                // Event was handled by our code do not launch default behaviour.
+//                return true;
+//            }
+//        });
+//
+//        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
+//            @Override
+//            public void onCameraIdle() {
+//                Log.i(TAG, "Camera Idle");
+//
+//                QueryManager.Filter currState = mQueryManager.getCurrentState();
+//
+//                if (currState == QueryManager.Filter.VIEWALL) {
+//                    //TODO: Communicate in ViewAll Map Can't Be Moved
+//                    mMap.getUiSettings().setAllGesturesEnabled(false);
+//                } else if (currState == QueryManager.Filter.DEFAULT) {
+//                    mMap.getUiSettings().setAllGesturesEnabled(true);
+//                    LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+//                    LatLng ne = bounds.northeast;
+//                    LatLng sw = bounds.southwest;
+//                    ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
+//                    ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
+//
+//                    mQueryManager.setSwBound(southwest);
+//                    mQueryManager.setNeBound(northeast);
+//
+//                    queryPosts();
+//                }
+//            }
+//        });
+//
+//
+//        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
+//            @Override
+//            public void onInfoWindowClick(Marker marker) {
+//                Log.i(TAG, "info window clicked");
+//
+//                Post post = mPostsAndMarkers.getPost(marker);
+//
+//                Intent intent = new Intent(getActivity(), PostDetails.class);
+//                intent.putExtra("post", Parcels.wrap(post));
+//                intent.putExtra("flag", MainActivity.TAG);
+//
+//                startActivity(intent);
+//            }
+//        });
+    }
+
+    //DELETE LATER JUST LOOKING AT HOW CLUSTERING
+    private void queryPostsTemp(){
+        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
+        query.include(Post.KEY_USER);
+        query.findInBackground(new FindCallback<Post>() {
             @Override
-            public void onCameraIdle() {
-                Log.i(TAG, "Camera Idle");
+            public void done(List<Post> objects, ParseException e) {
 
-                QueryManager.Filter currState = mQueryManager.getCurrentState();
+                for(Post p: objects){
+                    ParseGeoPoint pgp = p.getLocation();
 
-                if (currState == QueryManager.Filter.VIEWALL) {
-                    //TODO: Communicate in ViewAll Map Can't Be Moved
-                    mMap.getUiSettings().setAllGesturesEnabled(false);
-                } else if (currState == QueryManager.Filter.DEFAULT) {
-                    mMap.getUiSettings().setAllGesturesEnabled(true);
-                    LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                    LatLng ne = bounds.northeast;
-                    LatLng sw = bounds.southwest;
-                    ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
-                    ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
-
-                    mQueryManager.setSwBound(southwest);
-                    mQueryManager.setNeBound(northeast);
-
-                    queryPosts();
+                    PostMarker postMarker = new PostMarker(pgp.getLatitude(),pgp.getLongitude(),p);
+                    mClusterManager.addItem(postMarker);
                 }
             }
         });

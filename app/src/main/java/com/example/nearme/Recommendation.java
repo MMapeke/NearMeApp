@@ -1,11 +1,14 @@
 package com.example.nearme;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
 
 import com.example.nearme.models.Post;
+import com.example.nearme.models.RecommendAdapter;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
 import com.parse.FindCallback;
@@ -20,6 +23,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
+import me.relex.circleindicator.CircleIndicator;
+
+/**
+ * Class/Activity handling logic and dispalying of recommendations
+ */
 public class Recommendation extends AppCompatActivity {
 
     //TODO: May add options for differnt distance amounts
@@ -29,16 +37,20 @@ public class Recommendation extends AppCompatActivity {
     private static double sDistanceWeight = 0.5;
     private static double sTimeWeight = 0.5;
 
-    private static double sMaxDistanceInMeters = 8 * 1609.34;
+    private static double sMaxDistanceInMeters = 1 * 1609.34;
     private static Long sMaxTimeAgoInMilliSeconds = Long.valueOf(30 * 24 * 60 * 60) * Long.valueOf(1000);
 
-    private HashMap<String,Post>  mIdToPost;
+    private HashMap<String, Post> mIdToPost;
     private HashMap<String, Double> mPostIdToDistance;
     private HashMap<String, Double> mPostIdToTimeAgo;
     private ParseUser mParseUser;
     private LatLng mCenter;
 
     private List<Post> mPostsRec;
+
+    ViewPager mViewPager;
+    RecommendAdapter mRecommendAdapter;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +70,9 @@ public class Recommendation extends AppCompatActivity {
     }
 
 
+    /**
+     * queries all posts
+     */
     private void queryAllPosts() {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
@@ -73,6 +88,7 @@ public class Recommendation extends AppCompatActivity {
                     //Create a Ranking List, using a Heap
                     createRanking();
                     //Display the Posts
+                    displayPosts();
                 } else {
                     Log.e(TAG, "error while querying", e);
                 }
@@ -80,25 +96,30 @@ public class Recommendation extends AppCompatActivity {
         });
     }
 
+    /**
+     * initializes all values for posts that satisfy filters
+     *
+     * @param objects - list of posts, representing posts
+     */
     private void initializeValuesToRecommendWith(List<Post> objects) {
         int numOfPostsAdded = 0;
         //Needed to normalize later
         Double sumOfDistancesAdded = 0.0;
         Double sumOfTimesAdded = 0.0;
 
-        for(Post post: objects){
+        for (Post post : objects) {
             boolean passesFilter = true;
 
             //Checking Distance
             passesFilter = passesFilter && withinDistance(post);
 
             //Checking Time
-            passesFilter =  passesFilter && withinTime(post);
+            passesFilter = passesFilter && withinTime(post);
 
-            if(passesFilter){
+            if (passesFilter) {
                 numOfPostsAdded++;
                 String postID = post.getObjectId();
-                mIdToPost.put(postID,post);
+                mIdToPost.put(postID, post);
 
                 //Adding to Distance Map
                 Double distanceBetween = calcDistance(post);
@@ -110,57 +131,86 @@ public class Recommendation extends AppCompatActivity {
                 mPostIdToTimeAgo.put(postID, Double.valueOf(timeAgo));
                 sumOfTimesAdded += timeAgo;
 
-                Log.i(TAG,"Post Added: " + post.getDescription());
+                Log.i(TAG, "Post Added: " + post.getDescription());
             }
         }
-        Log.i(TAG,"TOTAL Number of Posts Added: " + numOfPostsAdded);
+        Log.i(TAG, "TOTAL Number of Posts Added: " + numOfPostsAdded);
 
         //Normalize everything
         normalizeDistances(sumOfDistancesAdded);
         normalizeTimes(sumOfTimesAdded);
     }
 
+    /**
+     * checks if post is within distance filter
+     *
+     * @param post - Post, representing post
+     * @return - boolean representing if post is within filter distance
+     */
     private boolean withinDistance(Post post) {
         return calcDistance(post) < sMaxDistanceInMeters;
     }
 
-    private Double calcDistance(Post post){
+    /**
+     * calculates distance between center and post location
+     *
+     * @param post - Post, representing post
+     * @return Double, representing distance in meters
+     */
+    private Double calcDistance(Post post) {
         ParseGeoPoint parseGeoPoint = post.getLocation();
         LatLng postLocation = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
 
         //Calculating distance
         Double distanceBetween = SphericalUtil.computeDistanceBetween(mCenter, postLocation);
 
-        return  distanceBetween;
+        return distanceBetween;
     }
 
+    /**
+     * normalizes distance value of all posts, so sum of all is 1
+     *
+     * @param sum - Double, representing sum of all distance values
+     */
     private void normalizeDistances(Double sum) {
-        Double normalizer =  1D/sum;
-        Log.i(TAG,"distance normalizer value: " + String.valueOf(normalizer));
+        Double normalizer = 1D / sum;
+        Log.i(TAG, "distance normalizer value: " + String.valueOf(normalizer));
 
-        for(String postID: mPostIdToDistance.keySet()){
+        for (String postID : mPostIdToDistance.keySet()) {
 
             Double defaultValue = mPostIdToDistance.get(postID);
             Double normalizedValue = defaultValue * normalizer;
 
             //Replacing with normalized value
-            mPostIdToDistance.put(postID,normalizedValue);
+            mPostIdToDistance.put(postID, normalizedValue);
         }
 
         //Checking normalized value sum
         Double checkSum = 0.0;
-        for(Double val: mPostIdToDistance.values()){
+        for (Double val : mPostIdToDistance.values()) {
             checkSum += val;
 //            Log.i(TAG,"new dist value is: " + String.valueOf(val));
         }
-        Log.i(TAG,"Normalized Sum of Distances is: " + checkSum);
+        Log.i(TAG, "Normalized Sum of Distances is: " + checkSum);
     }
 
-    private boolean withinTime(Post post){
+    /**
+     * checks if post creation time is within filter
+     *
+     * @param post - Post, representing post
+     * @return - boolean,indicating if post is within time fitler
+     */
+    private boolean withinTime(Post post) {
         return calcTime(post) < sMaxTimeAgoInMilliSeconds;
     }
 
-    private Long calcTime(Post post){
+    /**
+     * calculates time between not and when post was created
+     *
+     * @param post - Post, representing post
+     * @return Long, representing time in milliseconds between current time and when post was created
+     */
+    private Long calcTime(Post post) {
         Long dateNow = new Date().getTime();
 
         Long date = post.getCreatedAt().getTime();
@@ -169,41 +219,49 @@ public class Recommendation extends AppCompatActivity {
         return timeAgoInMS;
     }
 
+    /**
+     * normalizes time value for all posts so sum is 1
+     *
+     * @param sum - Double, representing sum of all timePassed with posts
+     */
     private void normalizeTimes(Double sum) {
-        Double normalizer = 1D/sum;
-        Log.i(TAG,"time normalizer: " + String.valueOf(normalizer));
+        Double normalizer = 1D / sum;
+        Log.i(TAG, "time normalizer: " + String.valueOf(normalizer));
 
-        for(String postID: mPostIdToTimeAgo.keySet()){
+        for (String postID : mPostIdToTimeAgo.keySet()) {
 
             Double defaultValue = mPostIdToTimeAgo.get(postID);
             Double newTime = normalizer * defaultValue;
 
             //Replacing with normalized value
-            mPostIdToTimeAgo.put(postID,newTime);
+            mPostIdToTimeAgo.put(postID, newTime);
         }
 
         //Check normalized value sum
         Double checkingSum = 0D;
-        for(Double i : mPostIdToTimeAgo.values()){
+        for (Double i : mPostIdToTimeAgo.values()) {
             checkingSum += i;
-            Log.i(TAG,"new time val is: " + i);
+            Log.i(TAG, "new time val is: " + i);
         }
         //should be v close or equal to 1
-        Log.i(TAG,"Normalized Sum of Times is: " + checkingSum);
+        Log.i(TAG, "Normalized Sum of Times is: " + checkingSum);
     }
 
-    private void createRanking(){
+    /**
+     * Creates rankings between posts and grabs up to 3 lowest rated
+     */
+    private void createRanking() {
         PriorityQueue<PostAndRanking> rankingsPQ = new PriorityQueue<>();
 
         //Initializing rankings
-        for(String id: mIdToPost.keySet()){
+        for (String id : mIdToPost.keySet()) {
             Double postDistance = mPostIdToDistance.get(id);
             Double postTime = mPostIdToTimeAgo.get(id);
             Post post = mIdToPost.get(id);
 
             Double ranking = (postDistance * sDistanceWeight) + (postTime * sTimeWeight);
 
-            PostAndRanking postAndRanking = new PostAndRanking(post,ranking);
+            PostAndRanking postAndRanking = new PostAndRanking(post, ranking);
 
             rankingsPQ.add(postAndRanking);
         }
@@ -212,7 +270,7 @@ public class Recommendation extends AppCompatActivity {
 
         //Grabbing up to 3
         int iterate = (rankingsPQ.size() < 3) ? rankingsPQ.size() : 3;
-        for(int i = 0; i < iterate; i++){
+        for (int i = 0; i < iterate; i++) {
             PostAndRanking top = rankingsPQ.poll();
             Post postFromTop = top.getPost();
 
@@ -220,7 +278,27 @@ public class Recommendation extends AppCompatActivity {
         }
     }
 
-    public class PostAndRanking implements Comparable<PostAndRanking>{
+    /**
+     * handles displaying up to 3 top posts to user
+     */
+    private void displayPosts() {
+
+        if (mPostsRec.isEmpty()) {
+            Toast.makeText(this, "no recomended posts, make one?", Toast.LENGTH_SHORT);
+        } else {
+            mRecommendAdapter = new RecommendAdapter(mPostsRec, this);
+            mViewPager = findViewById(R.id.viewPager);
+            mViewPager.setAdapter(mRecommendAdapter);
+
+            CircleIndicator indicator = findViewById(R.id.rec_indicator);
+            indicator.setViewPager(mViewPager);
+        }
+    }
+
+    /**
+     * Class to represent posts and their rankings for priority queue
+     */
+    private class PostAndRanking implements Comparable<PostAndRanking> {
         private Post post;
         private Double ranking;
 
