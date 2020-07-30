@@ -222,6 +222,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
             case R.id.recommend:
+                goToRecommendation();
                 return true;
             case R.id.viewAll:
                 viewAll();
@@ -235,6 +236,14 @@ public class MainActivity extends AppCompatActivity {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    /**
+     * goes to recommendation activity/screen
+     */
+    private void goToRecommendation() {
+        Intent intent = new Intent(this,Recommendation.class);
+        startActivity(intent);
     }
 
     /**
