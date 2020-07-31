@@ -18,7 +18,7 @@ import com.example.nearme.PostDetails;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.PostMarker;
-import com.example.nearme.models.PostsAndMarkers;
+import com.example.nearme.models.PostMarkerManager;
 import com.example.nearme.models.QueryManager;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -53,7 +53,8 @@ public class MapFragment extends Fragment implements FilterChanged {
 
     private QueryManager mQueryManager;
     private GoogleMap mMap;
-    private PostsAndMarkers mPostsAndMarkers;
+    private PostMarkerManager mPostMarkerManager;
+//    private PostsAndMarkers mPostsAndMarkers;
     private SupportMapFragment mMapFragment;
     private ClusterManager<PostMarker> mClusterManager;
     private Marker mLastOpenedMarker = null;
@@ -93,7 +94,7 @@ public class MapFragment extends Fragment implements FilterChanged {
                         } catch (Resources.NotFoundException e) {
                             Log.e(TAG, "Can't find style. Error: ", e);
                         }
-                        mPostsAndMarkers = new PostsAndMarkers(map);
+//                        mPostsAndMarkers = new PostsAndMarkers(map);
                         loadMap(map);
                     }
                 });
@@ -125,16 +126,25 @@ public class MapFragment extends Fragment implements FilterChanged {
         LatLngBounds newBounds = builder.build();
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds, width, height, 16));
 
-
-        //START OF CLUSTER STUFF
-        //TODO: Need to move all other logic into cluster logic
-
         // Init the manager with context and the map
         mClusterManager = new ClusterManager<PostMarker>(getContext(),mMap);
+        mPostMarkerManager = new PostMarkerManager(mClusterManager);
 
         mMap.setOnMarkerClickListener(mClusterManager);
-//        mMap.setOnCameraIdleListener(mClusterManager);
 
+        mClusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<PostMarker>() {
+            @Override
+            public boolean onClusterClick(Cluster<PostMarker> cluster) {
+                Collection<PostMarker> postsMarkers = cluster.getItems();
+                List<PostMarker> test = new ArrayList<>(postsMarkers);
+//                for(PostMarker inp: test){
+////                    Log.i(TAG,"cluster desc: " + inp.getmPost().getDescription());
+////                }
+                Log.i(TAG,"Cluster clicked: " + test.size() + " items");
+                //TODO: check if should return true or false
+                return false;
+            }
+        });
 
         mClusterManager.setOnClusterItemInfoWindowClickListener(new ClusterManager.OnClusterItemInfoWindowClickListener<PostMarker>() {
             @Override
@@ -151,93 +161,30 @@ public class MapFragment extends Fragment implements FilterChanged {
             }
         });
 
-
-        queryPostsTemp();
-
-
-        //END OF CLUSTER STUFF
-
-//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-//            public boolean onMarkerClick(Marker marker) {
-//                // Check if there is an open info window
-//                if (mLastOpenedMarker != null) {
-//                    // Close the info window
-//                    mLastOpenedMarker.hideInfoWindow();
-//
-//                    // Is the marker the same marker that was already open
-//                    if (mLastOpenedMarker.equals(marker)) {
-//                        // Nullify the lastOpenned object
-//                        mLastOpenedMarker = null;
-//                        // Return so that the info window isn't openned again
-//                        return true;
-//                    }
-//                }
-//                // Open the info window for the marker
-//                marker.showInfoWindow();
-//                // Re-assign the last openned such that we can close it later
-//                mLastOpenedMarker = marker;
-//
-//                // Event was handled by our code do not launch default behaviour.
-//                return true;
-//            }
-//        });
-//
-//        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-//            @Override
-//            public void onCameraIdle() {
-//                Log.i(TAG, "Camera Idle");
-//
-//                QueryManager.Filter currState = mQueryManager.getCurrentState();
-//
-//                if (currState == QueryManager.Filter.VIEWALL) {
-//                    //TODO: Communicate in ViewAll Map Can't Be Moved
-//                    mMap.getUiSettings().setAllGesturesEnabled(false);
-//                } else if (currState == QueryManager.Filter.DEFAULT) {
-//                    mMap.getUiSettings().setAllGesturesEnabled(true);
-//                    LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-//                    LatLng ne = bounds.northeast;
-//                    LatLng sw = bounds.southwest;
-//                    ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
-//                    ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
-//
-//                    mQueryManager.setSwBound(southwest);
-//                    mQueryManager.setNeBound(northeast);
-//
-//                    queryPosts();
-//                }
-//            }
-//        });
-//
-//
-//        map.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener() {
-//            @Override
-//            public void onInfoWindowClick(Marker marker) {
-//                Log.i(TAG, "info window clicked");
-//
-//                Post post = mPostsAndMarkers.getPost(marker);
-//
-//                Intent intent = new Intent(getActivity(), PostDetails.class);
-//                intent.putExtra("post", Parcels.wrap(post));
-//                intent.putExtra("flag", MainActivity.TAG);
-//
-//                startActivity(intent);
-//            }
-//        });
-    }
-
-    //DELETE LATER JUST LOOKING AT HOW CLUSTERING
-    private void queryPostsTemp(){
-        ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
-        query.include(Post.KEY_USER);
-        query.findInBackground(new FindCallback<Post>() {
+        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
-            public void done(List<Post> objects, ParseException e) {
+            public void onCameraIdle() {
+                Log.i(TAG, "CAMERA IDLE");
 
-                for(Post p: objects){
-                    ParseGeoPoint pgp = p.getLocation();
+                QueryManager.Filter currState = mQueryManager.getCurrentState();
 
-                    PostMarker postMarker = new PostMarker(pgp.getLatitude(),pgp.getLongitude(),p);
-                    mClusterManager.addItem(postMarker);
+                if (currState == QueryManager.Filter.VIEWALL) {
+                    //TODO: Communicate in ViewAll Map Can't Be Zoomed
+                    mMap.getUiSettings().setZoomControlsEnabled(false);
+                    mMap.getUiSettings().setZoomGesturesEnabled(false);
+                } else if (currState == QueryManager.Filter.DEFAULT) {
+                    mMap.getUiSettings().setZoomControlsEnabled(true);
+                    mMap.getUiSettings().setZoomGesturesEnabled(true);
+                    LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                    LatLng ne = bounds.northeast;
+                    LatLng sw = bounds.southwest;
+                    ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
+                    ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
+
+                    mQueryManager.setSwBound(southwest);
+                    mQueryManager.setNeBound(northeast);
+
+                    queryPosts();
                 }
             }
         });
@@ -254,11 +201,14 @@ public class MapFragment extends Fragment implements FilterChanged {
                     public void done(List<Post> objects, ParseException e) {
                         if (e == null) {
 
+                            //TODO: view all implementation
                             if (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
+                                mPostMarkerManager.updateMarkers(objects);
                                 zoomMapOutForMarkers(objects);
                             }
-
-                            mPostsAndMarkers.addNewAndDeleteOldMarkers(objects);
+                            if(mQueryManager.getCurrentState() == QueryManager.Filter.DEFAULT){
+                                mPostMarkerManager.updateMarkers(objects);
+                            }
 
                             Log.i(TAG, "Posts queried: " + objects.size());
                         } else {
@@ -297,13 +247,16 @@ public class MapFragment extends Fragment implements FilterChanged {
 
         for (Post post : objects) {
             ParseGeoPoint parseGeoPoint = post.getLocation();
-            LatLng latLng = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
+            LatLng latLng = new LatLng(parseGeoPoint.getLatitude(),parseGeoPoint.getLongitude());
+
+            //Adding to Bounds for zoom out
             builder.include(latLng);
         }
 
         LatLngBounds allBounds = builder.build();
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
+        mClusterManager.cluster();
         Log.i(TAG, "Zoom out to view all markers");
     }
 
