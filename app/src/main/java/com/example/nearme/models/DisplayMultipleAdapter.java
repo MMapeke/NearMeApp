@@ -18,13 +18,13 @@ import java.util.List;
 /**
  * Adapter for viewpager on recommendation activity
  */
-public class RecommendAdapter extends PagerAdapter {
+public class DisplayMultipleAdapter extends PagerAdapter {
 
     private List<Post> posts;
     private LayoutInflater layoutInflater;
     private Context context;
 
-    public RecommendAdapter(List<Post> posts, Context context) {
+    public DisplayMultipleAdapter(List<Post> posts, Context context) {
         this.posts = posts;
         this.context = context;
     }
@@ -43,7 +43,7 @@ public class RecommendAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
         layoutInflater = LayoutInflater.from(context);
-        View view = layoutInflater.inflate(R.layout.recommendation_item, container, false);
+        View view = layoutInflater.inflate(R.layout.multiple_post_item, container, false);
 
         ImageView imageView;
         TextView desc;

@@ -1,14 +1,10 @@
-package com.example.nearme;
+package com.example.nearme.models;
 
-import android.os.Bundle;
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.viewpager.widget.ViewPager;
-
-import com.example.nearme.models.Post;
-import com.example.nearme.models.RecommendAdapter;
+import com.example.nearme.DisplayMultiplePosts;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.maps.android.SphericalUtil;
 import com.parse.FindCallback;
@@ -23,16 +19,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.PriorityQueue;
 
-import me.relex.circleindicator.CircleIndicator;
-
 /**
- * Class/Activity handling logic and dispalying of recommendations
+ * Handles Logic of Finding Recommendations
  */
-public class Recommendation extends AppCompatActivity {
-
-    //TODO: May add options for differnt distance amounts
-
-    public static final String TAG = "Recommendation";
+public class GrabRecommendations {
+    public static final String TAG = "GrabRecommendations";
 
     private static double sDistanceWeight = 0.5;
     private static double sTimeWeight = 0.5;
@@ -46,29 +37,24 @@ public class Recommendation extends AppCompatActivity {
     private ParseUser mParseUser;
     private LatLng mCenter;
 
-    private List<Post> mPostsRec;
+    private ArrayList<Post> mPostsRec;
+    private Context mContext;
 
-    ViewPager mViewPager;
-    RecommendAdapter mRecommendAdapter;
-
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_recommendation);
-
-        mIdToPost = new HashMap<>();
-        mPostIdToDistance = new HashMap<>();
-        mPostIdToTimeAgo = new HashMap<>();
-        mPostsRec = new ArrayList<>();
-        mParseUser = ParseUser.getCurrentUser();
+    public GrabRecommendations(Context context){
+        this.mContext = context;
+        this.mIdToPost = new HashMap<>();
+        this.mPostIdToDistance = new HashMap<>();
+        this.mPostIdToTimeAgo = new HashMap<>();
+        this.mPostsRec = new ArrayList<>();
+        this.mParseUser = ParseUser.getCurrentUser();
 
         ParseGeoPoint parseGeoPoint = mParseUser.getParseGeoPoint("location");
-        mCenter = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
-
-        queryAllPosts();
+        this.mCenter = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
     }
 
+    public void showRecommendations(){
+        queryAllPosts();
+    }
 
     /**
      * queries all posts
@@ -140,6 +126,7 @@ public class Recommendation extends AppCompatActivity {
         normalizeDistances(sumOfDistancesAdded);
         normalizeTimes(sumOfTimesAdded);
     }
+
 
     /**
      * checks if post is within distance filter
@@ -278,21 +265,18 @@ public class Recommendation extends AppCompatActivity {
         }
     }
 
-    /**
-     * handles displaying up to 3 top posts to user
-     */
-    private void displayPosts() {
-
-        if (mPostsRec.isEmpty()) {
-            Toast.makeText(this, "no recomended posts, make one?", Toast.LENGTH_SHORT);
-        } else {
-            mRecommendAdapter = new RecommendAdapter(mPostsRec, this);
-            mViewPager = findViewById(R.id.viewPager);
-            mViewPager.setAdapter(mRecommendAdapter);
-
-            CircleIndicator indicator = findViewById(R.id.rec_indicator);
-            indicator.setViewPager(mViewPager);
+    private void displayPosts(){
+        //send intent and info to stories activity.
+        for(Post post: mPostsRec){
+            Log.i(TAG,"recommendatons workks., DESC: " + post.getDescription());
         }
+
+        Intent intent = new Intent(mContext, DisplayMultiplePosts.class);
+
+        intent.putParcelableArrayListExtra("posts",mPostsRec);
+//        intent.putExtra("posts",mPostsRec);
+
+        mContext.startActivity(intent);
     }
 
     /**

@@ -19,6 +19,7 @@ import com.example.nearme.fragments.ComposeFragment;
 import com.example.nearme.fragments.MapFragment;
 import com.example.nearme.fragments.ProfileFragment;
 import com.example.nearme.fragments.TextFragment;
+import com.example.nearme.models.GrabRecommendations;
 import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -242,8 +243,11 @@ public class MainActivity extends AppCompatActivity {
      * goes to recommendation activity/screen
      */
     private void goToRecommendation() {
-        Intent intent = new Intent(this,Recommendation.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this,Recommendation.class);
+//        startActivity(intent);
+
+        GrabRecommendations grabRecommendations = new GrabRecommendations(this);
+        grabRecommendations.showRecommendations();
     }
 
     /**
