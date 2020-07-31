@@ -16,6 +16,7 @@ import com.example.nearme.FilterChanged;
 import com.example.nearme.MainActivity;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
+import com.example.nearme.models.CustomRenderer;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.PostMarker;
 import com.example.nearme.models.PostMarkerManager;
@@ -131,6 +132,7 @@ public class MapFragment extends Fragment implements FilterChanged {
 
         // Init the manager with context and the map
         mClusterManager = new ClusterManager<>(getContext(),mMap);
+        mClusterManager.setRenderer(new CustomRenderer<PostMarker>(getActivity(),mMap,mClusterManager));
         mPostMarkerManager = new PostMarkerManager(mClusterManager);
 
         mClusterManager.getRenderer().setAnimation(true);
