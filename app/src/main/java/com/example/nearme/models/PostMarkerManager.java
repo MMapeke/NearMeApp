@@ -28,6 +28,9 @@ public class PostMarkerManager {
     public void updateMarkers(List<Post> posts){
         addNewPostMarkers(posts);
         deletePostMarkersNotOnScreen(posts);
+
+        Log.i(TAG,"NUMBER OF POSTS: " +
+                        mClusterManager.getAlgorithm().getItems().size());
     }
 
     /**
@@ -80,5 +83,10 @@ public class PostMarkerManager {
         }
         Log.i(TAG,"Old Markers Deleted");
         mClusterManager.cluster();
+    }
+
+    public void clearAll(){
+        mClusterManager.clearItems();
+        mPostIdToPostMrker.clear();
     }
 }

@@ -32,6 +32,8 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm;
+import com.google.maps.android.clustering.algo.PreCachingAlgorithmDecorator;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
@@ -46,6 +48,7 @@ import java.util.List;
 /**
  * Fragment
  */
+//TODO: ON Idle spammed in view all
 public class MapFragment extends Fragment implements FilterChanged {
 
     public static final String TAG = "MapFragment";
@@ -127,8 +130,10 @@ public class MapFragment extends Fragment implements FilterChanged {
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds, width, height, 16));
 
         // Init the manager with context and the map
-        mClusterManager = new ClusterManager<PostMarker>(getContext(),mMap);
+        mClusterManager = new ClusterManager<>(getContext(),mMap);
         mPostMarkerManager = new PostMarkerManager(mClusterManager);
+
+        mClusterManager.getRenderer().setAnimation(true);
 
         mMap.setOnMarkerClickListener(mClusterManager);
 
@@ -141,8 +146,7 @@ public class MapFragment extends Fragment implements FilterChanged {
 ////                    Log.i(TAG,"cluster desc: " + inp.getmPost().getDescription());
 ////                }
                 Log.i(TAG,"Cluster clicked: " + test.size() + " items");
-                //TODO: check if should return true or false
-                return false;
+                return true;
             }
         });
 
@@ -161,6 +165,33 @@ public class MapFragment extends Fragment implements FilterChanged {
             }
         });
 
+        //TODO: Marker recenters on click trying to remove
+//        mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<PostMarker>() {
+//            @Override
+//            public boolean onClusterItemClick(PostMarker item) {
+////                 Check if there is an open info window
+//                if (mLastOpenedMarker != null) {
+//                    // Close the info window
+//                    mLastOpenedMarker.hideInfoWindow();
+//
+//                    // Is the marker the same marker that was already open
+//                    if (mLastOpenedMarker.equals(marker)) {
+//                        // Nullify the lastOpenned object
+//                        mLastOpenedMarker = null;
+//                        // Return so that the info window isn't openned again
+//                        return true;
+//                    }
+//                }
+//                // Open the info window for the marker
+//                marker.showInfoWindow();
+//                // Re-assign the last openned such that we can close it later
+//                mLastOpenedMarker = marker;
+//
+//                // Event was handled by our code do not launch default behaviour.
+//                return true;
+//            }
+//        });
+
         map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
             public void onCameraIdle() {
@@ -170,11 +201,13 @@ public class MapFragment extends Fragment implements FilterChanged {
 
                 if (currState == QueryManager.Filter.VIEWALL) {
                     //TODO: Communicate in ViewAll Map Can't Be Zoomed
-                    mMap.getUiSettings().setZoomControlsEnabled(false);
-                    mMap.getUiSettings().setZoomGesturesEnabled(false);
+                    mMap.getUiSettings().setAllGesturesEnabled(false);
+//                    mMap.getUiSettings().setZoomControlsEnabled(false);
+//                    mMap.getUiSettings().setZoomGesturesEnabled(false);
                 } else if (currState == QueryManager.Filter.DEFAULT) {
-                    mMap.getUiSettings().setZoomControlsEnabled(true);
-                    mMap.getUiSettings().setZoomGesturesEnabled(true);
+                    mMap.getUiSettings().setAllGesturesEnabled(true);
+//                    mMap.getUiSettings().setZoomControlsEnabled(true);
+//                    mMap.getUiSettings().setZoomGesturesEnabled(true);
                     LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                     LatLng ne = bounds.northeast;
                     LatLng sw = bounds.southwest;
@@ -184,8 +217,8 @@ public class MapFragment extends Fragment implements FilterChanged {
                     mQueryManager.setSwBound(southwest);
                     mQueryManager.setNeBound(northeast);
 
-                    queryPosts();
                 }
+                queryPosts();
             }
         });
     }
@@ -203,8 +236,9 @@ public class MapFragment extends Fragment implements FilterChanged {
 
                             //TODO: view all implementation
                             if (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
-                                mPostMarkerManager.updateMarkers(objects);
                                 zoomMapOutForMarkers(objects);
+
+                                mPostMarkerManager.updateMarkers(objects);
                             }
                             if(mQueryManager.getCurrentState() == QueryManager.Filter.DEFAULT){
                                 mPostMarkerManager.updateMarkers(objects);
@@ -255,8 +289,8 @@ public class MapFragment extends Fragment implements FilterChanged {
 
         LatLngBounds allBounds = builder.build();
 
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
-        mClusterManager.cluster();
         Log.i(TAG, "Zoom out to view all markers");
     }
 
