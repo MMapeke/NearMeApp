@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.example.nearme.DisplayMultiplePosts;
 import com.example.nearme.FilterChanged;
 import com.example.nearme.MainActivity;
 import com.example.nearme.PostDetails;
@@ -114,7 +115,7 @@ public class MapFragment extends Fragment implements FilterChanged {
         DEFAULT_MARKER = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_VIOLET);
 
         ParseGeoPoint sw = mQueryManager.getSwBound();
-        ParseGeoPoint ne = mQueryManager.getNeBound();
+        final ParseGeoPoint ne = mQueryManager.getNeBound();
 
         LatLng swBound = new LatLng(sw.getLatitude(), sw.getLongitude());
         LatLng neBound = new LatLng(ne.getLatitude(), ne.getLongitude());
@@ -144,9 +145,17 @@ public class MapFragment extends Fragment implements FilterChanged {
             public boolean onClusterClick(Cluster<PostMarker> cluster) {
                 Collection<PostMarker> postsMarkers = cluster.getItems();
                 List<PostMarker> test = new ArrayList<>(postsMarkers);
-//                for(PostMarker inp: test){
-////                    Log.i(TAG,"cluster desc: " + inp.getmPost().getDescription());
-////                }
+
+                //Shows most recent posts first
+                ArrayList<Post> postsInCluster = new ArrayList<>();
+                for(PostMarker postMarker: test){
+                    postsInCluster.add(postMarker.getmPost());
+                }
+
+                Intent intent = new Intent(getContext(), DisplayMultiplePosts.class);
+                intent.putParcelableArrayListExtra("posts",postsInCluster);
+                startActivity(intent);
+
                 Log.i(TAG,"Cluster clicked: " + test.size() + " items");
                 return true;
             }

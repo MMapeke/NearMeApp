@@ -16,9 +16,8 @@ import java.util.List;
 
 import me.relex.circleindicator.CircleIndicator;
 
-//TODO: Pass Cluster Info into here throughlist
+//TODO: text thing showing if recommendation or a cluster
 //TODO: May add options for differnt distance amounts in recommendation
-
 /**
  * Class/Activity Handling Displaying a List of Posts
  */

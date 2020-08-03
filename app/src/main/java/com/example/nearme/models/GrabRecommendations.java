@@ -28,7 +28,7 @@ public class GrabRecommendations {
     private static double sDistanceWeight = 0.5;
     private static double sTimeWeight = 0.5;
 
-    private static double sMaxDistanceInMeters = 1 * 1609.34;
+    private static double sMaxDistanceInMeters = 15 * 1609.34;
     private static Long sMaxTimeAgoInMilliSeconds = Long.valueOf(30 * 24 * 60 * 60) * Long.valueOf(1000);
 
     private HashMap<String, Post> mIdToPost;
