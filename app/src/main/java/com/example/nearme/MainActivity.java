@@ -69,11 +69,6 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-        //If User has no location set
-        if (mParseUser.getParseGeoPoint("location") == null) {
-            goLocationActivity();
-        }
-
         mQueryManager = new QueryManager(mParseUser.getParseGeoPoint("location"));
 
         initFragments();
