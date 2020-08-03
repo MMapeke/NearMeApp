@@ -14,6 +14,17 @@
         android:layout_height="wrap_content"
         app:titleTextColor="@android:color/white"
         android:background="?attr/colorPrimary">
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/nearme_logo"
+            android:gravity="center"
+            android:text="NearMe"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp" />
+
     </androidx.appcompat.widget.Toolbar>
     
     <FrameLayout
@@ -24,15 +35,6 @@
         android:layout_above="@id/bottom_navigation">
     </FrameLayout>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/main_btnLocation"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:layout_alignParentRight="true"
-        android:layout_above="@+id/bottom_navigation"
-        android:src="@drawable/ic_outline_edit_location_24"
-        app:backgroundTint="@color/colorPrimary"/>
 
     <com.google.android.material.bottomnavigation.BottomNavigationView
         app:labelVisibilityMode="unlabeled"

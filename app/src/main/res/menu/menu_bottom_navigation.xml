@@ -4,22 +4,22 @@
 
     <item
         android:id="@+id/action_text"
-        android:icon="@drawable/ic_outline_view_list_24"
+        android:icon="@drawable/states_action_textfrag"
         android:title="Home"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_map"
-        android:icon="@drawable/ic_outline_map_24"
+        android:icon="@drawable/states_action_mapfrag"
         android:title="Map"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_post"
-        android:icon="@drawable/ic_outline_create_24"
+        android:icon="@drawable/states_action_composefrag"
         android:title="Make a Post"
         app:showAsAction="always" />
     <item
         android:id="@+id/action_profile"
-        android:icon="@drawable/ic_outline_account_box_24"
+        android:icon="@drawable/states_action_profilefrag"
         android:title="Profile"
         app:showAsAction="always" />
 </menu>

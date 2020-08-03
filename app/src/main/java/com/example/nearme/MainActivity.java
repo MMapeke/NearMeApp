@@ -27,9 +27,7 @@ import com.parse.ParseUser;
 
 
 //TODO: Read about array types parse/Recommendation
-
-//TODO: FAB -> toolbar
-//TODO: Improve REadMe + better description of feature
+//TODO: Improve REadMe + better description of all features
 
 
 /**
@@ -40,9 +38,10 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "MainActivity";
     private final FragmentManager sFragmentManager = getSupportFragmentManager();
 
+    MenuItem viewAll;
+    MenuItem defaultView;
 
     private BottomNavigationView mBottomNavView;
-    private FloatingActionButton mBtnEditLocation;
 
     private QueryManager mQueryManager;
     private ParseUser mParseUser = ParseUser.getCurrentUser();
@@ -62,7 +61,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mBtnEditLocation = findViewById(R.id.main_btnLocation);
         mBottomNavView = findViewById(R.id.bottom_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -102,16 +100,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //setting default bottom nav view
-        mBottomNavView.setSelectedItemId(R.id.action_map);
-
-        mBtnEditLocation.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, GetLocation.class);
-                startActivity(intent);
-                finish();
-            }
-        });
+        mBottomNavView.setSelectedItemId(R.id.action_post);
     }
 
     public void setSelectedBottomNav(int inp){
@@ -207,9 +196,13 @@ public class MainActivity extends AppCompatActivity {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
-        MenuItem menuItem = menu.findItem(R.id.app_bar_search);
-        SearchView searchView = (SearchView) menuItem.getActionView();
-        searchView.setQueryHint("Search Here!");
+        viewAll = menu.findItem(R.id.viewAll);
+        defaultView = menu.findItem(R.id.defaultView);
+        defaultView.setVisible(false);
+
+//        MenuItem menuItem = menu.findItem(R.id.app_bar_search);
+//        SearchView searchView = (SearchView) menuItem.getActionView();
+//        searchView.setQueryHint("Search Here!");
 
         return true;
     }
@@ -217,14 +210,25 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.editLocation:
+                goLocationActivity();
+                return true;
             case R.id.recommend:
                 goToRecommendation();
                 return true;
             case R.id.viewAll:
                 viewAll();
+
+                viewAll.setVisible(false);
+                defaultView.setVisible(true);
+
                 return true;
             case R.id.defaultView:
                 defaultView();
+
+                defaultView.setVisible(false);
+                viewAll.setVisible(true);
+
                 return true;
             case R.id.logout:
                 logOut();
