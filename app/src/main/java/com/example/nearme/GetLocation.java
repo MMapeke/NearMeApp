@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -20,6 +21,7 @@ import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.widget.Autocomplete;
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
+import com.google.android.material.snackbar.Snackbar;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseUser;
@@ -56,6 +58,9 @@ public class GetLocation extends AppCompatActivity {
         mBtnCurrentLocation = findViewById(R.id.btnCurrentLocation);
         mBtnChooseLocation = findViewById(R.id.btnChooseLocation);
 
+        mBtnCurrentLocation.setClickable(false);
+        mBtnChooseLocation.setClickable(false);
+
         mBtnChooseLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -68,7 +73,6 @@ public class GetLocation extends AppCompatActivity {
             }
         });
 
-        //TODO: Loading button
         mBtnCurrentLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -132,6 +136,10 @@ public class GetLocation extends AppCompatActivity {
      * @param inp - LatLng, representing location
      */
     private void onLocation(LatLng inp) {
+        //Disalbing buttons
+        mBtnChooseLocation.setClickable(false);
+        mBtnCurrentLocation.setClickable(false);
+
         String msg = "Location: " + (inp.latitude) + "," + (inp.longitude);
         Log.i(TAG, msg);
 
@@ -145,7 +153,6 @@ public class GetLocation extends AppCompatActivity {
             public void done(ParseException e) {
                 if (e == null) {
                     Log.i(TAG, "location updated");
-                    //TODO: Definitely Add Loading Button
                     //Go to Main Activity
                     goMainActivity();
                 } else {
