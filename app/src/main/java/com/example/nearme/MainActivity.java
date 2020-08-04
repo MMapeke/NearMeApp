@@ -170,7 +170,6 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = sFragmentManager.beginTransaction();
         fragmentTransaction.show(inp);
 
-
         //Hiding Other Fragments
         if (inp != mTextFragment) fragmentTransaction.hide(mTextFragment);
         if (inp != mMapFragment) fragmentTransaction.hide(mMapFragment);

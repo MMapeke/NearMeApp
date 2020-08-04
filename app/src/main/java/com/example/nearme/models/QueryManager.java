@@ -72,6 +72,7 @@ public class QueryManager {
     public ParseQuery<Post> getQuery(int limit) {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
+        query.include(Post.KEY_LIKED);
         query.addDescendingOrder(Post.KEY_CREATED_AT);
         query.setLimit(limit);
 

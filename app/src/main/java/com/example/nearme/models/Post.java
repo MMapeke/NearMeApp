@@ -8,6 +8,8 @@ import com.parse.ParseUser;
 
 import org.parceler.Parcel;
 
+import java.util.ArrayList;
+
 /**
  * Class representing Post model used throughout application
  */
@@ -19,9 +21,18 @@ public class Post extends ParseObject {
     public static final String KEY_IMAGE = "imageMedia";
     public static final String KEY_DESCRIPTION = "desc";
     public static final String KEY_USER = "user";
+    public static final String KEY_LIKED = "likedBy";
 
     public Post() {
         super();
+    }
+
+    public ArrayList<ParseUser> getLikes(){
+        return (ArrayList<ParseUser>) get(KEY_LIKED);
+    }
+
+    public void setLikedBy(ArrayList<ParseUser> inp){
+        put(KEY_LIKED,inp);
     }
 
     public ParseGeoPoint getLocation() {

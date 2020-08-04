@@ -4,55 +4,80 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:paddingTop="4dp"
     android:layout_height="wrap_content">
+
+<!--    time ago-->
+<!--    like button -->
+<!--    like numbers-->
+<!--    have/havent viewed thing-->
 
     <TextView
         android:id="@+id/post_user"
         android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
-        android:layout_marginBottom="4dp"
         android:layout_toRightOf="@+id/post_preview"
         android:text="TextView"
         android:textColor="#000000"
-        android:textSize="18sp"
-        android:textStyle="bold"
-        tools:text="\@username" />
+        android:textSize="18dp"
+        tools:text="username" />
 
     <TextView
         android:id="@+id/post_desc"
-        android:layout_width="match_parent"
-        android:layout_height="30dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_below="@+id/post_user"
         android:layout_marginStart="4dp"
-        android:layout_marginTop="4dp"
         android:layout_marginEnd="4dp"
         android:layout_marginBottom="4dp"
+        android:layout_marginTop="-2dp"
         android:layout_toRightOf="@+id/post_preview"
-        android:text="TextView"
+        android:text="abcdefghijklmnopqrstuvwxyz"
         android:textAlignment="textStart"
         android:textColor="#A1A1A1"
-        tools:text="this event is happening rn" />
+        />
 
-    <ImageView
-        android:id="@+id/post_preview"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+    <TextView
+        android:id="@+id/post_timestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/post_desc"
         android:layout_marginLeft="4dp"
-        android:scaleType="centerCrop"
-        tools:srcCompat="@tools:sample/avatars" />
+        android:layout_marginTop="-2dp"
+        android:layout_toRightOf="@id/post_preview"
+        android:text="time ago"
+        android:textColor="#FFC107"
+        android:textSize="10dp" />
+
 
     <View
         android:id="@+id/view"
         android:layout_width="fill_parent"
-        android:layout_height="2dp"
+        android:layout_height="1dp"
         android:layout_below="@id/post_preview"
-        android:layout_marginTop="2dp"
+        android:layout_marginTop="4dp"
         android:layout_marginBottom="2dp"
         android:background="#EDEDED" />
+
+    <ImageView
+        android:id="@+id/post_btnLike"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/post_desc"
+        android:layout_alignBottom="@+id/post_desc"
+        android:layout_marginRight="4dp"
+        app:srcCompat="@drawable/ic_outline_thumb_up_24" />
+
+    <ImageView
+        android:id="@+id/post_preview"
+        android:layout_width="70dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignBottom="@+id/post_timestamp"
+        android:scaleType="centerCrop"
+        tools:srcCompat="@tools:sample/avatars" />
 </RelativeLayout>

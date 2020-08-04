@@ -78,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void goToInfo() {
         Transition testTransition = new Fade();
-        testTransition.setDuration(750);
+        testTransition.setDuration(650);
         TransitionManager.go(mSceneB,testTransition);
 
         mEditUser = findViewById(R.id.etUsername);

@@ -2,6 +2,8 @@ package com.example.nearme.models;
 
 import android.content.Context;
 import android.content.Intent;
+import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,10 +20,16 @@ import com.example.nearme.MainActivity;
 import com.example.nearme.OtherProfile;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
+import com.google.android.material.snackbar.Snackbar;
+import com.parse.Parse;
+import com.parse.ParseException;
 import com.parse.ParseUser;
+import com.parse.SaveCallback;
 
 import org.parceler.Parcels;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.BlurTransformation;
@@ -32,6 +40,7 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
  */
 public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
+    public static final String TAG = "PostAdapter";
     private List<Post> mPosts;
     private Context mContext;
 
@@ -73,7 +82,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         private ImageView mPreview;
         private TextView mUsername;
         private TextView mDescription;
-        private ParseUser mParseUser;
+        private TextView mTimeStamp;
+        private ImageView mThumbsUp;
+
+        private Post mPost;
+        private ArrayList<ParseUser> mLikedBy;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -81,6 +94,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             mPreview = itemView.findViewById(R.id.post_preview);
             mUsername = itemView.findViewById(R.id.post_user);
             mDescription = itemView.findViewById(R.id.post_desc);
+            mTimeStamp = itemView.findViewById(R.id.post_timestamp);
+            mThumbsUp = itemView.findViewById(R.id.post_btnLike);
+            mLikedBy = new ArrayList<>();
+
 
             mPreview.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -99,6 +116,13 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 @Override
                 public void onClick(View view) {
                     goToUserProfile();
+                }
+            });
+
+            mThumbsUp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    likePost();
                 }
             });
         }
@@ -123,14 +147,24 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         }
 
         public void bind(Post post) {
-            mParseUser = post.getUser();
+            mPost = post;
+            ParseUser parseUser = post.getUser();
 
-            mUsername.setText("@" + mParseUser.getUsername().toUpperCase());
+            if(post.getLikes() != null){
+                mLikedBy = post.getLikes();
+            }
+
+            checkIfPostLiked();
+
+            mUsername.setText(parseUser.getUsername().toUpperCase());
             mDescription.setText(post.getDescription());
+
+            Date date = post.getCreatedAt();
+            mTimeStamp.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
 
             int radius = 40; // corner radius, higher value = more rounded
             int margin = 5; // crop margin, set to 0 for corners with no crop
-            int blur = 6;
+            int blur = 15;
 
             Glide.with(mContext)
                     .load(post.getImage().getUrl())
@@ -140,6 +174,95 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                             new RoundedCornersTransformation(radius, margin)
                     ))
                     .into(mPreview);
+        }
+
+        /**
+         * Controls thumbs up image based on if liked or not
+         */
+        private void checkIfPostLiked(){
+            if(hasUserLikedPost()){
+                mThumbsUp.setImageResource(R.drawable.ic_baseline_thumb_up_filled_24);
+            }else{
+                mThumbsUp.setImageResource(R.drawable.ic_outline_thumb_up_24);
+            }
+        }
+
+
+        /**
+         * Likes/Unlikes post user clicked on
+         */
+        private void likePost() {
+            final ParseUser currUser = ParseUser.getCurrentUser();
+
+            if(!hasUserLikedPost()){
+                mLikedBy.add(currUser);
+                mPost.put(Post.KEY_LIKED,mLikedBy);
+                mPost.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if(e == null){
+                            checkIfPostLiked();
+                            Log.i(TAG,"User liked post");
+                        }else{
+                            mLikedBy.remove(currUser);
+                            Log.e(TAG,"was not able to like post",e);
+                        }
+                    }
+                });
+            }else{
+                removeCurrUserFromLikes();
+                mPost.put(Post.KEY_LIKED,mLikedBy);
+                mPost.saveInBackground(new SaveCallback() {
+                    @Override
+                    public void done(ParseException e) {
+                        if(e == null){
+                            checkIfPostLiked();
+                            Log.i(TAG,"User unliked post");
+                        }else{
+                            Log.e(TAG,"was not able to unlike post",e);
+                        }
+                    }
+                });
+            }
+        }
+
+        /**
+         * removes curr user from likes
+         */
+        private void removeCurrUserFromLikes(){
+            ParseUser currUser = ParseUser.getCurrentUser();
+            String currUserID = currUser.getObjectId();
+
+            ParseUser toRemove = null;
+            for(ParseUser i: mLikedBy){
+                String userID = i.getObjectId();
+                if(userID.equals(currUserID)){
+                    toRemove = i;
+                }
+            }
+
+            if(mLikedBy == null){
+                Log.e(TAG, "shoudlnt be null if removing like");
+            }else{
+                mLikedBy.remove(toRemove);
+                Log.i(TAG,"removed user from likes");
+            }
+        }
+
+        /**
+         * checks if user has liked post
+         * @return - boolean, representing if user has liked post
+         */
+        private Boolean hasUserLikedPost(){
+            ParseUser currUser = ParseUser.getCurrentUser();
+            String currUserID = currUser.getObjectId();
+            for(ParseUser i: mLikedBy){
+                String userID = i.getObjectId();
+                if(userID.equals(currUserID)){
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
