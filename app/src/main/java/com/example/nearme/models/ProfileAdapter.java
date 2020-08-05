@@ -168,7 +168,7 @@ public class ProfileAdapter extends CdsRecyclerViewAdapter<Post,ProfileAdapter.V
             mCreatedAgo.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
 
             //Setting number of likes
-            ArrayList<ParseUser> postLikedBy = new ArrayList<>();
+            ArrayList<String> postLikedBy = new ArrayList<>();
             if(post.getLikes() != null){
                 postLikedBy = post.getLikes();
             }

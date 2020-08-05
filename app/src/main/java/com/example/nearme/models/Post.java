@@ -28,8 +28,8 @@ public class Post extends ParseObject {
         super();
     }
 
-    public ArrayList<ParseUser> getLikes(){
-        return (ArrayList<ParseUser>) get(KEY_LIKED);
+    public ArrayList<String> getLikes(){
+        return (ArrayList<String>) get(KEY_LIKED);
     }
 
     public void setLikedBy(ArrayList<ParseUser> inp){

@@ -5,7 +5,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.OvershootInterpolator;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,8 +25,6 @@ import com.parse.ParseException;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import jp.wasabeef.recyclerview.adapters.AlphaInAnimationAdapter;
 
 public class TextFragment extends Fragment implements FilterChanged {
 
@@ -83,7 +80,6 @@ public class TextFragment extends Fragment implements FilterChanged {
                 queryPosts();
             }
         });
-        queryPosts();
     }
 
     @Override

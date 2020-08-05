@@ -86,7 +86,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         private RelativeLayout mRelativeLayout;
 
         private Post mPost;
-        private ArrayList<ParseUser> mLikedBy;
+        private ArrayList<String> mLikedBy;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -205,10 +205,11 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
          * Likes/Unlikes post user clicked on
          */
         private void likePost() {
-            final ParseUser currUser = ParseUser.getCurrentUser();
+            ParseUser currUser = ParseUser.getCurrentUser();
+            final String currUserID = currUser.getObjectId();
 
             if(!hasUserLikedPost()){
-                mLikedBy.add(currUser);
+                mLikedBy.add(currUserID);
                 mPost.put(Post.KEY_LIKED,mLikedBy);
                 mPost.saveInBackground(new SaveCallback() {
                     @Override
@@ -217,7 +218,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                             checkIfPostLiked();
                             Log.i(TAG,"User liked post");
                         }else{
-                            mLikedBy.remove(currUser);
+                            mLikedBy.remove(currUserID);
                             Log.e(TAG,"was not able to like post",e);
                         }
                     }
@@ -246,10 +247,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             ParseUser currUser = ParseUser.getCurrentUser();
             String currUserID = currUser.getObjectId();
 
-            ParseUser toRemove = null;
-            for(ParseUser i: mLikedBy){
-                String userID = i.getObjectId();
-                if(userID.equals(currUserID)){
+            String toRemove = null;
+            for(String i: mLikedBy){
+                if(currUserID.equals(i)){
                     toRemove = i;
                 }
             }
@@ -269,9 +269,8 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         private Boolean hasUserLikedPost(){
             ParseUser currUser = ParseUser.getCurrentUser();
             String currUserID = currUser.getObjectId();
-            for(ParseUser i: mLikedBy){
-                String userID = i.getObjectId();
-                if(userID.equals(currUserID)){
+            for(String i: mLikedBy){
+                if(currUserID.equals(i)){
                     return true;
                 }
             }

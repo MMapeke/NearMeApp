@@ -22,9 +22,6 @@ import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
-//TODO: userid instead of parseusercopy for likes
-//TODO: Improve REadMe + better description of all features
-//TODO: Empty Messages in relevant spots
 //TODO: curious about animations btwn fragments, preloading map
 
 /**
