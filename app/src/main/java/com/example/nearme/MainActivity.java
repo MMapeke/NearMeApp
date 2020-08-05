@@ -25,7 +25,8 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.ParseUser;
 
-
+//TODO: userid instead of parseusercopy for likes
+//TODO: change default fragment
 //TODO: Read about array types parse/Recommendation
 //TODO: Improve REadMe + better description of all features
 

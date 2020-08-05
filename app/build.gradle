@@ -74,4 +74,5 @@ dependencies {
     // Utilities for Maps SDK for Android (requires Google Play Services)
     implementation 'com.google.maps.android:android-maps-utils:2.0.3'
 
+    compile 'com.github.GauravChaddha1996:CDSRecyclerView:1.5'
 }

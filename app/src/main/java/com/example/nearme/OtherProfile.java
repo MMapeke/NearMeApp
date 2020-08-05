@@ -1,6 +1,7 @@
 package com.example.nearme;
 
 import android.os.Bundle;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.ProfileAdapter;
+import com.gaurav.cdsrecyclerview.CdsRecyclerView;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -21,6 +23,7 @@ import com.parse.ParseUser;
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -35,7 +38,10 @@ public class OtherProfile extends AppCompatActivity {
     private ImageView mProfilePic;
     private TextView mUsername;
 
-    private RecyclerView mRvPosts;
+    private TextView mNumPosts;
+    private TextView mAccountCreation;
+
+    private CdsRecyclerView mRvPosts;
     private ProfileAdapter mProfileAdapter;
 
     @Override
@@ -48,7 +54,8 @@ public class OtherProfile extends AppCompatActivity {
 
         mProfilePic = findViewById(R.id.other_profile_pic);
         mUsername = findViewById(R.id.other_profile_username);
-
+        mNumPosts = findViewById(R.id.other_profile_num_posts);
+        mAccountCreation = findViewById(R.id.other_profile_created);
         mRvPosts = findViewById(R.id.other_profile_rvPosts);
 
         mProfileAdapter = new ProfileAdapter(this, new ArrayList<Post>(), false);
@@ -57,11 +64,17 @@ public class OtherProfile extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         mRvPosts.setLayoutManager(linearLayoutManager);
 
+        mRvPosts.disableItemSwipe();
+
         //Setting Username
         mUsername.setText(mParseUser.getUsername());
 
         //Setting Profile Pic
         loadProfilePic();
+
+        //Setting Account Creation
+        Date date = mParseUser.getCreatedAt();
+        mAccountCreation.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
 
         queryAllUserPosts();
     }
@@ -99,6 +112,7 @@ public class OtherProfile extends AppCompatActivity {
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
                     mProfileAdapter.addAll(objects);
+                    mNumPosts.setText(String.valueOf(objects.size()));
                     Log.i(TAG, "query successful");
                 } else {
                     Log.e(TAG, "error while querying", e);

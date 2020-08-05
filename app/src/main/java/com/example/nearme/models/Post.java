@@ -9,6 +9,7 @@ import com.parse.ParseUser;
 import org.parceler.Parcel;
 
 import java.util.ArrayList;
+import java.util.Date;
 
 /**
  * Class representing Post model used throughout application
@@ -65,5 +66,9 @@ public class Post extends ParseObject {
 
     public void setUser(ParseUser inp) {
         put(KEY_USER, inp);
+    }
+
+    public void setCreatedDate(Date inp){
+        put(KEY_CREATED_AT,inp);
     }
 }

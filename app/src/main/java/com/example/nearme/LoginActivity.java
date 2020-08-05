@@ -44,7 +44,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
 
         //if already logged in
-//        if (ParseUser.getCurrentUser() != null) goLocationActivity();
+        if (ParseUser.getCurrentUser() != null) goLocationActivity();
 
         mBtnLogin = findViewById(R.id.login_btnLogin);
         mBtnRegister = findViewById(R.id.login_btnRegister);

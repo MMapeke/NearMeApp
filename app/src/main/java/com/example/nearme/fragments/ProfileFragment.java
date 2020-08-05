@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,9 +24,12 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.ProfileAdapter;
+import com.gaurav.cdsrecyclerview.CdsItemTouchCallback;
+import com.gaurav.cdsrecyclerview.CdsRecyclerView;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -33,10 +37,16 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
+import org.w3c.dom.Text;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+
+import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
+
 
 /**
  * Fragment responsible for viewing current user profile
@@ -48,11 +58,13 @@ public class ProfileFragment extends Fragment {
 
     private ParseUser mParseUser;
 
-    private Button mBtnEditProfilePic;
     private ImageView mProfilePic;
     private TextView mUsername;
 
-    private RecyclerView mRvPosts;
+    private TextView mNumberPosts;
+    private TextView mAccountCreated;
+
+    private CdsRecyclerView mRvPosts;
     private ProfileAdapter mProfileAdapter;
 
     public ProfileFragment() {
@@ -71,29 +83,43 @@ public class ProfileFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mParseUser = ParseUser.getCurrentUser();
-        mBtnEditProfilePic = view.findViewById(R.id.profile_btnEditProfilePic);
         mProfilePic = view.findViewById(R.id.profile_pic);
         mUsername = view.findViewById(R.id.profile_username);
 
         mRvPosts = view.findViewById(R.id.profile_rvPosts);
 
-        mProfileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(), true);
+        mNumberPosts = view.findViewById(R.id.profile_num_posts);
+        mAccountCreated = view.findViewById(R.id.profile_created);
+
+        mProfileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(), true,getView());
         mRvPosts.setAdapter(mProfileAdapter);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mRvPosts.setLayoutManager(linearLayoutManager);
 
+        mRvPosts.enableItemSwipe();
+        mRvPosts.setItemSwipeCompleteListener(new CdsItemTouchCallback.ItemSwipeCompleteListener() {
+            @Override
+            public void onItemSwipeComplete(int i) {
+                //auto calls remove method in adapter
+                Log.i(TAG,"swipe complete");
+            }
+        });
+
+        //Setting Account Creation
+        Date date = mParseUser.getCreatedAt();
+        mAccountCreated.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
+
         //Setting Username
-        mUsername.setText(mParseUser.getUsername());
+        mUsername.setText( mParseUser.getUsername().toUpperCase());
 
         //Setting Profile Pic
         loadProfilePic();
 
-        //Setting Edit Pfp Pic Button
-        mBtnEditProfilePic.setOnClickListener(new View.OnClickListener() {
+        mProfilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // Create intent for picking a photo from the gallery
+//                 Create intent for picking a photo from the gallery
                 Intent intent = new Intent(Intent.ACTION_PICK,
                         MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
 
@@ -198,6 +224,7 @@ public class ProfileFragment extends Fragment {
             public void done(List<Post> objects, ParseException e) {
                 if (e == null) {
                     mProfileAdapter.addAll(objects);
+                    mNumberPosts.setText(String.valueOf(objects.size()));
                     Log.i(TAG, "query successful");
                 } else {
                     Log.e(TAG, "error while querying", e);

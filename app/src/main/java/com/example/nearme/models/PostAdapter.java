@@ -102,13 +102,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             mPreview.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    int position = getAdapterPosition();
-                    Post post = mPosts.get(position);
-
-                    Intent intent = new Intent(mContext, PostDetails.class);
-                    intent.putExtra("post", Parcels.wrap(post));
-                    intent.putExtra("flag", MainActivity.TAG);
-                    mContext.startActivity(intent);
+                    goToMoreDetails();
                 }
             });
 
@@ -125,6 +119,16 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     likePost();
                 }
             });
+        }
+
+        private void goToMoreDetails() {
+            int position = getAdapterPosition();
+            Post post = mPosts.get(position);
+
+            Intent intent = new Intent(mContext, PostDetails.class);
+            intent.putExtra("post", Parcels.wrap(post));
+            intent.putExtra("flag", MainActivity.TAG);
+            mContext.startActivity(intent);
         }
 
         /**

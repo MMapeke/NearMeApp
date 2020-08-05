@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="8dp">
+    android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/profile_post_preview"
@@ -18,17 +17,22 @@
         android:id="@+id/profile_post_imageTimeAgo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="8dp"
         android:layout_alignParentBottom="true"
-        android:layout_toLeftOf="@+id/profile_trash"
-        android:text="TIME AGO POSTED/CREATED"
+        android:text="9 days ago"
+        android:textColor="#FFC107"
+        android:textAlignment="textEnd"
         android:textSize="24sp" />
 
-    <ImageView
-        android:id="@+id/profile_trash"
+    <TextView
+        android:id="@+id/profile_post_likes"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/profile_post_preview"
-        android:layout_alignParentRight="true"
-        android:background="#000000"
-        app:srcCompat="@drawable/ic_outline_delete_forever_24" />
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:layout_marginLeft="8dp"
+        android:text="3 Likes"
+        android:textSize="24sp" />
+
 </RelativeLayout>

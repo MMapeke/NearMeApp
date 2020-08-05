@@ -13,37 +13,120 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:text="Username"
+        android:textAlignment="center"
         android:textAppearance="@style/TextAppearance.AppCompat.Large"
-        android:layout_toRightOf="@+id/profile_pic"
+        android:textSize="40sp"
         android:textStyle="bold" />
+
+    <View
+        android:id="@+id/profile_view"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
+        android:layout_below="@id/profile_username"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="2dp"
+        android:background="#EDEDED" />
 
     <ImageView
         android:id="@+id/profile_pic"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_alignParentTop="true"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:layout_below="@+id/profile_view"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:scaleType="centerCrop"
         android:src="@drawable/default_pic" />
 
-    <Button
-        android:id="@+id/profile_btnEditProfilePic"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+    <View
+        android:id="@+id/profile_view2"
+        android:layout_width="fill_parent"
+        android:layout_height="2dp"
         android:layout_below="@id/profile_pic"
-        android:text="Change Profile Pic" />
+        android:layout_marginTop="10dp"
+        android:background="#EDEDED" />
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.gaurav.cdsrecyclerview.CdsRecyclerView
         android:id="@+id/profile_rvPosts"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/profile_btnEditProfilePic"
+        android:layout_below="@id/profile_view2"
         android:layout_alignParentBottom="true" />
 
     <TextView
-        android:id="@+id/profile_following"
+        android:id="@+id/profile_num_posts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/profile_username"
+        android:layout_alignTop="@id/profile_pic"
+        android:layout_alignParentEnd="true"
+        android:layout_marginTop="6dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:layout_toRightOf="@id/profile_pic"
-        android:text="Following XX People" />
+        android:text="10"
+        android:textSize="18sp"
+        android:textAlignment="center" />
+
+    <TextView
+        android:id="@+id/profile_num_posts_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profile_num_posts"
+        android:layout_alignLeft="@id/profile_num_posts"
+        android:layout_alignRight="@id/profile_num_posts"
+        android:text="Posts Created"
+        android:layout_marginTop="-4dp"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp" />
+
+    <TextView
+        android:id="@+id/profile_created"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/profile_num_posts_text"
+        android:layout_alignLeft="@+id/profile_created_text"
+        android:layout_alignRight="@id/profile_created_text"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="-1dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="1dp"
+        android:layout_marginBottom="-4dp"
+        android:layout_toRightOf="@id/profile_pic"
+        android:text="6 Days Ago"
+        android:textAlignment="center"
+        android:textSize="18sp" />
+
+    <TextView
+        android:id="@+id/profile_created_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_toRightOf="@id/profile_pic"
+        android:layout_below="@id/profile_created"
+        android:text="Profile Created"
+        android:textAlignment="center"
+        android:textColor="#000000"
+        android:textSize="20sp" />
+
+    <Button
+        android:id="@+id/profile_editProfile"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/profile_pic"
+        android:layout_below="@id/profile_created_text"
+        android:layout_marginTop="6dp"
+        android:layout_alignLeft="@id/profile_created_text"
+        android:layout_alignRight="@id/profile_created_text"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        style="@style/Widget.MaterialComponents.Button.UnelevatedButton"
+        android:layout_alignBottom="@id/profile_pic"
+        android:text="Edit Profile" />
+
+
 </RelativeLayout>
