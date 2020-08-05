@@ -160,7 +160,7 @@ public class GetLocation extends AppCompatActivity {
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(alertDialogView);
-        builder.setTitle("Test");
+        builder.setTitle("Enter Location Manually");
         builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

@@ -21,8 +21,6 @@ import com.example.nearme.MainActivity;
 import com.example.nearme.OtherProfile;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
-import com.google.android.material.snackbar.Snackbar;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
@@ -153,6 +151,9 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 intent.putExtra("user", Parcels.wrap(parseUser));
                 mContext.startActivity(intent);
             }else{
+                //Notify Main Activity to control back button to allow going back to text fragment
+                //like when other profile clicked
+                ((MainActivity) mContext).setmBackButtonGoesToLastFragment(true);
                 //If clicked on own profile
                 ((MainActivity) mContext).setSelectedBottomNav(R.id.action_profile);
             }

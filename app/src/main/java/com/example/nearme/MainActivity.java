@@ -5,11 +5,9 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -24,7 +22,6 @@ import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
-//TODO: profile fragment keep backstack when text->profile
 //TODO: userid instead of parseusercopy for likes
 //TODO: Improve REadMe + better description of all features
 //TODO: Empty Messages in relevant spots
@@ -55,6 +52,10 @@ public class MainActivity extends AppCompatActivity {
 
     private FilterChanged mCurrentFragmentWithFilter;
 
+    private Boolean mBackButtonGoesToLastFragment = false;
+    private Fragment mCurrentFragment;
+    private Fragment mLastFragment;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.i(TAG,"new main activity");
@@ -80,19 +81,23 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.action_text:
                         displayFragment(mTextFragment);
                         mCurrentFragmentWithFilter = mTextFragment;
+                        mCurrentFragment = mTextFragment;
                         break;
                     case R.id.action_map:
                         displayFragment(mMapFragment);
                         mCurrentFragmentWithFilter = mMapFragment;
+                        mCurrentFragment = mMapFragment;
                         break;
                     case R.id.action_profile:
                         displayFragment(mProfileFragment);
                         mCurrentFragmentWithFilter = null;
+                        mCurrentFragment = mProfileFragment;
                         break;
                     case R.id.action_post:
                     default:
                         displayFragment(mComposeFragment);
                         mCurrentFragmentWithFilter = null;
+                        mCurrentFragment = mComposeFragment;
                         break;
                 }
                 return true;
@@ -100,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //setting default bottom nav view
-        mBottomNavView.setSelectedItemId(R.id.action_profile);
+        mBottomNavView.setSelectedItemId(R.id.action_text);
     }
 
     public void setSelectedBottomNav(int inp){
@@ -118,9 +123,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.i(TAG,"RESUMED");
+        //representing bottom nav option to navigate to
         int navigateTo = getIntent().getIntExtra("nav",0);
 
         if(navigateTo != 0){
+            //Notify Main Activity to control back button to allow going back to text fragment
+            //like when other profile clicked
+            mBackButtonGoesToLastFragment = true;
+
             setSelectedBottomNav(navigateTo);
             //Removes extra, so behavior doesnt continue next time resuming MainActivity
             getIntent().removeExtra("nav");
@@ -167,6 +177,9 @@ public class MainActivity extends AppCompatActivity {
      * @param inp - Fragment, fragment to show
      */
     private void displayFragment(Fragment inp) {
+        if(inp != mProfileFragment) mBackButtonGoesToLastFragment = false;
+        mLastFragment = mCurrentFragment;
+
         FragmentTransaction fragmentTransaction = sFragmentManager.beginTransaction();
         fragmentTransaction.show(inp);
 
@@ -178,6 +191,36 @@ public class MainActivity extends AppCompatActivity {
 
         fragmentTransaction.commit();
         Log.i(TAG, "New Fragment Displayed");
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(mBackButtonGoesToLastFragment){
+            selectNavOptionForFragment(mLastFragment);
+            mBackButtonGoesToLastFragment = false;
+        } else{
+            super.onBackPressed();
+        }
+    }
+
+    /**
+     * selects appropriate bottom nav option for inp fragment
+     * @param inp - fragment, representing fragment to select option for
+     */
+    private void selectNavOptionForFragment(Fragment inp){
+        if (mTextFragment == inp) {
+            mBottomNavView.setSelectedItemId(R.id.action_text);
+        } else if (mMapFragment == inp) {
+            mBottomNavView.setSelectedItemId(R.id.action_map);
+        } else if (mProfileFragment == inp) {
+            mBottomNavView.setSelectedItemId(R.id.action_profile);
+        } else {
+            mBottomNavView.setSelectedItemId(R.id.action_post);
+        }
+    }
+
+    public void setmBackButtonGoesToLastFragment(Boolean mBackButtonGoesToLastFragment) {
+        this.mBackButtonGoesToLastFragment = mBackButtonGoesToLastFragment;
     }
 
     /**
@@ -217,14 +260,12 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case R.id.viewAll:
                 viewAll();
-
                 viewAll.setVisible(false);
                 defaultView.setVisible(true);
 
                 return true;
             case R.id.defaultView:
                 defaultView();
-
                 defaultView.setVisible(false);
                 viewAll.setVisible(true);
 
