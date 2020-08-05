@@ -75,4 +75,8 @@ dependencies {
     implementation 'com.google.maps.android:android-maps-utils:2.0.3'
 
     compile 'com.github.GauravChaddha1996:CDSRecyclerView:1.5'
+
+    compile('com.github.afollestad.material-dialogs:core:0.8.5.4@aar') {
+        transitive = true
+    }
 }

@@ -5,9 +5,8 @@
     android:id="@+id/loginParent"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
+    android:fitsSystemWindows="true"
     tools:context=".LoginActivity">
-
    <FrameLayout
        android:id="@+id/login_scene_root"
        android:layout_width="match_parent"

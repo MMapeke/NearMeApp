@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/get_location_rl"
 
     android:background="#FFFFFF"
     android:gravity="center_horizontal"

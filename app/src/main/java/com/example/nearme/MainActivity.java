@@ -22,14 +22,13 @@ import com.example.nearme.fragments.TextFragment;
 import com.example.nearme.models.GrabRecommendations;
 import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.parse.ParseUser;
 
+//TODO: profile fragment keep backstack when text->profile
 //TODO: userid instead of parseusercopy for likes
-//TODO: change default fragment
-//TODO: Read about array types parse/Recommendation
 //TODO: Improve REadMe + better description of all features
-
+//TODO: Empty Messages in relevant spots
+//TODO: curious about animations btwn fragments, preloading map
 
 /**
  * Main Entry for app, responsible for setting up and handling nav between everything
@@ -101,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         //setting default bottom nav view
-        mBottomNavView.setSelectedItemId(R.id.action_post);
+        mBottomNavView.setSelectedItemId(R.id.action_profile);
     }
 
     public void setSelectedBottomNav(int inp){

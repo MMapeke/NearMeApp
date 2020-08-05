@@ -99,7 +99,6 @@ public class MapFragment extends Fragment implements FilterChanged {
                         } catch (Resources.NotFoundException e) {
                             Log.e(TAG, "Can't find style. Error: ", e);
                         }
-//                        mPostsAndMarkers = new PostsAndMarkers(map);
                         loadMap(map);
                     }
                 });
@@ -177,31 +176,6 @@ public class MapFragment extends Fragment implements FilterChanged {
         });
 
         //TODO: Marker recenters on click trying to remove
-//        mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<PostMarker>() {
-//            @Override
-//            public boolean onClusterItemClick(PostMarker item) {
-////                 Check if there is an open info window
-//                if (mLastOpenedMarker != null) {
-//                    // Close the info window
-//                    mLastOpenedMarker.hideInfoWindow();
-//
-//                    // Is the marker the same marker that was already open
-//                    if (mLastOpenedMarker.equals(marker)) {
-//                        // Nullify the lastOpenned object
-//                        mLastOpenedMarker = null;
-//                        // Return so that the info window isn't openned again
-//                        return true;
-//                    }
-//                }
-//                // Open the info window for the marker
-//                marker.showInfoWindow();
-//                // Re-assign the last openned such that we can close it later
-//                mLastOpenedMarker = marker;
-//
-//                // Event was handled by our code do not launch default behaviour.
-//                return true;
-//            }
-//        });
 
         map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
             @Override
@@ -245,7 +219,6 @@ public class MapFragment extends Fragment implements FilterChanged {
                     public void done(List<Post> objects, ParseException e) {
                         if (e == null) {
 
-                            //TODO: view all implementation
                             if (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
                                 zoomMapOutForMarkers(objects);
 
@@ -301,7 +274,7 @@ public class MapFragment extends Fragment implements FilterChanged {
         LatLngBounds allBounds = builder.build();
 
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64),1000,null);
         Log.i(TAG, "Zoom out to view all markers");
     }
 

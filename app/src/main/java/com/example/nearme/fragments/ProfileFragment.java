@@ -30,6 +30,7 @@ import com.example.nearme.models.Post;
 import com.example.nearme.models.ProfileAdapter;
 import com.gaurav.cdsrecyclerview.CdsItemTouchCallback;
 import com.gaurav.cdsrecyclerview.CdsRecyclerView;
+import com.google.android.material.snackbar.Snackbar;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseFile;
@@ -46,7 +47,6 @@ import java.util.Date;
 import java.util.List;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
-
 
 /**
  * Fragment responsible for viewing current user profile
@@ -153,6 +153,7 @@ public class ProfileFragment extends Fragment {
                     .circleCrop()
                     .into(mProfilePic);
         }
+        Log.i(TAG,"pfp loaded/updated");
     }
 
 
@@ -200,10 +201,11 @@ public class ProfileFragment extends Fragment {
                 public void done(ParseException e) {
                     if (e != null) {
                         Log.e(TAG, "uploaded pc no work", e);
+                    }else{
+                        Log.i(TAG, "pic worked");
                         loadProfilePic();
+                        Snackbar.make(getView(),"Profile Picture Changed",Snackbar.LENGTH_SHORT).show();
                     }
-                    Log.i(TAG, "pic worked");
-                    Toast.makeText(getContext(), "Profile Picture Changed", Toast.LENGTH_SHORT).show();
                 }
             });
 

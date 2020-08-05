@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -84,6 +85,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         private TextView mDescription;
         private TextView mTimeStamp;
         private ImageView mThumbsUp;
+        private RelativeLayout mRelativeLayout;
 
         private Post mPost;
         private ArrayList<ParseUser> mLikedBy;
@@ -96,15 +98,21 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             mDescription = itemView.findViewById(R.id.post_desc);
             mTimeStamp = itemView.findViewById(R.id.post_timestamp);
             mThumbsUp = itemView.findViewById(R.id.post_btnLike);
+            mRelativeLayout = itemView.findViewById(R.id.post_rl);
             mLikedBy = new ArrayList<>();
 
 
-            mPreview.setOnClickListener(new View.OnClickListener() {
+            View.OnClickListener moreDetails = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     goToMoreDetails();
                 }
-            });
+            };
+
+            mPreview.setOnClickListener(moreDetails);
+            mDescription.setOnClickListener(moreDetails);
+            mRelativeLayout.setOnClickListener(moreDetails);
+            mTimeStamp.setOnClickListener(moreDetails);
 
             mUsername.setOnClickListener(new View.OnClickListener() {
                 @Override
