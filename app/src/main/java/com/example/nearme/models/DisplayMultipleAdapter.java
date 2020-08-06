@@ -133,7 +133,6 @@ public class DisplayMultipleAdapter extends PagerAdapter {
         Log.i(TAG,"pfp loaded/updated");
 
         //SET CLICK LISTENERS
-        //TODO: if going from multiple to own profile, need like a copy or something
         View.OnClickListener goToProfile = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -159,10 +158,23 @@ public class DisplayMultipleAdapter extends PagerAdapter {
         username.setOnClickListener(goToProfile);
         profilePic.setOnClickListener(goToProfile);
 
+        //SETTING LIKE FUNCTIONALITY
+        final LikeManager likeManager = new LikeManager(
+                ParseUser.getCurrentUser(),
+                post,
+                likeBtn,
+                likeCount);
 
-        //TODO: liking, unliking
+        likeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                likeManager.likePost();
+            }
+        });
+
         //TODO: message to differentiate btwn recommendations && cluster
         //TODO: Lowkey supposed to be based off position not 0?
+        //TODO: viewing profiles
         container.addView(view, 0);
         return view;
     }

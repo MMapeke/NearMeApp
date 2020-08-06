@@ -118,13 +118,6 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     goToUserProfile();
                 }
             });
-
-            mThumbsUp.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    likePost();
-                }
-            });
         }
 
         private void goToMoreDetails() {
@@ -163,11 +156,18 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             mPost = post;
             ParseUser parseUser = post.getUser();
 
-            if(post.getLikes() != null){
-                mLikedBy = post.getLikes();
-            }
+            final LikeManager likeManager = new LikeManager(
+                    ParseUser.getCurrentUser(),
+                    mPost,
+                    mThumbsUp
+            );
 
-            checkIfPostLiked();
+           mThumbsUp.setOnClickListener(new View.OnClickListener() {
+               @Override
+               public void onClick(View view) {
+                    likeManager.likePost();
+               }
+           });
 
             mUsername.setText(parseUser.getUsername().toUpperCase());
             mDescription.setText(post.getDescription());

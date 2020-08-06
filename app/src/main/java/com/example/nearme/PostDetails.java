@@ -18,7 +18,9 @@ import androidx.palette.graphics.Palette;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.nearme.models.LikeManager;
 import com.example.nearme.models.Post;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -72,14 +74,6 @@ public class PostDetails extends AppCompatActivity {
         mPost = Parcels.unwrap(intent.getParcelableExtra("post"));
         checkFlag = intent.getStringExtra("flag");
 
-        mLikedBy = new ArrayList<>();
-        if(mPost.getLikes() != null){
-            mLikedBy = mPost.getLikes();
-        }
-
-        checkIfPostLiked();
-        updateNumLikes();
-
         if (mPost != null) {
             //Setting username
             mUsername.setText(mPost.getUser().getUsername().toUpperCase());
@@ -90,7 +84,6 @@ public class PostDetails extends AppCompatActivity {
 
             //Setting description
             mDescription.setText(mPost.getDescription());
-
 
             // Define an asynchronous listener for image loading
             CustomTarget<Bitmap> target = new CustomTarget<Bitmap>() {
@@ -140,10 +133,17 @@ public class PostDetails extends AppCompatActivity {
         mUsername.setOnClickListener(gotoProfile);
         mProfilePic.setOnClickListener(gotoProfile);
 
+        final LikeManager likeManager = new LikeManager(
+                ParseUser.getCurrentUser(),
+                mPost,
+                mLikeBtn,
+                mLikeCount
+        );
+
         mLikeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                likePost();
+                likeManager.likePost();
             }
         });
     }
@@ -185,10 +185,7 @@ public class PostDetails extends AppCompatActivity {
             intent.putExtra("user", Parcels.wrap(parseUser));
             startActivity(intent);
 
-//            if (checkFlag.equals(MainActivity.TAG)) {
-                //improving activity flow for user
                 finish();
-//            }
         } else {
             //If Clicked on Own Profile/Username
             if(checkFlag.equals(MainActivity.TAG)){
@@ -202,99 +199,5 @@ public class PostDetails extends AppCompatActivity {
                 finish();
             }
         }
-    }
-
-    /**
-     * Likes/Unlikes post user clicked on
-     */
-    private void likePost() {
-        ParseUser currUser = ParseUser.getCurrentUser();
-        final String currUserID = currUser.getObjectId();
-
-        if(!hasUserLikedPost()){
-            mLikedBy.add(currUserID);
-            mPost.put(Post.KEY_LIKED,mLikedBy);
-            mPost.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if(e == null){
-                        checkIfPostLiked();
-                        updateNumLikes();
-                        Log.i(TAG,"User liked post");
-                    }else{
-                        mLikedBy.remove(currUserID);
-                        Log.e(TAG,"was not able to like post",e);
-                    }
-                }
-            });
-        }else{
-            removeCurrUserFromLikes();
-            mPost.put(Post.KEY_LIKED,mLikedBy);
-            mPost.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if(e == null){
-                        checkIfPostLiked();
-                        updateNumLikes();
-                        Log.i(TAG,"User unliked post");
-                    }else{
-                        Log.e(TAG,"was not able to unlike post",e);
-                    }
-                }
-            });
-        }
-    }
-
-    /**
-     * Controls thumbs up image based on if liked or not
-     */
-    private void checkIfPostLiked(){
-        if(hasUserLikedPost()){
-            mLikeBtn.setImageResource(R.drawable.ic_baseline_thumb_up_filled_24);
-        }else{
-            mLikeBtn.setImageResource(R.drawable.ic_outline_thumb_up_24);
-        }
-    }
-
-
-    /**
-     * checks if user has liked post
-     * @return - boolean, representing if user has liked post
-     */
-    private Boolean hasUserLikedPost(){
-        ParseUser currUser = ParseUser.getCurrentUser();
-        String currUserID = currUser.getObjectId();
-        for(String i: mLikedBy){
-            if(currUserID.equals(i)){
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * removes curr user from likes
-     */
-    private void removeCurrUserFromLikes(){
-        ParseUser currUser = ParseUser.getCurrentUser();
-        String currUserID = currUser.getObjectId();
-
-        String toRemove = null;
-        for(String i: mLikedBy){
-            if(currUserID.equals(i)){
-                toRemove = i;
-            }
-        }
-
-        if(mLikedBy == null){
-            Log.e(TAG, "shoudlnt be null if removing like");
-        }else{
-            mLikedBy.remove(toRemove);
-            Log.i(TAG,"removed user from likes");
-        }
-    }
-
-    private void updateNumLikes(){
-        mLikeCount.setText(String.valueOf(mLikedBy.size()));
     }
 }
