@@ -172,9 +172,6 @@ public class PostDetails extends AppCompatActivity {
      */
     private void goToUserProfile() {
         ParseUser parseUser = mPost.getUser();
-
-        if (!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
-            //If Profile Clicked on Is Not Own
             Intent intent = new Intent(this, OtherProfile.class);
 
             if (checkFlag.equals(OtherProfile.TAG)) {
@@ -185,19 +182,7 @@ public class PostDetails extends AppCompatActivity {
             intent.putExtra("user", Parcels.wrap(parseUser));
             startActivity(intent);
 
-                finish();
-        } else {
-            //If Clicked on Own Profile/Username
-            if(checkFlag.equals(MainActivity.TAG)){
-                Log.i(TAG,"Clicked on own profile");
-                //Nav back to mainactivity
-                Intent intent = new Intent(this,MainActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                intent.putExtra("nav",R.id.action_profile);
+            finish();
 
-                startActivity(intent);
-                finish();
-            }
-        }
     }
 }

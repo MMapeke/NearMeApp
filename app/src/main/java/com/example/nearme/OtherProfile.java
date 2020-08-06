@@ -3,6 +3,7 @@ package com.example.nearme;
 import android.os.Bundle;
 import android.text.format.DateUtils;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -44,6 +45,8 @@ public class OtherProfile extends AppCompatActivity {
     private CdsRecyclerView mRvPosts;
     private ProfileAdapter mProfileAdapter;
 
+    private Button mProfileButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,6 +54,17 @@ public class OtherProfile extends AppCompatActivity {
 
         //Grab User from Intent
         this.mParseUser = Parcels.unwrap(getIntent().getParcelableExtra("user"));
+
+        boolean viewingOwnProfile = false;
+        if(mParseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+            viewingOwnProfile = true;
+        }
+        mProfileButton = findViewById(R.id.other_profile_follow);
+        if(viewingOwnProfile){
+            mProfileButton.setText("Edit Profile");
+        } else{
+            //Follow Functionality would go here
+        }
 
         mProfilePic = findViewById(R.id.other_profile_pic);
         mUsername = findViewById(R.id.other_profile_username);

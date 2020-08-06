@@ -137,21 +137,10 @@ public class DisplayMultipleAdapter extends PagerAdapter {
             @Override
             public void onClick(View view) {
                 ParseUser parseUser = post.getUser();
-
-                if (!parseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
                     //If Profile Clicked on Is Not Own
                     Intent intent = new Intent(context, OtherProfile.class);
                     intent.putExtra("user", Parcels.wrap(parseUser));
                     context.startActivity(intent);
-                } else {
-                    //If Clicked on Own Profile/Username
-                        Log.i(TAG,"Clicked on own profile");
-                        //Nav back to mainactivity
-                        Intent intent = new Intent(context,MainActivity.class);
-                        intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                        intent.putExtra("nav",R.id.action_profile);
-                        context.startActivity(intent);
-                }
             }
         };
 
@@ -172,9 +161,6 @@ public class DisplayMultipleAdapter extends PagerAdapter {
             }
         });
 
-        //TODO: message to differentiate btwn recommendations && cluster
-        //TODO: Lowkey supposed to be based off position not 0?
-        //TODO: viewing profiles
         container.addView(view, 0);
         return view;
     }
