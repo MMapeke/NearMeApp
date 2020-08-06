@@ -1,5 +1,7 @@
 package com.example.nearme.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
@@ -15,16 +17,13 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.example.nearme.models.ProfileAdapter;
@@ -38,15 +37,11 @@ import com.parse.ParseQuery;
 import com.parse.ParseUser;
 import com.parse.SaveCallback;
 
-import org.w3c.dom.Text;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
-import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 
 /**
  * Fragment responsible for viewing current user profile
@@ -57,6 +52,8 @@ public class ProfileFragment extends Fragment {
     public final static int PICK_PHOTO_CODE = 1046;
 
     private ParseUser mParseUser;
+
+    private Button mBtnEditProfile;
 
     private ImageView mProfilePic;
     private TextView mUsername;
@@ -92,6 +89,8 @@ public class ProfileFragment extends Fragment {
         mNumberPosts = view.findViewById(R.id.profile_num_posts);
         mAccountCreated = view.findViewById(R.id.profile_created);
 
+        mBtnEditProfile = view.findViewById(R.id.profile_editProfile);
+
         mProfileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(), true,getView());
         mRvPosts.setAdapter(mProfileAdapter);
 
@@ -117,25 +116,56 @@ public class ProfileFragment extends Fragment {
         //Setting Profile Pic
         loadProfilePic();
 
-        mProfilePic.setOnClickListener(new View.OnClickListener() {
+        mProfilePic.setOnClickListener(mChooseNewProfilePic);
+
+        mBtnEditProfile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                 Create intent for picking a photo from the gallery
-                Intent intent = new Intent(Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-
-                // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
-                // So as long as the result is not null, it's safe to use the intent.
-                if (intent.resolveActivity(getContext().getPackageManager()) != null) {
-                    // Bring up gallery to select a photo
-                    startActivityForResult(intent, PICK_PHOTO_CODE);
-                }
+                openEditDialog();
             }
         });
 
         queryAllUserPosts();
     }
 
+    private View.OnClickListener mChooseNewProfilePic = new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            //                 Create intent for picking a photo from the gallery
+            Intent intent = new Intent(Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+
+            // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
+            // So as long as the result is not null, it's safe to use the intent.
+            if (intent.resolveActivity(getContext().getPackageManager()) != null) {
+                // Bring up gallery to select a photo
+                startActivityForResult(intent, PICK_PHOTO_CODE);
+            }
+        }
+    };
+
+    /**
+     * opens profile edit dialog
+     */
+    private void openEditDialog(){
+        LayoutInflater inflater = getActivity().getLayoutInflater();
+        View alertDialogView = inflater.inflate(R.layout.dialog_edit_profile,null);
+
+        Button editProfilePic = alertDialogView.findViewById(R.id.edit_profile_pic_button);
+        editProfilePic.setOnClickListener(mChooseNewProfilePic);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+        builder.setView(alertDialogView);
+        builder.setTitle("Profile Settings");
+        builder.setPositiveButton("Done", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                //nothing
+            }
+        });
+
+        builder.create().show();
+    }
 
     /**
      * Loads profile pic into imageView
