@@ -81,7 +81,7 @@ public class OtherProfile extends AppCompatActivity {
         mRvPosts.disableItemSwipe();
 
         //Setting Username
-        mUsername.setText(mParseUser.getUsername());
+        mUsername.setText(mParseUser.getUsername().toUpperCase());
 
         //Setting Profile Pic
         loadProfilePic();
