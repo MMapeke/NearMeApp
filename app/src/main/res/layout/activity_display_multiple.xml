@@ -7,6 +7,19 @@
     android:layout_height="match_parent"
     tools:context=".DisplayMultiplePosts">
 
+    <TextView
+        android:id="@+id/multiple_empty_msg"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:text="No Posts In This Area!"
+        android:textAlignment="center"
+        android:layout_marginTop="16dp"
+        android:textColor="#CAB0FA"
+        android:visibility="gone"
+        android:textSize="24dp"
+        android:textStyle="bold" />
+
     <me.relex.circleindicator.CircleIndicator
         android:id="@+id/multiple_indicator"
         android:layout_width="match_parent"

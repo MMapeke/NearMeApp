@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -34,6 +35,7 @@ public class TextFragment extends Fragment implements FilterChanged {
     private PostAdapter mPostAdapter;
     private RecyclerView mRecyclerView;
     private SwipeRefreshLayout mSwipeRefreshLayout;
+    private TextView mEmptyMsg;
     private EndlessRecyclerViewScrollListener mScrollListener;
 
     public TextFragment() {
@@ -57,6 +59,7 @@ public class TextFragment extends Fragment implements FilterChanged {
 
         mRecyclerView = view.findViewById(R.id.rvPosts);
         mSwipeRefreshLayout = view.findViewById(R.id.text_swipeContainer);
+        mEmptyMsg = view.findViewById(R.id.text_empty_msg);
         mPostAdapter = new PostAdapter(getContext(), new ArrayList<Post>());
 
         mRecyclerView.setAdapter(mPostAdapter);
@@ -109,7 +112,10 @@ public class TextFragment extends Fragment implements FilterChanged {
 
                             Log.i(TAG, "Posts queried: " + objects.size());
                             if (objects.isEmpty()) {
-                                Toast.makeText(getActivity(), "No Posts to Show", Toast.LENGTH_SHORT).show();
+//                                Toast.makeText(getActivity(), "No Posts to Show", Toast.LENGTH_SHORT).show();
+                                mEmptyMsg.setVisibility(View.VISIBLE);
+                            }else{
+                                mEmptyMsg.setVisibility(View.GONE);
                             }
                         } else {
                             Log.e(TAG, "error while querying posts", e);

@@ -61,7 +61,7 @@ public class OtherProfile extends AppCompatActivity {
         }
         mProfileButton = findViewById(R.id.other_profile_follow);
         if(viewingOwnProfile){
-            mProfileButton.setText("Edit Profile");
+            mProfileButton.setText("Following");
         } else{
             //Follow Functionality would go here
         }

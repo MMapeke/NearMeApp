@@ -3,6 +3,8 @@ package com.example.nearme;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,14 +27,20 @@ public class DisplayMultiplePosts extends AppCompatActivity {
 
     private List<Post> mPostsToShow;
 
-    ViewPager mViewPager;
-    DisplayMultipleAdapter mDisplayMultipleAdapter;
+    private CircleIndicator mIndicator;
+    private ViewPager mViewPager;
+    private DisplayMultipleAdapter mDisplayMultipleAdapter;
+    private TextView mEmptyMsg;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_display_multiple);
+
+        mIndicator = findViewById(R.id.multiple_indicator);
+        mEmptyMsg = findViewById(R.id.multiple_empty_msg);
+        mViewPager = findViewById(R.id.viewPager);
 
         mPostsToShow = new ArrayList<>();
         Intent intent = getIntent();
@@ -46,24 +54,24 @@ public class DisplayMultiplePosts extends AppCompatActivity {
             }
         }
 
-
-        displayPosts();
+        if(mPostsToShow.isEmpty()){
+            //No recs found/grabbed
+            mEmptyMsg.setVisibility(View.VISIBLE);
+            mIndicator.setVisibility(View.GONE);
+        }else{
+            displayPosts();
+            mEmptyMsg.setVisibility(View.GONE);
+            mIndicator.setVisibility(View.VISIBLE);
+        }
     }
 
     /**
      * handles displaying up to 3 top posts to user
      */
     private void displayPosts() {
-
-        if (mPostsToShow.isEmpty()) {
-            Toast.makeText(this, "no posts, make one?", Toast.LENGTH_SHORT);
-        } else {
             mDisplayMultipleAdapter = new DisplayMultipleAdapter(mPostsToShow, this);
-            mViewPager = findViewById(R.id.viewPager);
-            mViewPager.setAdapter(mDisplayMultipleAdapter);
 
-            CircleIndicator indicator = findViewById(R.id.multiple_indicator);
-            indicator.setViewPager(mViewPager);
-        }
+            mViewPager.setAdapter(mDisplayMultipleAdapter);
+            mIndicator.setViewPager(mViewPager);
     }
 }
