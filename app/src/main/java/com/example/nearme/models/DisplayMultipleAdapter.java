@@ -162,7 +162,6 @@ public class DisplayMultipleAdapter extends PagerAdapter {
 
         //TODO: liking, unliking
         //TODO: message to differentiate btwn recommendations && cluster
-
         //TODO: Lowkey supposed to be based off position not 0?
         container.addView(view, 0);
         return view;

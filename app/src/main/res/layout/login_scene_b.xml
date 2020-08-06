@@ -65,12 +65,11 @@
 
         <com.google.android.material.textfield.TextInputEditText
             android:layout_width="match_parent"
-            android:textSize="36dp"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:singleLine="true"
             android:nextFocusForward="@id/btnUserSubmit"
-            />
+            android:singleLine="true"
+            android:textSize="36dp" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

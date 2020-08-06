@@ -49,8 +49,8 @@ public class ComposeFragment extends Fragment {
 
     private ImageView mImage;
     private EditText mEditDesc;
-    private FloatingActionButton mBtnTakePic;
-    private FloatingActionButton mBtnChoosePic;
+    private ImageView mBtnTakePic;
+    private ImageView mBtnChoosePic;
     private Button mBtnSubmit;
     private ProgressBar mProgressBar;
     private String mPhotoFileName = "photo.jpg";
@@ -113,6 +113,23 @@ public class ComposeFragment extends Fragment {
         });
     }
 
+    /**
+     * disables photo picking buttons
+     */
+    private void disableButtons(){
+        mBtnChoosePic.setVisibility(View.GONE);
+        mBtnTakePic.setVisibility(View.GONE);
+    }
+
+    /**
+     * enables photo picking buttons
+     */
+    private void enableButtions(){
+        mBtnChoosePic.setVisibility(View.VISIBLE);
+        mBtnTakePic.setVisibility(View.VISIBLE);
+    }
+
+
     private void launchCamera() {
         // create Intent to take a picture and return control to the calling application
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -168,6 +185,7 @@ public class ComposeFragment extends Fragment {
                     Log.i(TAG, "Saving Post succesful");
                     mEditDesc.setText("");
                     mImage.setImageResource(0);
+                    enableButtions();
                     mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 } else {
                     Log.e(TAG, "error while saving", e);
@@ -186,6 +204,7 @@ public class ComposeFragment extends Fragment {
                 // RESIZE BITMAP, see section below
                 // Load the taken image into a preview
                 mImage.setImageBitmap(takenImage);
+                disableButtons();
 
                 mPhotoParseFile = new ParseFile(mPhotoFile);
             } else { // Result was a failure
@@ -197,6 +216,7 @@ public class ComposeFragment extends Fragment {
                 // Load the image located at photoUri into selectedImage
                 Bitmap selectedImage = loadFromUri(photoUri);
                 mImage.setImageBitmap(selectedImage);
+                disableButtons();
 
                 //Making bitmap into ParseFile
                 // Convert it to byte
