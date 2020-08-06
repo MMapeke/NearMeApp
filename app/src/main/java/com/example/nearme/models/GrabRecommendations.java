@@ -40,7 +40,7 @@ public class GrabRecommendations {
     private ArrayList<Post> mPostsRec;
     private Context mContext;
 
-    public GrabRecommendations(Context context){
+    public GrabRecommendations(Context context) {
         this.mContext = context;
         this.mIdToPost = new HashMap<>();
         this.mPostIdToDistance = new HashMap<>();
@@ -52,7 +52,7 @@ public class GrabRecommendations {
         this.mCenter = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
     }
 
-    public void showRecommendations(){
+    public void showRecommendations() {
         queryAllPosts();
     }
 
@@ -265,15 +265,15 @@ public class GrabRecommendations {
         }
     }
 
-    private void displayPosts(){
+    private void displayPosts() {
         //send intent and info to stories activity.
-        for(Post post: mPostsRec){
-            Log.i(TAG,"recommendatons workks., DESC: " + post.getDescription());
+        for (Post post : mPostsRec) {
+            Log.i(TAG, "recommendatons workks., DESC: " + post.getDescription());
         }
 
         Intent intent = new Intent(mContext, DisplayMultiplePosts.class);
 
-        intent.putParcelableArrayListExtra("posts",mPostsRec);
+        intent.putParcelableArrayListExtra("posts", mPostsRec);
 //        intent.putExtra("posts",mPostsRec);
 
         mContext.startActivity(intent);

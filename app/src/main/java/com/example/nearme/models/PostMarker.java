@@ -15,7 +15,7 @@ public class PostMarker implements ClusterItem {
 
     public PostMarker(double lat, double lng, Post post) {
         this.mPost = post;
-        this.mPosition = new LatLng(lat,lng);
+        this.mPosition = new LatLng(lat, lng);
     }
 
     @NonNull

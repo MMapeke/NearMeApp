@@ -143,7 +143,7 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                 Intent intent = new Intent(mContext, OtherProfile.class);
                 intent.putExtra("user", Parcels.wrap(parseUser));
                 mContext.startActivity(intent);
-            }else{
+            } else {
                 //Notify Main Activity to control back button to allow going back to text fragment
                 //like when other profile clicked
                 ((MainActivity) mContext).setmBackButtonGoesToLastFragment(true);
@@ -162,12 +162,12 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
                     mThumbsUp
             );
 
-           mThumbsUp.setOnClickListener(new View.OnClickListener() {
-               @Override
-               public void onClick(View view) {
+            mThumbsUp.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
                     likeManager.likePost();
-               }
-           });
+                }
+            });
 
             mUsername.setText(parseUser.getUsername().toUpperCase());
             mDescription.setText(post.getDescription());
@@ -192,10 +192,10 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         /**
          * Controls thumbs up image based on if liked or not
          */
-        private void checkIfPostLiked(){
-            if(hasUserLikedPost()){
+        private void checkIfPostLiked() {
+            if (hasUserLikedPost()) {
                 mThumbsUp.setImageResource(R.drawable.ic_baseline_thumb_up_filled_24);
-            }else{
+            } else {
                 mThumbsUp.setImageResource(R.drawable.ic_outline_thumb_up_24);
             }
         }
@@ -208,32 +208,32 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
             ParseUser currUser = ParseUser.getCurrentUser();
             final String currUserID = currUser.getObjectId();
 
-            if(!hasUserLikedPost()){
+            if (!hasUserLikedPost()) {
                 mLikedBy.add(currUserID);
-                mPost.put(Post.KEY_LIKED,mLikedBy);
+                mPost.put(Post.KEY_LIKED, mLikedBy);
                 mPost.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
-                        if(e == null){
+                        if (e == null) {
                             checkIfPostLiked();
-                            Log.i(TAG,"User liked post");
-                        }else{
+                            Log.i(TAG, "User liked post");
+                        } else {
                             mLikedBy.remove(currUserID);
-                            Log.e(TAG,"was not able to like post",e);
+                            Log.e(TAG, "was not able to like post", e);
                         }
                     }
                 });
-            }else{
+            } else {
                 removeCurrUserFromLikes();
-                mPost.put(Post.KEY_LIKED,mLikedBy);
+                mPost.put(Post.KEY_LIKED, mLikedBy);
                 mPost.saveInBackground(new SaveCallback() {
                     @Override
                     public void done(ParseException e) {
-                        if(e == null){
+                        if (e == null) {
                             checkIfPostLiked();
-                            Log.i(TAG,"User unliked post");
-                        }else{
-                            Log.e(TAG,"was not able to unlike post",e);
+                            Log.i(TAG, "User unliked post");
+                        } else {
+                            Log.e(TAG, "was not able to unlike post", e);
                         }
                     }
                 });
@@ -243,34 +243,35 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
         /**
          * removes curr user from likes
          */
-        private void removeCurrUserFromLikes(){
+        private void removeCurrUserFromLikes() {
             ParseUser currUser = ParseUser.getCurrentUser();
             String currUserID = currUser.getObjectId();
 
             String toRemove = null;
-            for(String i: mLikedBy){
-                if(currUserID.equals(i)){
+            for (String i : mLikedBy) {
+                if (currUserID.equals(i)) {
                     toRemove = i;
                 }
             }
 
-            if(mLikedBy == null){
+            if (mLikedBy == null) {
                 Log.e(TAG, "shoudlnt be null if removing like");
-            }else{
+            } else {
                 mLikedBy.remove(toRemove);
-                Log.i(TAG,"removed user from likes");
+                Log.i(TAG, "removed user from likes");
             }
         }
 
         /**
          * checks if user has liked post
+         *
          * @return - boolean, representing if user has liked post
          */
-        private Boolean hasUserLikedPost(){
+        private Boolean hasUserLikedPost() {
             ParseUser currUser = ParseUser.getCurrentUser();
             String currUserID = currUser.getObjectId();
-            for(String i: mLikedBy){
-                if(currUserID.equals(i)){
+            for (String i : mLikedBy) {
+                if (currUserID.equals(i)) {
                     return true;
                 }
             }

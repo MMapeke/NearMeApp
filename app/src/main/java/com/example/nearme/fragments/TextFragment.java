@@ -6,7 +6,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -112,9 +111,8 @@ public class TextFragment extends Fragment implements FilterChanged {
 
                             Log.i(TAG, "Posts queried: " + objects.size());
                             if (objects.isEmpty()) {
-//                                Toast.makeText(getActivity(), "No Posts to Show", Toast.LENGTH_SHORT).show();
                                 mEmptyMsg.setVisibility(View.VISIBLE);
-                            }else{
+                            } else {
                                 mEmptyMsg.setVisibility(View.GONE);
                             }
                         } else {

@@ -3,7 +3,6 @@ package com.example.nearme.models;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.maps.android.SphericalUtil;
-import com.parse.ParseClassName;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseQuery;
 

@@ -38,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     private Button mBtnRegister;
     private Button mBtnSubmit;
     private Boolean mCreatingNewAccount;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +80,7 @@ public class LoginActivity extends AppCompatActivity {
     private void goToInfo() {
         Transition testTransition = new Fade();
         testTransition.setDuration(650);
-        TransitionManager.go(mSceneB,testTransition);
+        TransitionManager.go(mSceneB, testTransition);
 
         mEditUser = findViewById(R.id.etUsername);
         mEditPass = findViewById(R.id.etPassword);
@@ -93,10 +94,10 @@ public class LoginActivity extends AppCompatActivity {
                 String password = String.valueOf(mEditPass.getEditText().getText());
 
                 mBtnSubmit.setClickable(false);
-                if(mCreatingNewAccount){
-                    registerUser(username,password);
-                }else{
-                    loginUser(username,password);
+                if (mCreatingNewAccount) {
+                    registerUser(username, password);
+                } else {
+                    loginUser(username, password);
                 }
             }
         });
@@ -153,8 +154,8 @@ public class LoginActivity extends AppCompatActivity {
                     mBtnSubmit.setClickable(true);
                     Log.e(TAG, "Login failed", e);
                     String errorMsg = e.getLocalizedMessage();
-                    errorMsg = errorMsg.substring(0,1).toUpperCase() + errorMsg.substring(1);
-                    Snackbar.make(mSceneRoot,errorMsg,Snackbar.LENGTH_SHORT)
+                    errorMsg = errorMsg.substring(0, 1).toUpperCase() + errorMsg.substring(1);
+                    Snackbar.make(mSceneRoot, errorMsg, Snackbar.LENGTH_SHORT)
                             .show();
                     mBtnLogin.setEnabled(true);
                     mBtnRegister.setEnabled(true);

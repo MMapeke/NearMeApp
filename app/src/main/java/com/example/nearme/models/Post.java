@@ -28,12 +28,12 @@ public class Post extends ParseObject {
         super();
     }
 
-    public ArrayList<String> getLikes(){
+    public ArrayList<String> getLikes() {
         return (ArrayList<String>) get(KEY_LIKED);
     }
 
-    public void setLikedBy(ArrayList<ParseUser> inp){
-        put(KEY_LIKED,inp);
+    public void setLikedBy(ArrayList<ParseUser> inp) {
+        put(KEY_LIKED, inp);
     }
 
     public ParseGeoPoint getLocation() {
@@ -68,7 +68,7 @@ public class Post extends ParseObject {
         put(KEY_USER, inp);
     }
 
-    public void setCreatedDate(Date inp){
-        put(KEY_CREATED_AT,inp);
+    public void setCreatedDate(Date inp) {
+        put(KEY_CREATED_AT, inp);
     }
 }

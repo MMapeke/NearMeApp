@@ -6,22 +6,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.os.Bundle;
-import android.text.InputFilter;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.FragmentManager;
 
-import com.afollestad.materialdialogs.DialogAction;
-import com.afollestad.materialdialogs.MaterialDialog;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -38,7 +33,6 @@ import com.parse.SaveCallback;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.zip.Inflater;
 
 import permissions.dispatcher.NeedsPermission;
 import permissions.dispatcher.RuntimePermissions;
@@ -141,7 +135,7 @@ public class GetLocation extends AppCompatActivity {
      * Called when location error or not found
      */
     private void locationNotFound() {
-        Snackbar.make(mRelativeLayout,"Was not able to grab location. Please try again!",Snackbar.LENGTH_SHORT)
+        Snackbar.make(mRelativeLayout, "Was not able to grab location. Please try again!", Snackbar.LENGTH_SHORT)
                 .setAction("Set Manually", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
@@ -156,7 +150,7 @@ public class GetLocation extends AppCompatActivity {
      */
     private void openManualDialog() {
         LayoutInflater inflater = this.getLayoutInflater();
-        final View alertDialogView = inflater.inflate(R.layout.fragment_manual_location,null);
+        final View alertDialogView = inflater.inflate(R.layout.fragment_manual_location, null);
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setView(alertDialogView);
@@ -177,9 +171,9 @@ public class GetLocation extends AppCompatActivity {
                 EditText latitude = alertDialogView.findViewById(R.id.manual_location_lat);
                 EditText longitude = alertDialogView.findViewById(R.id.manual_location_long);
 
-                if(latitude.getText().toString().isEmpty() || longitude.getText().toString().isEmpty()){
-                    Snackbar.make(alertDialogView,"Latitude and Longitude Can Not Be Empty!",Snackbar.LENGTH_SHORT).show();
-                }else {
+                if (latitude.getText().toString().isEmpty() || longitude.getText().toString().isEmpty()) {
+                    Snackbar.make(alertDialogView, "Latitude and Longitude Can Not Be Empty!", Snackbar.LENGTH_SHORT).show();
+                } else {
                     Double lat = Double.valueOf(String.valueOf(latitude.getText()));
                     Double lng = Double.valueOf(String.valueOf(longitude.getText()));
 
@@ -199,6 +193,7 @@ public class GetLocation extends AppCompatActivity {
 
     /**
      * returns boolean determing if coords are valid
+     *
      * @param lat - Double, representing latitude
      * @param lng - DOuble, representing longitude
      * @return - boolean telling if coordinates are valid

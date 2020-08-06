@@ -34,12 +34,9 @@ import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.clustering.algo.NonHierarchicalDistanceBasedAlgorithm;
-import com.google.maps.android.clustering.algo.PreCachingAlgorithmDecorator;
 import com.parse.FindCallback;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
-import com.parse.ParseQuery;
 
 import org.parceler.Parcels;
 
@@ -50,7 +47,6 @@ import java.util.List;
 /**
  * Fragment
  */
-//TODO: ON Idle spammed in view all
 public class MapFragment extends Fragment implements FilterChanged {
 
     public static final String TAG = "MapFragment";
@@ -59,7 +55,7 @@ public class MapFragment extends Fragment implements FilterChanged {
     private QueryManager mQueryManager;
     private GoogleMap mMap;
     private PostMarkerManager mPostMarkerManager;
-//    private PostsAndMarkers mPostsAndMarkers;
+    //    private PostsAndMarkers mPostsAndMarkers;
     private SupportMapFragment mMapFragment;
     private ClusterManager<PostMarker> mClusterManager;
     private Marker mLastOpenedMarker = null;
@@ -131,8 +127,8 @@ public class MapFragment extends Fragment implements FilterChanged {
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds, width, height, 16));
 
         // Init the manager with context and the map
-        mClusterManager = new ClusterManager<>(getContext(),mMap);
-        mClusterManager.setRenderer(new CustomRenderer<PostMarker>(getActivity(),mMap,mClusterManager));
+        mClusterManager = new ClusterManager<>(getContext(), mMap);
+        mClusterManager.setRenderer(new CustomRenderer<PostMarker>(getActivity(), mMap, mClusterManager));
         mPostMarkerManager = new PostMarkerManager(mClusterManager);
 
         mClusterManager.getRenderer().setAnimation(true);
@@ -147,15 +143,15 @@ public class MapFragment extends Fragment implements FilterChanged {
 
                 //Shows most recent posts first
                 ArrayList<Post> postsInCluster = new ArrayList<>();
-                for(PostMarker postMarker: test){
+                for (PostMarker postMarker : test) {
                     postsInCluster.add(postMarker.getmPost());
                 }
 
                 Intent intent = new Intent(getContext(), DisplayMultiplePosts.class);
-                intent.putParcelableArrayListExtra("posts",postsInCluster);
+                intent.putParcelableArrayListExtra("posts", postsInCluster);
                 startActivity(intent);
 
-                Log.i(TAG,"Cluster clicked: " + test.size() + " items");
+                Log.i(TAG, "Cluster clicked: " + test.size() + " items");
                 return true;
             }
         });
@@ -224,7 +220,7 @@ public class MapFragment extends Fragment implements FilterChanged {
 
                                 mPostMarkerManager.updateMarkers(objects);
                             }
-                            if(mQueryManager.getCurrentState() == QueryManager.Filter.DEFAULT){
+                            if (mQueryManager.getCurrentState() == QueryManager.Filter.DEFAULT) {
                                 mPostMarkerManager.updateMarkers(objects);
                             }
 
@@ -265,7 +261,7 @@ public class MapFragment extends Fragment implements FilterChanged {
 
         for (Post post : objects) {
             ParseGeoPoint parseGeoPoint = post.getLocation();
-            LatLng latLng = new LatLng(parseGeoPoint.getLatitude(),parseGeoPoint.getLongitude());
+            LatLng latLng = new LatLng(parseGeoPoint.getLatitude(), parseGeoPoint.getLongitude());
 
             //Adding to Bounds for zoom out
             builder.include(latLng);
@@ -274,7 +270,7 @@ public class MapFragment extends Fragment implements FilterChanged {
         LatLngBounds allBounds = builder.build();
 
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64),1000,null);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64), 1000, null);
         Log.i(TAG, "Zoom out to view all markers");
     }
 

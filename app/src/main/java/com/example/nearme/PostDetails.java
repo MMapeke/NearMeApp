@@ -20,18 +20,14 @@ import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.nearme.models.LikeManager;
 import com.example.nearme.models.Post;
-import com.parse.Parse;
-import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Date;
 
-//TODO: add likes
 
 /**
  * Class/Activity responsible for showing more details about posts
@@ -97,7 +93,7 @@ public class PostDetails extends AppCompatActivity {
                     palette.generate(new Palette.PaletteAsyncListener() {
                         @Override
                         public void onGenerated(@Nullable Palette palette) {
-                            Log.i(TAG,"Palette generated");
+                            Log.i(TAG, "Palette generated");
                             //Setting color for bottom
                             mViewPalette.setBackgroundColor(palette.getDarkMutedColor(000000));
 
@@ -123,7 +119,7 @@ public class PostDetails extends AppCompatActivity {
             finish();
         }
 
-        View.OnClickListener gotoProfile =  new View.OnClickListener() {
+        View.OnClickListener gotoProfile = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 goToUserProfile();
@@ -164,7 +160,7 @@ public class PostDetails extends AppCompatActivity {
                     .circleCrop()
                     .into(mProfilePic);
         }
-        Log.i(TAG,"pfp loaded/updated");
+        Log.i(TAG, "pfp loaded/updated");
     }
 
     /**
@@ -172,17 +168,17 @@ public class PostDetails extends AppCompatActivity {
      */
     private void goToUserProfile() {
         ParseUser parseUser = mPost.getUser();
-            Intent intent = new Intent(this, OtherProfile.class);
+        Intent intent = new Intent(this, OtherProfile.class);
 
-            if (checkFlag.equals(OtherProfile.TAG)) {
-                //preventing stacking of profile and post detail activiies
-                intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-            }
+        if (checkFlag.equals(OtherProfile.TAG)) {
+            //preventing stacking of profile and post detail activiies
+            intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+        }
 
-            intent.putExtra("user", Parcels.wrap(parseUser));
-            startActivity(intent);
+        intent.putExtra("user", Parcels.wrap(parseUser));
+        startActivity(intent);
 
-            finish();
+        finish();
 
     }
 }

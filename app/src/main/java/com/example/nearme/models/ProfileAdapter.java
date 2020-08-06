@@ -18,13 +18,10 @@ import com.example.nearme.MainActivity;
 import com.example.nearme.OtherProfile;
 import com.example.nearme.PostDetails;
 import com.example.nearme.R;
-import com.gaurav.cdsrecyclerview.CdsRecyclerView;
 import com.gaurav.cdsrecyclerview.CdsRecyclerViewAdapter;
 import com.google.android.material.snackbar.Snackbar;
 import com.parse.DeleteCallback;
 import com.parse.ParseException;
-import com.parse.ParseUser;
-import com.parse.SaveCallback;
 
 import org.parceler.Parcels;
 
@@ -37,7 +34,7 @@ import java.util.TimerTask;
 /**
  * Adapter responsible for controlling and displaying posts in Any User Profile
  */
-public class ProfileAdapter extends CdsRecyclerViewAdapter<Post,ProfileAdapter.ViewHolder> {
+public class ProfileAdapter extends CdsRecyclerViewAdapter<Post, ProfileAdapter.ViewHolder> {
 
     public static final String TAG = "ProfileAdapter";
 
@@ -49,14 +46,14 @@ public class ProfileAdapter extends CdsRecyclerViewAdapter<Post,ProfileAdapter.V
     private View view;
 
     public ProfileAdapter(Context context, List<Post> posts, boolean viewingOwnProfile) {
-        super(context,posts);
+        super(context, posts);
         this.mPosts = posts;
         this.mContext = context;
         this.mViewingOwnProfile = viewingOwnProfile;
     }
 
     public ProfileAdapter(Context context, List<Post> posts, boolean viewingOwnProfile, View view) {
-        super(context,posts);
+        super(context, posts);
         this.mPosts = posts;
         this.mContext = context;
         this.view = view;
@@ -96,23 +93,23 @@ public class ProfileAdapter extends CdsRecyclerViewAdapter<Post,ProfileAdapter.V
                 post.deleteInBackground(new DeleteCallback() {
                     @Override
                     public void done(ParseException e) {
-                        if(e == null){
-                            Log.i(TAG,"post deleted successfully");
-                        }else{
-                            Log.e(TAG,"post not deleted correctly",e);
+                        if (e == null) {
+                            Log.i(TAG, "post deleted successfully");
+                        } else {
+                            Log.e(TAG, "post not deleted correctly", e);
                         }
                     }
                 });
             }
         };
 
-        timer.schedule(task,3500L);
-        Snackbar.make(view,"Post Deleted",Snackbar.LENGTH_SHORT)
+        timer.schedule(task, 3500L);
+        Snackbar.make(view, "Post Deleted", Snackbar.LENGTH_SHORT)
                 .setAction("Undo", new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
                         timer.cancel();
-                        mPosts.add(position,post);
+                        mPosts.add(position, post);
                         notifyDataSetChanged();
                     }
                 })
@@ -146,9 +143,9 @@ public class ProfileAdapter extends CdsRecyclerViewAdapter<Post,ProfileAdapter.V
                     Intent intent = new Intent(mContext, PostDetails.class);
                     intent.putExtra("post", Parcels.wrap(post));
 
-                    if(!mViewingOwnProfile){
+                    if (!mViewingOwnProfile) {
                         intent.putExtra("flag", OtherProfile.TAG);
-                    }else{
+                    } else {
                         intent.putExtra("flag", MainActivity.TAG);
                     }
 
@@ -169,11 +166,11 @@ public class ProfileAdapter extends CdsRecyclerViewAdapter<Post,ProfileAdapter.V
 
             //Setting number of likes
             ArrayList<String> postLikedBy = new ArrayList<>();
-            if(post.getLikes() != null){
+            if (post.getLikes() != null) {
                 postLikedBy = post.getLikes();
             }
 
-            String numLikes = "\u25BA" + "Liked By " +  String.valueOf(postLikedBy.size());
+            String numLikes = "\u25BA" + "Liked By " + String.valueOf(postLikedBy.size());
             mNumLikes.setText(numLikes);
         }
 

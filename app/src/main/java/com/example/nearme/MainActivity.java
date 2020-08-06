@@ -22,8 +22,6 @@ import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.parse.ParseUser;
 
-//TODO: curious about animations btwn fragments, preloading map
-
 /**
  * Main Entry for app, responsible for setting up and handling nav between everything
  */
@@ -55,7 +53,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG,"new main activity");
+        Log.i(TAG, "new main activity");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -105,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         mBottomNavView.setSelectedItemId(R.id.action_text);
     }
 
-    public void setSelectedBottomNav(int inp){
+    public void setSelectedBottomNav(int inp) {
         mBottomNavView.setSelectedItemId(inp);
     }
 
@@ -119,11 +117,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i(TAG,"RESUMED");
+        Log.i(TAG, "RESUMED");
         //representing bottom nav option to navigate to
-        int navigateTo = getIntent().getIntExtra("nav",0);
+        int navigateTo = getIntent().getIntExtra("nav", 0);
 
-        if(navigateTo != 0){
+        if (navigateTo != 0) {
             //Notify Main Activity to control back button to allow going back to text fragment
             //like when other profile clicked
             mBackButtonGoesToLastFragment = true;
@@ -174,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
      * @param inp - Fragment, fragment to show
      */
     private void displayFragment(Fragment inp) {
-        if(inp != mProfileFragment) mBackButtonGoesToLastFragment = false;
+        if (inp != mProfileFragment) mBackButtonGoesToLastFragment = false;
         mLastFragment = mCurrentFragment;
 
         FragmentTransaction fragmentTransaction = sFragmentManager.beginTransaction();
@@ -192,19 +190,20 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if(mBackButtonGoesToLastFragment){
+        if (mBackButtonGoesToLastFragment) {
             selectNavOptionForFragment(mLastFragment);
             mBackButtonGoesToLastFragment = false;
-        } else{
+        } else {
             super.onBackPressed();
         }
     }
 
     /**
      * selects appropriate bottom nav option for inp fragment
+     *
      * @param inp - fragment, representing fragment to select option for
      */
-    private void selectNavOptionForFragment(Fragment inp){
+    private void selectNavOptionForFragment(Fragment inp) {
         if (mTextFragment == inp) {
             mBottomNavView.setSelectedItemId(R.id.action_text);
         } else if (mMapFragment == inp) {

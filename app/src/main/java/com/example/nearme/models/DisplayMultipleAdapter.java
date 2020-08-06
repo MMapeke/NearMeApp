@@ -20,7 +20,6 @@ import androidx.viewpager.widget.PagerAdapter;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.nearme.MainActivity;
 import com.example.nearme.OtherProfile;
 import com.example.nearme.R;
 import com.parse.ParseFile;
@@ -98,7 +97,7 @@ public class DisplayMultipleAdapter extends PagerAdapter {
                 palette.generate(new Palette.PaletteAsyncListener() {
                     @Override
                     public void onGenerated(@Nullable Palette palette) {
-                        Log.i(TAG,"Palette generated");
+                        Log.i(TAG, "Palette generated");
                         //Setting color for bottom
                         viewPalette.setBackgroundColor(palette.getDarkMutedColor(000000));
                     }
@@ -130,17 +129,17 @@ public class DisplayMultipleAdapter extends PagerAdapter {
                     .circleCrop()
                     .into(profilePic);
         }
-        Log.i(TAG,"pfp loaded/updated");
+        Log.i(TAG, "pfp loaded/updated");
 
         //SET CLICK LISTENERS
         View.OnClickListener goToProfile = new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 ParseUser parseUser = post.getUser();
-                    //If Profile Clicked on Is Not Own
-                    Intent intent = new Intent(context, OtherProfile.class);
-                    intent.putExtra("user", Parcels.wrap(parseUser));
-                    context.startActivity(intent);
+                //If Profile Clicked on Is Not Own
+                Intent intent = new Intent(context, OtherProfile.class);
+                intent.putExtra("user", Parcels.wrap(parseUser));
+                context.startActivity(intent);
             }
         };
 

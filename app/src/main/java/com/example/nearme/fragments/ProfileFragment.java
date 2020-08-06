@@ -91,7 +91,7 @@ public class ProfileFragment extends Fragment {
 
         mBtnEditProfile = view.findViewById(R.id.profile_editProfile);
 
-        mProfileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(), true,getView());
+        mProfileAdapter = new ProfileAdapter(getContext(), new ArrayList<Post>(), true, getView());
         mRvPosts.setAdapter(mProfileAdapter);
 
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
@@ -102,7 +102,7 @@ public class ProfileFragment extends Fragment {
             @Override
             public void onItemSwipeComplete(int i) {
                 //auto calls remove method in adapter
-                Log.i(TAG,"swipe complete");
+                Log.i(TAG, "swipe complete");
             }
         });
 
@@ -111,7 +111,7 @@ public class ProfileFragment extends Fragment {
         mAccountCreated.setText((String) DateUtils.getRelativeTimeSpanString(date.getTime()));
 
         //Setting Username
-        mUsername.setText( mParseUser.getUsername().toUpperCase());
+        mUsername.setText(mParseUser.getUsername().toUpperCase());
 
         //Setting Profile Pic
         loadProfilePic();
@@ -147,9 +147,9 @@ public class ProfileFragment extends Fragment {
     /**
      * opens profile edit dialog
      */
-    private void openEditDialog(){
+    private void openEditDialog() {
         LayoutInflater inflater = getActivity().getLayoutInflater();
-        View alertDialogView = inflater.inflate(R.layout.dialog_edit_profile,null);
+        View alertDialogView = inflater.inflate(R.layout.dialog_edit_profile, null);
 
         Button editProfilePic = alertDialogView.findViewById(R.id.edit_profile_pic_button);
         editProfilePic.setOnClickListener(mChooseNewProfilePic);
@@ -184,7 +184,7 @@ public class ProfileFragment extends Fragment {
                     .circleCrop()
                     .into(mProfilePic);
         }
-        Log.i(TAG,"pfp loaded/updated");
+        Log.i(TAG, "pfp loaded/updated");
     }
 
 
@@ -232,10 +232,10 @@ public class ProfileFragment extends Fragment {
                 public void done(ParseException e) {
                     if (e != null) {
                         Log.e(TAG, "uploaded pc no work", e);
-                    }else{
+                    } else {
                         Log.i(TAG, "pic worked");
                         loadProfilePic();
-                        Snackbar.make(getView(),"Profile Picture Changed",Snackbar.LENGTH_SHORT).show();
+                        Snackbar.make(getView(), "Profile Picture Changed", Snackbar.LENGTH_SHORT).show();
                     }
                 }
             });

@@ -9,7 +9,6 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.nearme.models.Post;
@@ -56,13 +55,13 @@ public class OtherProfile extends AppCompatActivity {
         this.mParseUser = Parcels.unwrap(getIntent().getParcelableExtra("user"));
 
         boolean viewingOwnProfile = false;
-        if(mParseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())){
+        if (mParseUser.getObjectId().equals(ParseUser.getCurrentUser().getObjectId())) {
             viewingOwnProfile = true;
         }
         mProfileButton = findViewById(R.id.other_profile_follow);
-        if(viewingOwnProfile){
+        if (viewingOwnProfile) {
             mProfileButton.setText("Following");
-        } else{
+        } else {
             //Follow Functionality would go here
         }
 

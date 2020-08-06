@@ -5,13 +5,12 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
-import com.example.nearme.models.Post;
 import com.example.nearme.models.DisplayMultipleAdapter;
+import com.example.nearme.models.Post;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,19 +45,19 @@ public class DisplayMultiplePosts extends AppCompatActivity {
         Intent intent = getIntent();
 
         ArrayList<Post> parcelizedPosts = intent.getParcelableArrayListExtra("posts");
-        if(parcelizedPosts == null){
-            Log.e(TAG,"MUST PASS posts or not getting found");
-        }else{
-            for(Post post: parcelizedPosts){
+        if (parcelizedPosts == null) {
+            Log.e(TAG, "MUST PASS posts or not getting found");
+        } else {
+            for (Post post : parcelizedPosts) {
                 mPostsToShow.add(post);
             }
         }
 
-        if(mPostsToShow.isEmpty()){
+        if (mPostsToShow.isEmpty()) {
             //No recs found/grabbed
             mEmptyMsg.setVisibility(View.VISIBLE);
             mIndicator.setVisibility(View.GONE);
-        }else{
+        } else {
             displayPosts();
             mEmptyMsg.setVisibility(View.GONE);
             mIndicator.setVisibility(View.VISIBLE);
@@ -69,9 +68,9 @@ public class DisplayMultiplePosts extends AppCompatActivity {
      * handles displaying up to 3 top posts to user
      */
     private void displayPosts() {
-            mDisplayMultipleAdapter = new DisplayMultipleAdapter(mPostsToShow, this);
+        mDisplayMultipleAdapter = new DisplayMultipleAdapter(mPostsToShow, this);
 
-            mViewPager.setAdapter(mDisplayMultipleAdapter);
-            mIndicator.setViewPager(mViewPager);
+        mViewPager.setAdapter(mDisplayMultipleAdapter);
+        mIndicator.setViewPager(mViewPager);
     }
 }

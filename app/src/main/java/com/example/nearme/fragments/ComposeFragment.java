@@ -17,7 +17,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -26,7 +25,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.parse.ParseException;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
@@ -100,11 +99,11 @@ public class ComposeFragment extends Fragment {
                 ParseUser currUser = ParseUser.getCurrentUser();
 
                 if (description.isEmpty()) {
-                    Toast.makeText(getContext(), "Description can't be empty", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getView(), "Description can't be empty!", Snackbar.LENGTH_SHORT).show();
                     return;
                 }
                 if (mImage.getDrawable() == null) {
-                    Toast.makeText(getContext(), "Take an image", Toast.LENGTH_SHORT).show();
+                    Snackbar.make(getView(), "Image Not Found!", Snackbar.LENGTH_SHORT).show();
                     return;
                 }
 
@@ -116,7 +115,7 @@ public class ComposeFragment extends Fragment {
     /**
      * disables photo picking buttons
      */
-    private void disableButtons(){
+    private void disableButtons() {
         mBtnChoosePic.setVisibility(View.GONE);
         mBtnTakePic.setVisibility(View.GONE);
     }
@@ -124,7 +123,7 @@ public class ComposeFragment extends Fragment {
     /**
      * enables photo picking buttons
      */
-    private void enableButtions(){
+    private void enableButtions() {
         mBtnChoosePic.setVisibility(View.VISIBLE);
         mBtnTakePic.setVisibility(View.VISIBLE);
     }
@@ -189,7 +188,7 @@ public class ComposeFragment extends Fragment {
                     mProgressBar.setVisibility(ProgressBar.INVISIBLE);
                 } else {
                     Log.e(TAG, "error while saving", e);
-                    Toast.makeText(getContext(), "Error while saving post", Toast.LENGTH_SHORT);
+                    Snackbar.make(getView(), "Error while saving post", Snackbar.LENGTH_SHORT).show();
                 }
             }
         });
@@ -208,7 +207,7 @@ public class ComposeFragment extends Fragment {
 
                 mPhotoParseFile = new ParseFile(mPhotoFile);
             } else { // Result was a failure
-                Toast.makeText(getContext(), "Picture wasn't taken!", Toast.LENGTH_SHORT).show();
+                Snackbar.make(getView(), "Picture wasn't taken!", Snackbar.LENGTH_SHORT).show();
             }
         } else if ((data != null) && requestCode == PICK_PHOTO_CODE) {
             if (resultCode == RESULT_OK) {
@@ -227,13 +226,14 @@ public class ComposeFragment extends Fragment {
                 mPhotoParseFile = new ParseFile("profile_pic.png", bytes);
 
             } else {
-                Toast.makeText(getContext(), "Picture wasn't selected!", Toast.LENGTH_SHORT).show();
+                Snackbar.make(getView(), "Picture wasn't selected!", Snackbar.LENGTH_SHORT).show();
             }
         }
     }
 
     /**
      * Returns the File for a photo stored on disk given the fileName
+     *
      * @param fileName
      * @return
      */
