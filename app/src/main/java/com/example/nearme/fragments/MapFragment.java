@@ -173,35 +173,40 @@ public class MapFragment extends Fragment implements FilterChanged {
 
         //TODO: Marker recenters on click trying to remove
 
-        map.setOnCameraIdleListener(new GoogleMap.OnCameraIdleListener() {
-            @Override
-            public void onCameraIdle() {
-                Log.i(TAG, "CAMERA IDLE");
+        map.setOnCameraIdleListener(onCameraIdleListener);
+    }
 
-                QueryManager.Filter currState = mQueryManager.getCurrentState();
+    GoogleMap.OnCameraIdleListener onCameraIdleListener =  new GoogleMap.OnCameraIdleListener() {
+        @Override
+        public void onCameraIdle() {
+            Log.i(TAG, "CAMERA IDLE");
 
-                if (currState == QueryManager.Filter.VIEWALL) {
-                    //TODO: Communicate in ViewAll Map Can't Be Zoomed
-                    mMap.getUiSettings().setAllGesturesEnabled(false);
-//                    mMap.getUiSettings().setZoomControlsEnabled(false);
-//                    mMap.getUiSettings().setZoomGesturesEnabled(false);
-                } else if (currState == QueryManager.Filter.DEFAULT) {
-                    mMap.getUiSettings().setAllGesturesEnabled(true);
-//                    mMap.getUiSettings().setZoomControlsEnabled(true);
-//                    mMap.getUiSettings().setZoomGesturesEnabled(true);
-                    LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
-                    LatLng ne = bounds.northeast;
-                    LatLng sw = bounds.southwest;
-                    ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
-                    ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
+            QueryManager.Filter currState = mQueryManager.getCurrentState();
 
-                    mQueryManager.setSwBound(southwest);
-                    mQueryManager.setNeBound(northeast);
+            if (currState == QueryManager.Filter.VIEWALL) {
+                mMap.getUiSettings().setAllGesturesEnabled(false);
+            } else if (currState == QueryManager.Filter.DEFAULT) {
+                mMap.getUiSettings().setAllGesturesEnabled(true);
+                LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
+                LatLng ne = bounds.northeast;
+                LatLng sw = bounds.southwest;
+                ParseGeoPoint northeast = new ParseGeoPoint(ne.latitude, ne.longitude);
+                ParseGeoPoint southwest = new ParseGeoPoint(sw.latitude, sw.longitude);
 
-                }
-                queryPosts();
+                mQueryManager.setSwBound(southwest);
+                mQueryManager.setNeBound(northeast);
+
             }
-        });
+            queryPosts();
+        }
+    };
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        if(!hidden){
+            onCameraIdleListener.onCameraIdle();
+        }
     }
 
     /**

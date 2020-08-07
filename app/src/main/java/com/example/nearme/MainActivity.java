@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +22,7 @@ import com.example.nearme.fragments.TextFragment;
 import com.example.nearme.models.GrabRecommendations;
 import com.example.nearme.models.QueryManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.snackbar.Snackbar;
 import com.parse.ParseUser;
 
 /**
@@ -40,6 +43,7 @@ public class MainActivity extends AppCompatActivity {
 
     private int mFragmentContainer;
 
+    private FrameLayout mFrameLayout;
     private MapFragment mMapFragment;
     private TextFragment mTextFragment;
     private ComposeFragment mComposeFragment;
@@ -57,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mFrameLayout = findViewById(R.id.frameContainer);
         mBottomNavView = findViewById(R.id.bottom_navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
 
@@ -178,6 +183,11 @@ public class MainActivity extends AppCompatActivity {
         FragmentTransaction fragmentTransaction = sFragmentManager.beginTransaction();
         fragmentTransaction.show(inp);
 
+        //Map Notifications
+        if((inp == mMapFragment) && (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL)){
+            Snackbar.make(mFrameLayout,"Note: Can't Move Map in ViewAll Mode",Snackbar.LENGTH_SHORT).show();
+        }
+
         //Hiding Other Fragments
         if (inp != mTextFragment) fragmentTransaction.hide(mTextFragment);
         if (inp != mMapFragment) fragmentTransaction.hide(mMapFragment);
@@ -255,6 +265,9 @@ public class MainActivity extends AppCompatActivity {
                 goToRecommendation();
                 return true;
             case R.id.viewAll:
+                if(mCurrentFragment == mMapFragment){
+                    Snackbar.make(mFrameLayout,"Note: Can't Move Map in ViewAll Mode",Snackbar.LENGTH_SHORT).show();
+                }
                 viewAll();
                 viewAll.setVisible(false);
                 defaultView.setVisible(true);
@@ -273,6 +286,7 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
 
     /**
      * goes to recommendation activity/screen
