@@ -129,6 +129,9 @@ public class MainActivity extends AppCompatActivity {
         if(mCurrentFragment == mTextFragment){
             mTextFragment.queryPosts();
         }
+        if(mCurrentFragment == mMapFragment){
+            mMapFragment.onHiddenChanged(false);
+        }
 
         if (navigateTo != 0) {
             //Notify Main Activity to control back button to allow going back to text fragment

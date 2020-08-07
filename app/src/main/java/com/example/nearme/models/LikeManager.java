@@ -62,7 +62,7 @@ public class LikeManager {
         final String currUserID = currUser.getObjectId();
 
         if (!hasUserLikedPost()) {
-            mLikedBy.add(currUserID);
+            this.mLikedBy.add(currUserID);
             mPost.put(Post.KEY_LIKED, mLikedBy);
             mPost.saveInBackground(new SaveCallback() {
                 @Override

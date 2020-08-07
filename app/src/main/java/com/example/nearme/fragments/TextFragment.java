@@ -98,13 +98,13 @@ public class TextFragment extends Fragment implements FilterChanged {
      */
     public void queryPosts() {
         Log.i(TAG, "Querying posts");
-        mPostAdapter.clearAll();
 
         mQueryManager.getQuery(10)
                 .findInBackground(new FindCallback<Post>() {
                     @Override
                     public void done(List<Post> objects, ParseException e) {
                         if (e == null) {
+                            mPostAdapter.clearAll();
                             mPostAdapter.addAll(objects);
 
                             mSwipeRefreshLayout.setRefreshing(false);

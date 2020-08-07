@@ -218,6 +218,7 @@ public class MapFragment extends Fragment implements FilterChanged {
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if(!hidden){
+            Log.i(TAG,"no longer hidden");
             mOnCameraIdleListener.onCameraIdle();
         }
     }
@@ -232,7 +233,6 @@ public class MapFragment extends Fragment implements FilterChanged {
                     @Override
                     public void done(List<Post> objects, ParseException e) {
                         if (e == null) {
-
                             if (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
                                 zoomMapOutForMarkers(objects);
 

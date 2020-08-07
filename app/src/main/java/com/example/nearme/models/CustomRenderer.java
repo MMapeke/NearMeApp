@@ -57,7 +57,7 @@ public class CustomRenderer<PostMarker extends ClusterItem> extends DefaultClust
 
     @Override
     protected int getColor(int clusterSize) {
-        return Color.parseColor("#3700B3");
+        return Color.parseColor("#CAB0FA");
     }
 
     public static Bitmap getBitmapFromVectorDrawable(Context context, int drawableId) {

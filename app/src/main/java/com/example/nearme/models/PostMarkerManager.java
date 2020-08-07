@@ -25,8 +25,9 @@ public class PostMarkerManager {
     }
 
     public void updateMarkers(List<Post> posts) {
+
+        deletePostMarkers();
         addNewPostMarkers(posts);
-        deletePostMarkersNotOnScreen(posts);
 
         Log.i(TAG, "NUMBER OF POSTS: " +
                 mClusterManager.getAlgorithm().getItems().size());
@@ -41,53 +42,27 @@ public class PostMarkerManager {
         for (Post post : posts) {
             String postID = post.getObjectId();
 
-            //If Marker Does Not Exist for Post
-            if (!mPostIdToPostMrker.containsKey(postID)) {
-                ParseGeoPoint geoPoint = post.getLocation();
+            ParseGeoPoint geoPoint = post.getLocation();
 
-                PostMarker postMarker = new PostMarker(geoPoint.getLatitude(), geoPoint.getLongitude(), post);
-                mClusterManager.addItem(postMarker);
+            PostMarker postMarker = new PostMarker(geoPoint.getLatitude(), geoPoint.getLongitude(), post);
+            mClusterManager.addItem(postMarker);
 
-                //Create reference in HashMap
-                mPostIdToPostMrker.put(postID, postMarker);
+            //Create reference in HashMap
+            mPostIdToPostMrker.put(postID, postMarker);
 
-                Log.i(TAG, "Created new marker from post: " + post.getDescription());
-            }
+            Log.i(TAG, "Created new marker from post: " + post.getDescription());
         }
         Log.i(TAG, "New Markers Added");
         mClusterManager.cluster();
     }
 
     /**
-     * deletes old postmarkers from map and cluster
-     *
-     * @param posts - list of posts to be kept on map
+     * deletes all old postmarkers from map and cluster
      */
-    private void deletePostMarkersNotOnScreen(List<Post> posts) {
-        //Grabbing ID of all posts on screen
-        HashSet<String> newPostsID = new HashSet<>();
-        for (Post post : posts) {
-            newPostsID.add(post.getObjectId());
-        }
-
-        HashMap<String, PostMarker> oldMarkers = (HashMap<String, PostMarker>) mPostIdToPostMrker.clone();
-
-        for (String postMarkerID : oldMarkers.keySet()) {
-            if (!newPostsID.contains(postMarkerID)) {
-                //Old PostMarker not visible now
-                PostMarker postMarker = mPostIdToPostMrker.get(postMarkerID);
-                mClusterManager.removeItem(postMarker);
-                mPostIdToPostMrker.remove(postMarkerID);
-
-                Log.i(TAG, "Deleted Marker from post: " + postMarker.getmPost().getDescription());
-            }
-        }
-        Log.i(TAG, "Old Markers Deleted");
-        mClusterManager.cluster();
-    }
-
-    public void clearAll() {
+    private void deletePostMarkers() {
         mClusterManager.clearItems();
         mPostIdToPostMrker.clear();
+        Log.i(TAG, "Old Markers Deleted");
+        mClusterManager.cluster();
     }
 }
