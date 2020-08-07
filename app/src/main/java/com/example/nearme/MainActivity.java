@@ -126,11 +126,9 @@ public class MainActivity extends AppCompatActivity {
         //representing bottom nav option to navigate to
         int navigateTo = getIntent().getIntExtra("nav", 0);
 
-        if(mCurrentFragment == mTextFragment){
-            mTextFragment.queryPosts();
-        }
-        if(mCurrentFragment == mMapFragment){
-            mMapFragment.onHiddenChanged(false);
+
+        if(mCurrentFragment != null){
+            mCurrentFragment.onHiddenChanged(false);
         }
 
         if (navigateTo != 0) {
