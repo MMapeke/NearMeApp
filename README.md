@@ -11,13 +11,13 @@
 NearMe allows users to view short descriptions of events near them along with short videos from users at the events. Can be viewed on a list or map showing whats near you. Users can also post information about events currently happening, with the location, short description, and short video.
 
 ### App Evaluation
-[Evaluation of your app across the following attributes]
+
 - **Category:** Social/Video
 - **Mobile:** View Only, uses camera, intended for mobile only experience
-- **Story:** Allows users to find events near them and view short videos of whats currently going on.
-- **Market:** Anyone looking for something to do or to go to near them could find use for this app. Can only find specific content from people you know through following. 
-- **Habit:** Users can very easily check what's going on near them with a visual guide, and short stories make consumption easy since. Habit forming because users will be interested/curious on whats happening around them.
-- **Scope:** Start out only focused on realtime events going on nearby. Can expand to following specific users.
+- **Story:** Allows users to find events near them and view short info and media of whats currently going on.
+- **Market:** Anyone looking for something to do or to go to near them could find use for this app. Can also share what's near you for your profile or to get more people to come. 
+- **Habit:** Users can very easily check what's going on near them with a visual guide, and short stories make consumption easy. Habit forming because users will be interested/curious on whats happening around them and intuitive viewing experience.
+- **Scope:** Start out only focused on realtime events going on nearby. Can expand to recommendations, liking content.
 
 ## Product Spec
 
@@ -25,27 +25,26 @@ NearMe allows users to view short descriptions of events near them along with sh
 
 **Required Must-have Stories**
 
-- [x] User can create a new account
-- [x] User can logins
-- [x] User can use current location
-- [x] User can view map of local posts
-- [x] User can view list of local and recent posts
-- [x] User can post short info for local event w/ short desc, location, short vid
-- [x] User can set input location
+- [x] User can login/register/logout
+- [x] User can use app with current location/search a location
+- [x] User can view posts through Map and Feed view.
+- [x] User can view more details about posts from both screens
+- [x] Map and Feed View query same posts in intuitive way
+- [x] User can post short description and media for an event at a location
 
 **Optional Nice-to-have Stories**
 
+- [x] Posts are recommended to user based off last location
+- [x] User can view and interact with other profiles
+- [x] User can customize own profile, view own posts, and delete posts 
+- [x] User can like posts
+- [x] User can switch viewing modes (ViewAll/Manual Defa) 
+- [x] Items in map view are clustered based off locaton, and can be viewed/interacted with
+- [x] Infinite Pagination and Refresh on Feed view
+- [x] General UI Improvements, Color Scheme, Animations
+- [ ] Location/Zoom Persistence
 - [ ] Video Support
-- [ ] User can customize sorting of posts
-
-- [ ] Profile Configuration(Pics,Desc) / User Can Remove Post
-- [ ] Improve Map UI/ Group Posts Together
-- [ ] User can follow/unfollow and view profiles
-- [ ] User can like posts
-- [ ]  Notifications for Active Area
-
-
-
+- [ ] More User to User Support: Following, View Following, etc.
 
 ### 2. Screen Archetypes
 
@@ -74,20 +73,26 @@ NearMe allows users to view short descriptions of events near them along with sh
 *  Compose Post
 *  Profile
 *  Choose Location
+*  More Details/Recommendation Details
 
 **Flow Navigation** (Screen to Screen)
 
 * Login Screen/Registration
-   => Where You At
+  => Location Screen
 * Profile Screen
-   => Main Screen w/ Tab Navigation
-   => Login Screen/Registraton
+  => Main Screen w/ Tab Navigation
+  => Login Screen/Registraton
+  => More Details/Recommendation 
 * Location Screen
   => Main Screen w/ Tab Navigation
 * Compose Post
   => Main Screen w/ Tab Navigation
+  => Login Screen/Registraton
+  => Recommendation Details
 * Map/List View
-  => More Details
+  => Main Screen w/ Tab Navigation
+  => Login Screen/Registraton
+  => More Details/Recommendation 
 * More Details
   => Main Screen w/ Tab Navigation
 
@@ -102,11 +107,12 @@ NearMe allows users to view short descriptions of events near them along with sh
    | Property      | Type     | Description |
    | ------------- | -------- | ------------|
    | objectId      | String   | unique id for the user post (default field) |
-   | author        | Pointer to User| post creator |
+   | user          | Pointer to User| post creator |
    | media         | File     | video that user posts |
    | desc          | String   | description user made |
    | location      | GeoPoint   |where user made post for |
    | createdAt     | DateTime | date when post is created (default field) |
+   | likedBy       | Array   | collection of userID's that have liked post|
    
  #### User
 
@@ -117,6 +123,7 @@ NearMe allows users to view short descriptions of events near them along with sh
    | password      | String   | password |
    | last_location| GeoPoint   | last updated latitude |
    | createdAt     | DateTime | date when post is created (default field) |
+   | profilePic    | File    | profile pic file
 
 
 
@@ -131,6 +138,9 @@ NearMe allows users to view short descriptions of events near them along with sh
     - (Create/POST) Create a new post object associated w/ User
 - Map/List View
     - (Read/GET) Query all posts, sorted based on time creatd
+    - (Update/PUT) Liking posts, updates the post
+- More Details View
+    - (Update/PUT) Liking posts, updates the post
 - Profile Screen
     - (Read/GET) Query logged in user object
     - (Delete) Delete previous posts
