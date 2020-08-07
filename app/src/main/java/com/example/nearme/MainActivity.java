@@ -248,10 +248,6 @@ public class MainActivity extends AppCompatActivity {
         defaultView = menu.findItem(R.id.defaultView);
         defaultView.setVisible(false);
 
-//        MenuItem menuItem = menu.findItem(R.id.app_bar_search);
-//        SearchView searchView = (SearchView) menuItem.getActionView();
-//        searchView.setQueryHint("Search Here!");
-
         return true;
     }
 

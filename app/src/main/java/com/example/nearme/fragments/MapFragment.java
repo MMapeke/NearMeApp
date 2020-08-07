@@ -171,12 +171,23 @@ public class MapFragment extends Fragment implements FilterChanged {
             }
         });
 
-        //TODO: Marker recenters on click trying to remove
+        mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<PostMarker>() {
+            @Override
+            public boolean onClusterItemClick(PostMarker item) {
+                for (Marker marker : mClusterManager.getMarkerCollection().getMarkers()) {
+                    if (marker.getPosition().latitude == item.getPosition().latitude &&
+                            marker.getPosition().longitude == item.getPosition().longitude) {
+                        marker.showInfoWindow();
+                    }
+                }
+                return true;
+            }
+        });
 
-        map.setOnCameraIdleListener(onCameraIdleListener);
+        map.setOnCameraIdleListener(mOnCameraIdleListener);
     }
 
-    GoogleMap.OnCameraIdleListener onCameraIdleListener =  new GoogleMap.OnCameraIdleListener() {
+     private GoogleMap.OnCameraIdleListener mOnCameraIdleListener =  new GoogleMap.OnCameraIdleListener() {
         @Override
         public void onCameraIdle() {
             Log.i(TAG, "CAMERA IDLE");
@@ -205,7 +216,7 @@ public class MapFragment extends Fragment implements FilterChanged {
     public void onHiddenChanged(boolean hidden) {
         super.onHiddenChanged(hidden);
         if(!hidden){
-            onCameraIdleListener.onCameraIdle();
+            mOnCameraIdleListener.onCameraIdle();
         }
     }
 
