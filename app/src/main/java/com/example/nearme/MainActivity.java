@@ -126,6 +126,10 @@ public class MainActivity extends AppCompatActivity {
         //representing bottom nav option to navigate to
         int navigateTo = getIntent().getIntExtra("nav", 0);
 
+        if(mCurrentFragment == mTextFragment){
+            mTextFragment.queryPosts();
+        }
+
         if (navigateTo != 0) {
             //Notify Main Activity to control back button to allow going back to text fragment
             //like when other profile clicked

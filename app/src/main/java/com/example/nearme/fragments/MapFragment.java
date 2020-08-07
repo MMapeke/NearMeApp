@@ -122,9 +122,11 @@ public class MapFragment extends Fragment implements FilterChanged {
         int width = getResources().getDisplayMetrics().widthPixels;
         int height = getResources().getDisplayMetrics().heightPixels;
 
-        //TODO: Technically may not want to use fullscreen, check docs
+        // Using actual display height complicated because map loaded before view fully loaded
+        // int height = getActivity().findViewById(R.id.frameContainer).getHeight();
+
         LatLngBounds newBounds = builder.build();
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds, width, height, 16));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(newBounds,width,height, 16));
 
         // Init the manager with context and the map
         mClusterManager = new ClusterManager<>(getContext(), mMap);

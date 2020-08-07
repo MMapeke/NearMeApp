@@ -96,7 +96,7 @@ public class TextFragment extends Fragment implements FilterChanged {
     /**
      * Queries posts for Text Fragment
      */
-    private void queryPosts() {
+    public void queryPosts() {
         Log.i(TAG, "Querying posts");
         mPostAdapter.clearAll();
 
