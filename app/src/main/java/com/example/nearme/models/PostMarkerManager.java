@@ -29,6 +29,7 @@ public class PostMarkerManager {
         deletePostMarkers();
         addNewPostMarkers(posts);
 
+        mClusterManager.cluster();
         Log.i(TAG, "NUMBER OF POSTS: " +
                 mClusterManager.getAlgorithm().getItems().size());
     }

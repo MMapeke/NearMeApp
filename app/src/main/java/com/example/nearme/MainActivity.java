@@ -68,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+        //Setting up User Query Manager
         mQueryManager = new QueryManager(mParseUser.getParseGeoPoint("location"));
 
         initFragments();

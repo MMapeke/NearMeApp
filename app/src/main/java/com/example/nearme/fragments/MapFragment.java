@@ -43,6 +43,7 @@ import org.parceler.Parcels;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Fragment
@@ -52,6 +53,7 @@ public class MapFragment extends Fragment implements FilterChanged {
     public static final String TAG = "MapFragment";
     public static BitmapDescriptor DEFAULT_MARKER;
 
+    private Boolean mZoomedOut = false;
     private QueryManager mQueryManager;
     private GoogleMap mMap;
     private PostMarkerManager mPostMarkerManager;
@@ -197,8 +199,15 @@ public class MapFragment extends Fragment implements FilterChanged {
             QueryManager.Filter currState = mQueryManager.getCurrentState();
 
             if (currState == QueryManager.Filter.VIEWALL) {
-                mMap.getUiSettings().setAllGesturesEnabled(false);
-            } else if (currState == QueryManager.Filter.DEFAULT) {
+                if(!mZoomedOut){
+                    Log.i(TAG,"wasnt already zoomed out");
+                    mMap.getUiSettings().setAllGesturesEnabled(false);
+                    queryPosts();
+                }else{
+                    Log.i(TAG,"already zoomed out");
+                }
+            } else
+                if (currState == QueryManager.Filter.DEFAULT) {
                 mMap.getUiSettings().setAllGesturesEnabled(true);
                 LatLngBounds bounds = mMap.getProjection().getVisibleRegion().latLngBounds;
                 LatLng ne = bounds.northeast;
@@ -208,9 +217,8 @@ public class MapFragment extends Fragment implements FilterChanged {
 
                 mQueryManager.setSwBound(southwest);
                 mQueryManager.setNeBound(northeast);
-
+                queryPosts();
             }
-            queryPosts();
         }
     };
 
@@ -235,8 +243,6 @@ public class MapFragment extends Fragment implements FilterChanged {
                         if (e == null) {
                             if (mQueryManager.getCurrentState() == QueryManager.Filter.VIEWALL) {
                                 zoomMapOutForMarkers(objects);
-
-                                mPostMarkerManager.updateMarkers(objects);
                             }
                             if (mQueryManager.getCurrentState() == QueryManager.Filter.DEFAULT) {
                                 mPostMarkerManager.updateMarkers(objects);
@@ -267,6 +273,7 @@ public class MapFragment extends Fragment implements FilterChanged {
         LatLngBounds bounds = builder.build();
 
         mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 16));
+        mZoomedOut = false;
     }
 
     /**
@@ -274,7 +281,7 @@ public class MapFragment extends Fragment implements FilterChanged {
      *
      * @param objects - List of Posts, representing posts queried and to be shown
      */
-    private void zoomMapOutForMarkers(List<Post> objects) {
+    private void zoomMapOutForMarkers(final List<Post> objects) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
 
         for (Post post : objects) {
@@ -287,8 +294,23 @@ public class MapFragment extends Fragment implements FilterChanged {
 
         LatLngBounds allBounds = builder.build();
 
+
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 64), 1000, null);
+        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(allBounds, 128), 1000, new GoogleMap.CancelableCallback() {
+            @Override
+            public void onFinish() {
+                Log.i(TAG,"zoom ut animation FINISHED");
+                mPostMarkerManager.updateMarkers(objects);
+                mZoomedOut = true;
+                mMap.getUiSettings().setAllGesturesEnabled(false);
+            }
+
+            @Override
+            public void onCancel() {
+                //nothing
+            }
+        });
+
         Log.i(TAG, "Zoom out to view all markers");
     }
 

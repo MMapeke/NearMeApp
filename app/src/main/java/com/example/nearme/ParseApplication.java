@@ -3,6 +3,7 @@ package com.example.nearme;
 import android.app.Application;
 
 import com.example.nearme.models.Post;
+import com.example.nearme.models.QueryManager;
 import com.parse.Parse;
 import com.parse.ParseObject;
 
