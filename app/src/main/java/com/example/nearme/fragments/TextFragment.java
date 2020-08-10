@@ -99,7 +99,7 @@ public class TextFragment extends Fragment implements FilterChanged {
     public void queryPosts() {
         Log.i(TAG, "Querying posts");
 
-        mQueryManager.getQuery(10)
+        mQueryManager.getQuery(25)
                 .findInBackground(new FindCallback<Post>() {
                     @Override
                     public void done(List<Post> objects, ParseException e) {

@@ -23,6 +23,7 @@ import androidx.annotation.Nullable;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import com.example.nearme.MainActivity;
 import com.example.nearme.R;
 import com.example.nearme.models.Post;
 import com.google.android.material.snackbar.Snackbar;
@@ -186,6 +187,7 @@ public class ComposeFragment extends Fragment {
                     mImage.setImageResource(0);
                     enableButtions();
                     mProgressBar.setVisibility(ProgressBar.INVISIBLE);
+                    ((MainActivity) getContext()).setSelectedBottomNav(R.id.action_text);
                 } else {
                     Log.e(TAG, "error while saving", e);
                     Snackbar.make(getView(), "Error while saving post", Snackbar.LENGTH_SHORT).show();
