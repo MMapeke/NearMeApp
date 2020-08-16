@@ -8,7 +8,7 @@
 
 ## Overview
 ### Description
-NearMe allows users to view short descriptions of events near them along with short videos from users at the events. Can be viewed on a list or map showing whats near you. Users can also post information about events currently happening, with the location, short description, and short video.
+NearMe allows users to view short descriptions of events near them along with short media from users at the events. Can be viewed on a list or map showing whats near you. Users can also post information about events currently happening, with the location, short description, and short video.
 
 ### App Evaluation
 
